@@ -119,6 +119,35 @@
 - 考虑之前 code review 发现的 P0 安全问题是否仍需修复
 - 考虑给 WebUI 添加多 Agent 任务视图
 
+## 2026-05-21 第 16 轮思考
+
+### 观察
+- **Agent 状态**: 4 个 Agent 全部 idle
+  - main: 36轮, 5/5 done + #6 cancelled
+  - code-reviewer: 30轮, 3/3 done + #4 pending (闭环审查)
+  - frontend-developer: 25轮, 2/2 done + #3 pending (单元测试)
+  - security-engineer: 0轮, #1 cancelled + #2 done + #3 pending (P1 修复)
+- **收件箱**: frontend-developer 报告 #2 完成（P0 全部修复）
+- **P0 修复已验证**: shell=True 移除、_safe_agent_path 覆盖 6 处端点、server.py 558行/run.py 592行
+
+### 分析
+1. **P0 安全问题已闭环**: 修复+验证完成，可以进入 P1 加固阶段
+2. **测试覆盖为零**: 1150 行核心代码没有任何测试，这是最大的质量风险
+3. **security-engineer 从未运行**: run_count=0，需要验证 loopcli 能否正确调度它
+4. **P1 问题待处理**: CORS 白名单、并发限制、SSE 连接管理
+
+### 决策
+本轮派发 3 项任务：
+1. **frontend-developer #3**: 编写 server.py + run.py 单元测试（pytest）— 优先级最高
+2. **code-reviewer #4**: 对 P0 修复做闭环审查验证
+3. **security-engineer #3**: P1 安全加固（CORS、并发、SSE 管理）
+
+### 下一轮关注
+- 确认 3 个 Agent 的新任务被 loopcli 执行
+- 测试框架搭建结果
+- 闭环审查报告
+- P1 加固效果
+
 ## 2026-05-21 第 15 轮思考
 
 ### 观察

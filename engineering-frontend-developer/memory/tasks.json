@@ -16,5 +16,13 @@
     "created": "2026-05-21",
     "assignee": "engineering-frontend-developer",
     "completed": "2026-05-21 07:00:00"
+  },
+  {
+    "id": 3,
+    "status": "pending",
+    "title": "为 server.py 和 run.py 编写单元测试",
+    "description": "当前整个项目零测试覆盖，这是严重的质量缺口。要求：(1) 使用 pytest 框架；(2) 为 server.py 编写 API 端点测试（用 httpx/TestClient 或 urllib），覆盖 GET /api/agents、GET /api/tasks、POST /api/tasks、POST /api/messages/send、路径遍历拒绝（_safe_agent_path）；(3) 为 run.py 的 load_agent_tasks、cmd_task_inner、_safe_agent_path（如果有）编写单元测试；(4) 测试文件放在 D:/loopcli/main/tests/ 目录下；(5) 确保测试可独立运行不依赖 WebUI 服务器启动。完成后通过 inbox 通知 main。",
+    "created": "2026-05-21",
+    "assignee": "engineering-frontend-developer"
   }
 ]
