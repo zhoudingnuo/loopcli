@@ -10,10 +10,11 @@
   },
   {
     "id": 2,
-    "status": "pending",
+    "status": "done",
     "title": "修复 run.py + server.py 全部 P0 安全问题",
-    "description": "根据 D:\\loopcli\\main\\memory\\results\\code-review-webui.md 报告，修复以下 P0 阻塞项：\n1. server.py: _handle_agent_start 删除 shell=True，改用 stdin 传入 prompt 内容（参考 run.py:289 的方式）\n2. server.py: 所有接受 agent_id 的端点（_handle_sse_logs, _handle_agent_start, _handle_loopcli_dispatch, _handle_agent_enable）添加路径校验函数 _safe_agent_path（检查 .. / \\ 和 resolve 是否在 LOOPCLI_ROOT 下）\n3. server.py: --dangerously-skip-permissions 调用添加基本鉴权（检查请求头 X-API-Key 或 query param key）\n4. run.py: run_agent 的 Popen 删除 shell=True，改为列表形式 [claude_cmd, '--print', '--verbose', '--output-format', 'stream-json', '--dangerously-skip-permissions']\n5. run.py: log_file 和 agent_log 用 try/finally 确保关闭\n6. run.py: state.json 写入加 fcntl/msvcrt 文件锁防止并发冲突\n7. run.py: git push URL 中的 token 不要通过命令行暴露（改用环境变量或 git credential helper）\n8. run.py: open() 调用统一用 with 语句\n修复完成后通过 inbox 通知 main。",
+    "description": "已修复全部 P0 安全问题：shell=True 移除、路径遍历防护、API 鉴权、文件句柄安全、文件锁、token 保护",
     "created": "2026-05-21",
-    "assignee": "engineering-frontend-developer"
+    "assignee": "engineering-frontend-developer",
+    "completed": "2026-05-21 07:00:00"
   }
 ]

@@ -1,0 +1,18 @@
+[
+  {
+    "id": 1,
+    "status": "cancelled",
+    "title": "修复 run.py + server.py 全部 P0 安全问题（粗略版，详见 #2）",
+    "description": "与 #2 重复，已取消",
+    "created": "2026-05-21",
+    "assignee": "engineering-security-engineer"
+  },
+  {
+    "id": 2,
+    "status": "pending",
+    "title": "修复 run.py + server.py 全部 P0 安全漏洞",
+    "description": "根据 D:\\loopcli\\main\\memory\\results\\code-review-webui.md 报告修复所有 P0 阻塞项：(1) server.py: _handle_agent_start 删除 shell=True，改用列表参数 + stdin 传入 prompt；(2) server.py: 所有 agent_id 端点添加 _safe_agent_path 路径校验（检查 .. 和 resolve 在 LOOPCLI_ROOT 下）；(3) server.py: --dangerously-skip-permissions 添加 API Key 鉴权；(4) run.py: run_agent 的 Popen 删除 shell=True 改为列表形式；(5) run.py: log_file/agent_log 用 try/finally 确保关闭；(6) run.py: state.json 加文件锁；(7) run.py: git push token 改用环境变量；(8) run.py: open() 统一用 with 语句。修复完成后通过 inbox 通知 main。",
+    "created": "2026-05-21",
+    "assignee": "engineering-security-engineer"
+  }
+]

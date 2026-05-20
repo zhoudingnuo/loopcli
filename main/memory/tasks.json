@@ -46,8 +46,8 @@
   },
   {
     "id": 6,
-    "status": "pending",
-    "title": "修复 server.py + run.py 安全问题（P0 阻塞项）+ 日志轮转",
+    "status": "cancelled",
+    "title": "修复 server.py + run.py 安全问题（P0 阻塞项）+ 日志轮转（已转交 engineering-security-engineer）",
     "description": "根据代码审查报告 code-review-webui.md，修复所有 P0 阻塞项：[server.py] 1) _handle_agent_start 的 shell=True 命令注入 → 改为列表参数直接传 prompt 内容；2) 所有 agent_id 端点添加 _safe_agent_path 路径校验；3) --dangerously-skip-permissions 添加鉴权/API Key 保护；[run.py] 4) run_agent 的 shell=True → 改为列表形式调用；5) log_file/agent_log 用 try/finally 确保关闭；6) state.json 写入加文件锁；[通用] 7) 日志轮转（raw.log 超 1MB 归档）；8) LOOPCLI_ROOT 改为环境变量配置",
     "created": "2026-05-21",
     "assignee": "main"

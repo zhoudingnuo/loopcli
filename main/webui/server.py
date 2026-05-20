@@ -23,6 +23,7 @@ LOOP_STATE_FILE = WEBUI_DIR / "loop_state.json"
 
 _loop_proc = None
 _loop_lock = threading.Lock()
+API_KEY = os.environ.get("LOOPCLI_API_KEY", "")
 
 
 def read_json(path: Path, default=None):
@@ -37,6 +38,17 @@ def read_json(path: Path, default=None):
 def write_json(path: Path, data):
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def _safe_agent_path(agent_id: str) -> Path | None:
+    if not agent_id or '/' in agent_id or '\\' in agent_id or '..' in agent_id:
+        return None
+    agent_dir = LOOPCLI_ROOT / agent_id
+    try:
+        agent_dir.resolve().relative_to(LOOPCLI_ROOT.resolve())
+    except ValueError:
+        return None
+    return agent_dir
 
 
 def scan_agents():
@@ -224,7 +236,10 @@ class WebUIHandler(SimpleHTTPRequestHandler):
         params = parse_qs(urlparse(self.path).query)
         agent_id = params.get("agent", [None])[0]
         if agent_id:
-            log_path = LOOPCLI_ROOT / agent_id / "log" / "run.md"
+            agent_dir = _safe_agent_path(agent_id)
+            if not agent_dir:
+                return self._send_json({"error": "Invalid agent"}, status=400)
+            log_path = agent_dir / "log" / "run.md"
         else:
             log_path = MAIN_DIR / "log" / "run.md"
 
@@ -274,7 +289,10 @@ class WebUIHandler(SimpleHTTPRequestHandler):
             n = int(params.get("n", ["100"])[0])
             agent_id = params.get("agent", [None])[0]
             if agent_id:
-                log_path = LOOPCLI_ROOT / agent_id / "log" / "run.md"
+                agent_dir = _safe_agent_path(agent_id)
+                if not agent_dir:
+                    return self._send_json({"error": "Invalid agent"}, status=400)
+                log_path = agent_dir / "log" / "run.md"
             else:
                 log_path = MAIN_DIR / "log" / "run.md"
             lines = get_recent_lines(log_path, n)
@@ -351,27 +369,24 @@ class WebUIHandler(SimpleHTTPRequestHandler):
         if not agent_id:
             return self._send_json({"error": "agent is required"}, status=400)
 
-        agent_dir = LOOPCLI_ROOT / agent_id
+        agent_dir = _safe_agent_path(agent_id)
+        if not agent_dir:
+            return self._send_json({"error": "Invalid agent"}, status=400)
+
         prompt_file = agent_dir / "PROMPT.md"
         if not prompt_file.exists():
             return self._send_json({"error": f"Agent '{agent_id}' not found or no PROMPT.md"}, status=404)
 
-        # Launch claude in the agent directory, reading PROMPT.md
-        try:
-            proc = subprocess.Popen(
-                ["claude", "--print", "$(cat PROMPT.md)"],
-                cwd=str(agent_dir),
-                shell=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-            )
-        except FileNotFoundError:
-            proc = subprocess.Popen(
-                ["claude", "--print", prompt_file.read_text(encoding="utf-8")],
-                cwd=str(agent_dir),
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-            )
+        prompt = prompt_file.read_text(encoding="utf-8")
+        proc = subprocess.Popen(
+            ["claude", "--print"],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            cwd=str(agent_dir),
+        )
+        proc.stdin.write(prompt.encode("utf-8"))
+        proc.stdin.close()
 
         self._send_json({
             "agent": agent_id,
@@ -411,22 +426,27 @@ class WebUIHandler(SimpleHTTPRequestHandler):
         self._send_json(data, status)
 
     def _handle_loopcli_restart(self):
+        body = self._read_body()
         stop_loopcli_process()
         time.sleep(0.5)
-        body = self._read_body()
         iterations = int(body.get("iterations", 0))
         data, status = start_loopcli_process(iterations)
         self._send_json(data, status)
 
     def _handle_loopcli_dispatch(self):
+        if API_KEY:
+            key = self.headers.get("X-API-Key", "") or parse_qs(urlparse(self.path).query).get("key", [""])[0]
+            if key != API_KEY:
+                return self._send_json({"error": "Unauthorized"}, status=401)
+
         body = self._read_body()
         agent_id = body.get("agent", "").strip()
         title = body.get("title", "").strip()
         if not agent_id or not title:
             return self._send_json({"error": "agent and title are required"}, status=400)
 
-        agent_dir = LOOPCLI_ROOT / agent_id
-        if not (agent_dir / "AGENT").exists():
+        agent_dir = _safe_agent_path(agent_id)
+        if not agent_dir or not (agent_dir / "AGENT").exists():
             return self._send_json({"error": f"Agent '{agent_id}' not found"}, status=404)
 
         # Write task to agent's tasks.json
@@ -474,7 +494,9 @@ class WebUIHandler(SimpleHTTPRequestHandler):
             return self._send_json({"error": "content is required"}, status=400)
 
         agent_id = body.get("agent", "main").strip() or "main"
-        agent_dir = LOOPCLI_ROOT / agent_id
+        agent_dir = _safe_agent_path(agent_id)
+        if not agent_dir:
+            return self._send_json({"error": "Invalid agent"}, status=400)
         if not (agent_dir / "AGENT").exists():
             return self._send_json({"error": f"Agent '{agent_id}' not found"}, status=404)
 
@@ -498,7 +520,9 @@ class WebUIHandler(SimpleHTTPRequestHandler):
         if agent_id == "main":
             return self._send_json({"error": "cannot disable main agent"}, status=400)
 
-        agent_dir = LOOPCLI_ROOT / agent_id
+        agent_dir = _safe_agent_path(agent_id)
+        if not agent_dir:
+            return self._send_json({"error": "Invalid agent"}, status=400)
         marker = agent_dir / "AGENT"
         if not marker.exists():
             return self._send_json({"error": f"Agent '{agent_id}' not found"}, status=404)

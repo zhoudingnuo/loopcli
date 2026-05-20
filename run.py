@@ -1,5 +1,6 @@
 import argparse
 import json
+import msvcrt
 import os
 import shutil
 import subprocess
@@ -288,57 +289,68 @@ def run_agent(agent, iteration, run_log_dir):
     log_file = open(log_file_path, "a", encoding="utf-8")
     agent_log = open(run_agent_log, "a", encoding="utf-8")
 
-    header = f"\n[{ts}] --- 开始 (第{iteration}轮) ---\n"
-    log_file.write(header)
-    agent_log.write(header)
-    log_file.flush()
-    agent_log.flush()
-
-    env = {**os.environ, "IS_SANDBOX": "1"}
-
-    proc = subprocess.Popen(
-        f'"{CLAUDE}" --print --verbose --output-format stream-json --dangerously-skip-permissions',
-        stdin=subprocess.PIPE,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        env=env,
-        shell=True,
-        cwd=path,
-    )
-
-    proc.stdin.write(prompt.encode("utf-8"))
-    proc.stdin.close()
-
-    for line in proc.stdout:
-        decoded = line.decode("utf-8", errors="replace")
-        log_file.write(decoded)
-        agent_log.write(decoded)
+    try:
+        header = f"\n[{ts}] --- 开始 (第{iteration}轮) ---\n"
+        log_file.write(header)
+        agent_log.write(header)
         log_file.flush()
         agent_log.flush()
-        handle_event(name, decoded)
 
-    stderr_output = proc.stderr.read().decode("utf-8", errors="replace")
-    if stderr_output:
-        print(f"[{name}] [STDERR] {stderr_output}", flush=True)
-        log_file.write(stderr_output)
-        agent_log.write(stderr_output)
+        env = {**os.environ, "IS_SANDBOX": "1"}
 
-    proc.wait()
+        proc = subprocess.Popen(
+            [CLAUDE, "--print", "--verbose", "--output-format", "stream-json", "--dangerously-skip-permissions"],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            env=env,
+            cwd=path,
+        )
 
-    footer = f"\n[{ts}] --- 结束 (exit={proc.returncode}) ---\n"
-    log_file.write(footer)
-    agent_log.write(footer)
-    log_file.close()
-    agent_log.close()
+        proc.stdin.write(prompt.encode("utf-8"))
+        proc.stdin.close()
 
-    # 更新 state.json
+        for line in proc.stdout:
+            decoded = line.decode("utf-8", errors="replace")
+            log_file.write(decoded)
+            agent_log.write(decoded)
+            log_file.flush()
+            agent_log.flush()
+            handle_event(name, decoded)
+
+        stderr_output = proc.stderr.read().decode("utf-8", errors="replace")
+        if stderr_output:
+            print(f"[{name}] [STDERR] {stderr_output}", flush=True)
+            log_file.write(stderr_output)
+            agent_log.write(stderr_output)
+
+        proc.wait()
+
+        footer = f"\n[{ts}] --- 结束 (exit={proc.returncode}) ---\n"
+        log_file.write(footer)
+        agent_log.write(footer)
+    finally:
+        log_file.close()
+        agent_log.close()
+
+    # 更新 state.json (with file lock)
     state_file = os.path.join(path, "memory", "state.json")
-    state = load_agent_state(path) or {}
-    state["status"] = "idle"
-    state["last_run"] = ts
-    state["run_count"] = state.get("run_count", 0) + 1
-    with open(state_file, "w", encoding="utf-8") as f:
-        json.dump(state, f, indent=2, ensure_ascii=False)
+    with open(state_file, "a+") as f:
+        msvcrt.locking(f.fileno(), msvcrt.LK_LOCK, 1)
+        try:
+            f.seek(0)
+            try:
+                state = json.load(f)
+            except (json.JSONDecodeError, ValueError):
+                state = {}
+            state["status"] = "idle"
+            state["last_run"] = ts
+            state["run_count"] = state.get("run_count", 0) + 1
+            f.seek(0)
+            f.truncate()
+            json.dump(state, f, indent=2, ensure_ascii=False)
+        finally:
+            msvcrt.locking(f.fileno(), msvcrt.LK_UNLCK, 1)
 
     status = "完成" if proc.returncode == 0 else f"异常(exit={proc.returncode})"
     print(f"[{name}] 本轮{status}", flush=True)
@@ -349,7 +361,8 @@ def git_push():
     token_file = GIT_TOKEN_FILE
     if not os.path.isfile(token_file):
         return
-    token = open(token_file, "r").read().strip()
+    with open(token_file, "r") as f:
+        token = f.read().strip()
     if not token:
         return
     try:
@@ -359,8 +372,21 @@ def git_push():
             [git, "commit", "-m", f"auto: loopcli sync {datetime.now().strftime('%Y-%m-%d %H:%M')}"],
             cwd=LOOPCLI_DIR, capture_output=True, timeout=30
         )
-        url = f"https://{token}@github.com/zhoudingnuo/loopcli.git"
-        subprocess.run([git, "push", url, "main"], cwd=LOOPCLI_DIR, capture_output=True, timeout=60)
+        # Use GIT_ASKPASS to avoid exposing token in command line
+        askpass_script = os.path.join(LOOPCLI_DIR, ".git_askpass.bat")
+        with open(askpass_script, "w") as f:
+            f.write("@echo %GH_TOKEN%\n")
+        push_env = {
+            **os.environ,
+            "GH_TOKEN": token,
+            "GIT_ASKPASS": askpass_script,
+            "GIT_TERMINAL_PROMPT": "0",
+        }
+        subprocess.run(
+            [git, "push", "https://x-access-token@github.com/zhoudingnuo/loopcli.git", "main"],
+            cwd=LOOPCLI_DIR, capture_output=True, timeout=60, env=push_env,
+        )
+        os.remove(askpass_script)
         print("[git] 已同步到 GitHub", flush=True)
     except Exception as e:
         print(f"[git] 同步失败: {e}", flush=True)
