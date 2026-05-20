@@ -1,5 +1,37 @@
 # 思考记录
 
+## 2026-05-21 第 16 轮思考
+
+### 观察
+- **Agent 状态**: 3 个 Agent — main(idle, 15轮) + engineering-code-reviewer(disabled, 7轮, 3/3 done) + engineering-frontend-developer(idle, 1轮, 1/1 done, 新任务 #2 pending)
+- **收件箱**: 3 条消息 — code-reviewer 验证报告（P0 0/6 修复）+ 用户指令 x2
+- **code-reviewer 已禁用**: 无待处理任务，节省 token
+
+### 收件箱处理
+1. **code-reviewer 闭环报告**: P0 安全问题 6 个全未修复 + 新发现 2 个（git token 暴露、文件句柄）。验证结果已收到。
+2. **用户指令 1**: 为 main 添加 enable/disable agent 能力 → **已实现**
+3. **用户指令 2**: WebUI 进程守护 + 开机自启 → **已实现**
+
+### 本轮行动
+1. **实现 enable/disable 功能**:
+   - run.py: 新增 `loopcli enable/disable <agent>` 命令
+   - run.py: `discover_agents()` 过滤 disabled Agent
+   - run.py: `cmd_list()` 显示启用状态列
+   - server.py: 新增 POST `/api/agents/enable` 和 `/api/agents/disable` 端点
+   - 禁止禁用 main Agent
+2. **WebUI 进程守护**:
+   - 创建 watchdog.py（自动重启崩溃的 server.py）
+   - 创建 startup-hidden.vbs（无窗口运行）
+   - 复制到 Windows Startup 文件夹实现开机自启
+3. **派发安全修复任务**:
+   - engineering-frontend-developer #2: 修复 run.py + server.py 全部 8 个 P0 安全问题
+4. **禁用 code-reviewer**: 无待处理任务，节省 token
+
+### 下一轮关注
+- 确认 frontend-developer 完成 P0 安全修复
+- 安全修复完成后，启用 code-reviewer 做闭环验证
+- WebUI 可能需要添加 enable/disable 的前端 UI 按钮
+
 ## 2026-05-21 第 8 轮思考
 
 ### 观察
@@ -93,3 +125,28 @@
 - 根据 P0 修复情况决定是否需要 security-engineer 做进一步加固
 - 考虑 WebUI 的 P1/P2 修复（前端过滤器 value 冲突、SSE 效率优化）
 - 考虑将 code-reviewer 用于审查修复后的代码（闭环验证）
+
+## 2026-05-21 第 14 轮思考
+
+### 观察
+- **Agent 状态**: 3 个 Agent — main(idle, 13轮) + engineering-code-reviewer(僵尸，无 state/tasks) + engineering-frontend-developer(新建, idle, 1 task pending)
+- **收件箱**: 用户指令 — 为 WebUI 添加 `loopcli msg` 消息发送功能
+- **loopcli msg CLI 已存在**: run.py:442 实现了 `loopcli msg` 命令，可向指定 Agent inbox 发消息
+- **WebUI 缺口**: server.py 和 index.html 没有对应的消息发送 API 和 UI
+- **code-reviewer 僵尸**: 该 Agent 目录存在但缺少 state.json 和 tasks.json，可能是第 8 轮创建后文件丢失
+
+### 分析
+1. **用户需求明确**: 需要在 WebUI 上暴露 `loopcli msg` 功能，包括后端 API 端点和前端 UI
+2. **工程量适中**: 后端新增一个 POST 端点 + 前端新增消息发送面板，适合单个 Agent 完成
+3. **code-reviewer 需清理**: 僵尸 Agent 占目录但无有效状态，可在下轮决定是否删除或重新初始化
+
+### 决策
+1. **创建 engineering-frontend-developer** — 已完成，任务 #1: 为 WebUI 添加消息发送功能
+2. **暂不处理 code-reviewer** — 优先响应用户指令，僵尸 Agent 后续清理
+3. **关注前端开发者的执行** — 需要 loopcli run 来触发执行
+
+### 下一轮关注
+- 确认 frontend-developer 的消息功能实现结果
+- 清理或重建 engineering-code-reviewer
+- 考虑之前 code review 发现的 P0 安全问题是否仍需修复
+- 考虑给 WebUI 添加多 Agent 任务视图

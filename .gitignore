@@ -11,7 +11,9 @@ logs/
 __pycache__/
 *.pyc
 
-# 系统文件
+# 敏感文件
+*/memory/errors.json
+.gittoken
 .DS_Store
 Thumbs.db
 

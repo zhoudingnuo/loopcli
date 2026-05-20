@@ -146,6 +146,7 @@ body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; background
       <div class="nav-item" data-page="tasks"><div class="icon">📋</div><span>任务管理</span></div>
       <div class="nav-item" data-page="logs"><div class="icon">📄</div><span>实时日志</span></div>
       <div class="nav-item" data-page="control"><div class="icon">⚙️</div><span>控制面板</span></div>
+      <div class="nav-item" data-page="messages"><div class="icon">✉️</div><span>发送消息</span></div>
     </nav>
     <div class="sidebar-footer">LoopCLI v0.1</div>
   </aside>
@@ -232,6 +233,28 @@ body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; background
             <div class="form-group"><label>任务描述</label><textarea id="d-desc" placeholder="描述任务内容"></textarea></div>
             <button class="btn btn-primary" id="d-submit">派发并执行</button>
           </div>
+        </div>
+      </div>
+
+      <!-- Messages -->
+      <div class="page" id="page-messages">
+        <div class="ctrl-section">
+          <h3 class="ctrl-title">发送消息给 Agent</h3>
+          <div class="ctrl-dispatch-form">
+            <div class="form-group"><label>目标 Agent</label>
+              <select id="msg-agent"><option value="main">main (默认)</option></select>
+            </div>
+            <div class="form-group"><label>消息内容</label><textarea id="msg-content" placeholder="输入要发送的消息内容..." style="min-height:120px"></textarea></div>
+            <div style="display:flex;align-items:center;gap:12px">
+              <button class="btn btn-primary" id="msg-send-btn">发送</button>
+              <span id="msg-status" style="font-size:13px;color:var(--text2)"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="ctrl-section">
+          <h3 class="ctrl-title">最近发送</h3>
+          <div id="msg-history" style="font-size:13px;color:var(--text2)">暂无记录</div>
         </div>
       </div>
     </div>
@@ -344,7 +367,7 @@ document.querySelectorAll('.nav-item').forEach(item => {
     const page = item.dataset.page;
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById('page-' + page).classList.add('active');
-    const titles = { dashboard: '仪表盘', agents: 'Agent 列表', tasks: '任务管理', logs: '实时日志', control: '控制面板' };
+    const titles = { dashboard: '仪表盘', agents: 'Agent 列表', tasks: '任务管理', logs: '实时日志', control: '控制面板', messages: '发送消息' };
     document.getElementById('pageTitle').textContent = titles[page];
     if (page === 'logs') { initLogStream(); } else { closeLogStream(); }
   });
@@ -540,10 +563,57 @@ const _origRender2 = render;
 render = function() {
   _origRender2();
   fillDispatchAgentSelect();
+  fillMsgAgentSelect();
 };
 
 loadLoopStatus();
 setInterval(loadLoopStatus, 3000);
+
+// --- Message Send ---
+function fillMsgAgentSelect() {
+  const sel = document.getElementById('msg-agent');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="main">main (默认)</option>' +
+    agents.map(a => `<option value="${esc(a.id)}">${esc(a.name)}</option>`).join('');
+  sel.value = cur || 'main';
+}
+
+const msgHistory = [];
+
+document.getElementById('msg-send-btn').addEventListener('click', async () => {
+  const agent = document.getElementById('msg-agent').value || 'main';
+  const content = document.getElementById('msg-content').value.trim();
+  const statusEl = document.getElementById('msg-status');
+  if (!content) { statusEl.textContent = '请输入消息内容'; statusEl.style.color = 'var(--red)'; return; }
+
+  statusEl.textContent = '发送中...';
+  statusEl.style.color = 'var(--yellow)';
+  try {
+    const r = await fetch('/api/messages/send', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({agent, content}),
+    });
+    const data = await r.json();
+    if (!r.ok) { throw new Error(data.error || '发送失败'); }
+    statusEl.textContent = '已发送 -> ' + agent;
+    statusEl.style.color = 'var(--green)';
+    msgHistory.unshift({ agent, content, time: new Date().toLocaleTimeString('zh-CN'), file: data.file });
+    renderMsgHistory();
+    document.getElementById('msg-content').value = '';
+  } catch(e) {
+    statusEl.textContent = '发送失败: ' + e.message;
+    statusEl.style.color = 'var(--red)';
+  }
+});
+
+function renderMsgHistory() {
+  const el = document.getElementById('msg-history');
+  if (!msgHistory.length) { el.innerHTML = '暂无记录'; return; }
+  el.innerHTML = '<table class="task-table"><thead><tr><th>时间</th><th>目标</th><th>内容</th><th>文件</th></tr></thead><tbody>' +
+    msgHistory.slice(0, 20).map(m => `<tr><td>${esc(m.time)}</td><td>${esc(m.agent)}</td><td>${esc(m.content.slice(0,80))}${m.content.length > 80 ? '...' : ''}</td><td style="color:var(--text2)">${esc(m.file)}</td></tr>`).join('') +
+    '</tbody></table>';
+}
 </script>
 </body>
 </html>

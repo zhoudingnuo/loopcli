@@ -307,6 +307,12 @@ class WebUIHandler(SimpleHTTPRequestHandler):
             return self._handle_loopcli_restart()
         if path == "/api/loopcli/dispatch":
             return self._handle_loopcli_dispatch()
+        if path == "/api/messages/send":
+            return self._handle_message_send()
+        if path == "/api/agents/enable":
+            return self._handle_agent_enable("enable")
+        if path == "/api/agents/disable":
+            return self._handle_agent_enable("disable")
 
         self._send_json({"error": "Not found"}, status=404)
 
@@ -460,6 +466,49 @@ class WebUIHandler(SimpleHTTPRequestHandler):
             "pid": proc.pid,
             "status": "dispatched",
         }, status=201)
+
+    def _handle_message_send(self):
+        body = self._read_body()
+        content = body.get("content", "").strip()
+        if not content:
+            return self._send_json({"error": "content is required"}, status=400)
+
+        agent_id = body.get("agent", "main").strip() or "main"
+        agent_dir = LOOPCLI_ROOT / agent_id
+        if not (agent_dir / "AGENT").exists():
+            return self._send_json({"error": f"Agent '{agent_id}' not found"}, status=404)
+
+        inbox_dir = agent_dir / "inbox"
+        inbox_dir.mkdir(parents=True, exist_ok=True)
+
+        now = datetime.now()
+        ts = now.strftime("%Y%m%d_%H%M")
+        msg_file = inbox_dir / f"webui_{ts}.md"
+        msg_file.write_text(
+            f"# 来自 WebUI 的消息\n- 类型：指令\n- 时间：{now.strftime('%Y-%m-%d %H:%M')}\n\n## 内容\n{content}\n",
+            encoding="utf-8",
+        )
+        self._send_json({"status": "sent", "agent": agent_id, "file": msg_file.name}, status=201)
+
+    def _handle_agent_enable(self, action):
+        body = self._read_body()
+        agent_id = body.get("agent", "").strip()
+        if not agent_id:
+            return self._send_json({"error": "agent is required"}, status=400)
+        if agent_id == "main":
+            return self._send_json({"error": "cannot disable main agent"}, status=400)
+
+        agent_dir = LOOPCLI_ROOT / agent_id
+        marker = agent_dir / "AGENT"
+        if not marker.exists():
+            return self._send_json({"error": f"Agent '{agent_id}' not found"}, status=404)
+
+        if action == "enable":
+            marker.write_text("type: main\n", encoding="utf-8")
+        else:
+            marker.write_text("type: main\ndisabled: true\n", encoding="utf-8")
+
+        self._send_json({"status": "ok", "agent": agent_id, "enabled": action == "enable"})
 
 
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):

@@ -19,10 +19,11 @@
   },
   {
     "id": 3,
-    "status": "pending",
+    "status": "done",
     "title": "闭环审查：验证 server.py + run.py 安全修复",
     "description": "等 main 完成 #6 任务（修复 P0 安全问题）后，重新审查 server.py 和 run.py 的修复代码。重点验证：1) shell=True 是否全部移除；2) _safe_agent_path 路径校验是否正确实现；3) 文件句柄是否用 try/finally 保护；4) state.json 是否有并发保护；5) 是否有新的安全隐患引入。如果修复完成，将结果追加到 code-review-webui.md 报告的末尾（第三部分）",
     "created": "2026-05-21",
-    "assignee": "engineering-code-reviewer"
+    "assignee": "engineering-code-reviewer",
+    "completed": "2026-05-21"
   }
 ]
