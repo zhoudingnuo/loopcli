@@ -1,0 +1,28 @@
+[
+  {
+    "id": 1,
+    "status": "done",
+    "title": "审查 LoopCLI WebUI 全栈代码（D:\\loopcli\\main\\webui\\server.py 约 485 行 Python + D:\\loopcli\\main\\webui\\index.html 约 550 行前端），重点关注：1) API 安全性（命令注入、路径遍历、XSS）2) 错误处理完整性 3) 代码可维护性 4) 性能瓶颈 5) 前端安全。输出审查报告到 D:\\loopcli\\main\\memory\\results\\code-review-webui.md",
+    "description": "审查 LoopCLI WebUI 全栈代码（D:\\loopcli\\main\\webui\\server.py 约 485 行 Python + D:\\loopcli\\main\\webui\\index.html 约 550 行前端），重点关注：1) API 安全性（命令注入、路径遍历、XSS）2) 错误处理完整性 3) 代码可维护性 4) 性能瓶颈 5) 前端安全。输出审查报告到 D:\\loopcli\\main\\memory\\results\\code-review-webui.md",
+    "created": "2026-05-21",
+    "assignee": "engineering-code-reviewer",
+    "completed": "2026-05-21"
+  },
+  {
+    "id": 2,
+    "status": "done",
+    "title": "补充审查 run.py 安全性",
+    "description": "在已有 WebUI 审查基础上，补充审查 D:\\loopcli\\run.py（约 425 行），重点：1) Popen shell=True 的命令注入风险 2) 文件路径拼接的安全性 3) 进程管理的资源泄露 4) 多线程并发的线程安全。将结果追加到已有的 code-review-webui.md 报告中",
+    "created": "2026-05-21",
+    "assignee": "engineering-code-reviewer",
+    "completed": "2026-05-21"
+  },
+  {
+    "id": 3,
+    "status": "pending",
+    "title": "闭环审查：验证 server.py + run.py 安全修复",
+    "description": "等 main 完成 #6 任务（修复 P0 安全问题）后，重新审查 server.py 和 run.py 的修复代码。重点验证：1) shell=True 是否全部移除；2) _safe_agent_path 路径校验是否正确实现；3) 文件句柄是否用 try/finally 保护；4) state.json 是否有并发保护；5) 是否有新的安全隐患引入。如果修复完成，将结果追加到 code-review-webui.md 报告的末尾（第三部分）",
+    "created": "2026-05-21",
+    "assignee": "engineering-code-reviewer"
+  }
+]

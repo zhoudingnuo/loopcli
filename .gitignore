@@ -1,0 +1,19 @@
+# 日志
+logs/
+*/log/
+*/raw.log
+
+# 私人数据
+*/memory/results/
+*/inbox/
+
+# Python 缓存
+__pycache__/
+*.pyc
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 敏感文件
+*/memory/errors.json

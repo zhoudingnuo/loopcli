@@ -1,0 +1,55 @@
+[
+  {
+    "id": 1,
+    "status": "done",
+    "title": "开发 WebUI 适配 loopcli 项目",
+    "description": "查看各 Agent 状态、给 Agent 派发任务",
+    "created": "2026-05-21",
+    "completed": "2026-05-21T06:00:00Z",
+    "assignee": "main"
+  },
+  {
+    "id": 2,
+    "status": "done",
+    "title": "搭建 WebUI 后端服务",
+    "description": "用 Python 创建 HTTP 服务，提供 REST API 对接 loopcli 文件系统。API 包括：GET /api/agents（扫描所有 AGENT 目录，读取 state.json 返回状态）、GET /api/tasks（读取 tasks.json）、POST /api/tasks（写入 tasks.json 添加新任务）、GET /api/logs（读取 raw.log 最近 N 行）、POST /api/agents/start（触发指定 agent 执行一轮）。服务端口 8080，静态文件托管 webui/ 目录。",
+    "created": "2026-05-21",
+    "completed": "2026-05-21T07:00:00Z",
+    "assignee": "main"
+  },
+  {
+    "id": 3,
+    "status": "done",
+    "title": "WebUI 前端对接真实 API",
+    "description": "将 webui/index.html 的静态 data.json 改为调用后端 REST API。仪表盘实时显示各 agent 的 state.json 状态（idle/running/error），任务列表从 tasks.json 读取，新建任务通过 POST /api/tasks 写入 tasks.json。Agent 卡片显示最近一次运行时间和运行轮次。",
+    "created": "2026-05-21",
+    "completed": "2026-05-21T08:00:00Z",
+    "assignee": "main"
+  },
+  {
+    "id": 4,
+    "status": "done",
+    "title": "WebUI 添加实时日志查看",
+    "description": "在 WebUI 中添加日志页面，通过 SSE (Server-Sent Events) 实时推送 agent 运行日志。后端监听各 agent 的 raw.log 文件变化，前端自动滚动显示最新日志。支持按 agent 筛选、搜索日志内容。",
+    "created": "2026-05-21",
+    "completed": "2026-05-21T09:00:00Z",
+    "assignee": "main"
+  },
+  {
+    "id": 5,
+    "status": "done",
+    "title": "WebUI 集成 loopcli 控制功能",
+    "description": "在 WebUI 中添加控制面板：启动/停止 loopcli 循环、设置迭代次数、查看当前运行状态。后端管理 loopcli 进程生命周期（启动、停止、重启），前端显示进程 PID、运行时长、总轮次。支持一键给指定 agent 派发任务并立即触发执行。",
+    "created": "2026-05-21",
+    "completed": "2026-05-21T06:12:00Z",
+    "assignee": "main"
+  },
+  {
+    "id": 6,
+    "status": "pending",
+    "title": "修复 server.py + run.py 安全问题（P0 阻塞项）+ 日志轮转",
+    "description": "根据代码审查报告 code-review-webui.md，修复所有 P0 阻塞项：[server.py] 1) _handle_agent_start 的 shell=True 命令注入 → 改为列表参数直接传 prompt 内容；2) 所有 agent_id 端点添加 _safe_agent_path 路径校验；3) --dangerously-skip-permissions 添加鉴权/API Key 保护；[run.py] 4) run_agent 的 shell=True → 改为列表形式调用；5) log_file/agent_log 用 try/finally 确保关闭；6) state.json 写入加文件锁；[通用] 7) 日志轮转（raw.log 超 1MB 归档）；8) LOOPCLI_ROOT 改为环境变量配置",
+    "created": "2026-05-21",
+    "assignee": "main"
+  }
+]

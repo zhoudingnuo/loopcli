@@ -1,0 +1,485 @@
+"""
+LoopCLI WebUI Backend Server
+REST API + static file hosting for the Agent control console.
+"""
+
+import json
+import os
+import signal
+import subprocess
+import sys
+import time
+import threading
+from datetime import datetime, timezone
+from http.server import HTTPServer, SimpleHTTPRequestHandler
+from socketserver import ThreadingMixIn
+from pathlib import Path
+from urllib.parse import urlparse, parse_qs
+
+LOOPCLI_ROOT = Path(r"D:\loopcli")
+WEBUI_DIR = Path(__file__).parent.resolve()
+MAIN_DIR = LOOPCLI_ROOT / "main"
+LOOP_STATE_FILE = WEBUI_DIR / "loop_state.json"
+
+_loop_proc = None
+_loop_lock = threading.Lock()
+
+
+def read_json(path: Path, default=None):
+    if not path.exists():
+        return default if default is not None else {}
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return default if default is not None else {}
+
+
+def write_json(path: Path, data):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def scan_agents():
+    """Scan loopcli root for agent directories (containing AGENT marker file)."""
+    agents = []
+    for child in LOOPCLI_ROOT.iterdir():
+        if not child.is_dir():
+            continue
+        agent_marker = child / "AGENT"
+        if not agent_marker.exists():
+            continue
+        state = read_json(child / "memory" / "state.json", {})
+        soul_path = child / "SOUL.md"
+        desc = ""
+        if soul_path.exists():
+            lines = soul_path.read_text(encoding="utf-8").strip().splitlines()
+            for line in lines:
+                stripped = line.strip()
+                if stripped and not stripped.startswith("#"):
+                    desc = stripped
+                    break
+        agents.append({
+            "id": child.name,
+            "name": state.get("agent", child.name),
+            "status": state.get("status", "unknown"),
+            "description": desc,
+            "last_run": state.get("last_run"),
+            "run_count": state.get("run_count", 0),
+            "current_task": state.get("current_task"),
+        })
+    return agents
+
+
+def get_main_tasks():
+    return read_json(MAIN_DIR / "memory" / "tasks.json", [])
+
+
+def get_recent_lines(filepath: Path, n=100):
+    if not filepath.exists():
+        return []
+    try:
+        with open(filepath, "r", encoding="utf-8", errors="replace") as f:
+            lines = f.readlines()
+        return [l.rstrip("\n\r") for l in lines[-n:]]
+    except OSError:
+        return []
+
+
+# --- Loop Process Management ---
+
+def get_loop_state():
+    return read_json(LOOP_STATE_FILE, {
+        "status": "stopped", "pid": None,
+        "started_at": None, "iterations": 0, "total_iterations": 0,
+    })
+
+
+def set_loop_state(state):
+    write_json(LOOP_STATE_FILE, state)
+
+
+def _is_pid_alive(pid):
+    if not pid:
+        return False
+    try:
+        os.kill(pid, 0)
+        return True
+    except (ProcessLookupError, PermissionError, OSError):
+        return False
+
+
+def _monitor_loopcli(proc):
+    proc.wait()
+    with _loop_lock:
+        state = get_loop_state()
+        if state.get("pid") == proc.pid:
+            state["status"] = "stopped"
+            state["pid"] = None
+            state["ended_at"] = datetime.now().isoformat()
+            set_loop_state(state)
+
+
+def start_loopcli_process(iterations=0):
+    global _loop_proc
+    with _loop_lock:
+        state = get_loop_state()
+        if state.get("status") == "running" and _is_pid_alive(state.get("pid")):
+            return {"error": "Already running"}, 409
+
+        cmd = [sys.executable, str(LOOPCLI_ROOT / "run.py"), "run"]
+        if iterations > 0:
+            cmd.extend(["-n", str(iterations)])
+
+        proc = subprocess.Popen(
+            cmd,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+        )
+        _loop_proc = proc
+
+        state = {
+            "status": "running",
+            "pid": proc.pid,
+            "started_at": datetime.now().isoformat(),
+            "iterations": iterations,
+            "total_iterations": 0,
+        }
+        set_loop_state(state)
+
+        t = threading.Thread(target=_monitor_loopcli, args=(proc,), daemon=True)
+        t.start()
+        return state, 200
+
+
+def stop_loopcli_process():
+    global _loop_proc
+    with _loop_lock:
+        state = get_loop_state()
+        pid = state.get("pid")
+        if not pid or not _is_pid_alive(pid):
+            state["status"] = "stopped"
+            state["pid"] = None
+            set_loop_state(state)
+            return {"error": "Not running"}, 409
+
+        try:
+            os.kill(pid, signal.SIGTERM)
+        except OSError:
+            pass
+        if _loop_proc and _loop_proc.pid == pid:
+            try:
+                _loop_proc.terminate()
+            except OSError:
+                pass
+            _loop_proc = None
+
+        state["status"] = "stopped"
+        state["pid"] = None
+        state["ended_at"] = datetime.now().isoformat()
+        set_loop_state(state)
+        return {"status": "stopped"}, 200
+
+
+class WebUIHandler(SimpleHTTPRequestHandler):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, directory=str(WEBUI_DIR), **kwargs)
+
+    def log_message(self, format, *args):
+        ts = datetime.now().strftime("%H:%M:%S")
+        sys.stdout.write(f"[{ts}] {format % args}\n")
+        sys.stdout.flush()
+
+    def _send_json(self, data, status=200):
+        body = json.dumps(data, ensure_ascii=False, indent=2).encode("utf-8")
+        self.send_response(status)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def _read_body(self):
+        length = int(self.headers.get("Content-Length", 0))
+        if length == 0:
+            return {}
+        raw = self.rfile.read(length)
+        try:
+            return json.loads(raw.decode("utf-8"))
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            return {}
+
+    def _cors_headers(self):
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+
+    # ---------- SSE helpers ----------
+
+    def _send_sse_event(self, data):
+        payload = f"data: {json.dumps(data, ensure_ascii=False)}\n\n"
+        self.wfile.write(payload.encode("utf-8"))
+        self.wfile.flush()
+
+    def _handle_sse_logs(self):
+        params = parse_qs(urlparse(self.path).query)
+        agent_id = params.get("agent", [None])[0]
+        if agent_id:
+            log_path = LOOPCLI_ROOT / agent_id / "log" / "run.md"
+        else:
+            log_path = MAIN_DIR / "log" / "run.md"
+
+        self.send_response(200)
+        self.send_header("Content-Type", "text/event-stream")
+        self.send_header("Cache-Control", "no-cache")
+        self.send_header("Connection", "keep-alive")
+        self.send_header("X-Accel-Buffering", "no")
+        self._cors_headers()
+        self.end_headers()
+
+        last_size = 0
+        try:
+            while True:
+                if log_path.exists():
+                    current_size = log_path.stat().st_size
+                    if current_size != last_size:
+                        lines = get_recent_lines(log_path, 500)
+                        self._send_sse_event({
+                            "agent": agent_id,
+                            "lines": lines,
+                            "ts": datetime.now().isoformat(),
+                        })
+                        last_size = current_size
+                else:
+                    if last_size != -1:
+                        self._send_sse_event({"agent": agent_id, "lines": [], "ts": datetime.now().isoformat()})
+                        last_size = -1
+                time.sleep(1)
+        except (BrokenPipeError, ConnectionResetError, OSError):
+            pass
+
+    # ---------- GET routes ----------
+
+    def do_GET(self):
+        parsed = urlparse(self.path)
+        path = parsed.path
+
+        if path == "/api/agents":
+            return self._send_json(scan_agents())
+
+        if path == "/api/tasks":
+            return self._send_json(get_main_tasks())
+
+        if path == "/api/logs":
+            params = parse_qs(parsed.query)
+            n = int(params.get("n", ["100"])[0])
+            agent_id = params.get("agent", [None])[0]
+            if agent_id:
+                log_path = LOOPCLI_ROOT / agent_id / "log" / "run.md"
+            else:
+                log_path = MAIN_DIR / "log" / "run.md"
+            lines = get_recent_lines(log_path, n)
+            return self._send_json({"agent": agent_id, "lines": lines})
+
+        if path == "/api/logs/stream":
+            return self._handle_sse_logs()
+
+        if path == "/api/loopcli/status":
+            return self._handle_loopcli_status()
+
+        # Static files
+        super().do_GET()
+
+    # ---------- POST routes ----------
+
+    def do_POST(self):
+        parsed = urlparse(self.path)
+        path = parsed.path
+
+        if path == "/api/tasks":
+            return self._handle_create_task()
+        if path == "/api/agents/start":
+            return self._handle_agent_start()
+        if path == "/api/loopcli/start":
+            return self._handle_loopcli_start()
+        if path == "/api/loopcli/stop":
+            return self._handle_loopcli_stop()
+        if path == "/api/loopcli/restart":
+            return self._handle_loopcli_restart()
+        if path == "/api/loopcli/dispatch":
+            return self._handle_loopcli_dispatch()
+
+        self._send_json({"error": "Not found"}, status=404)
+
+    # ---------- OPTIONS (CORS preflight) ----------
+
+    def do_OPTIONS(self):
+        self.send_response(204)
+        self._cors_headers()
+        self.end_headers()
+
+    # ---------- Handlers ----------
+
+    def _handle_create_task(self):
+        body = self._read_body()
+        title = body.get("title", "").strip()
+        if not title:
+            return self._send_json({"error": "title is required"}, status=400)
+
+        tasks = get_main_tasks()
+        new_id = max((t.get("id", 0) for t in tasks), default=0) + 1
+        task = {
+            "id": new_id,
+            "status": "pending",
+            "title": title,
+            "description": body.get("description", ""),
+            "created": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+            "assignee": body.get("assignee") or "main",
+        }
+        tasks.append(task)
+        write_json(MAIN_DIR / "memory" / "tasks.json", tasks)
+        self._send_json(task, status=201)
+
+    def _handle_agent_start(self):
+        body = self._read_body()
+        agent_id = body.get("agent", "").strip()
+        if not agent_id:
+            return self._send_json({"error": "agent is required"}, status=400)
+
+        agent_dir = LOOPCLI_ROOT / agent_id
+        prompt_file = agent_dir / "PROMPT.md"
+        if not prompt_file.exists():
+            return self._send_json({"error": f"Agent '{agent_id}' not found or no PROMPT.md"}, status=404)
+
+        # Launch claude in the agent directory, reading PROMPT.md
+        try:
+            proc = subprocess.Popen(
+                ["claude", "--print", "$(cat PROMPT.md)"],
+                cwd=str(agent_dir),
+                shell=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+        except FileNotFoundError:
+            proc = subprocess.Popen(
+                ["claude", "--print", prompt_file.read_text(encoding="utf-8")],
+                cwd=str(agent_dir),
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+
+        self._send_json({
+            "agent": agent_id,
+            "pid": proc.pid,
+            "status": "started",
+        })
+
+    # --- Loop control handlers ---
+
+    def _handle_loopcli_status(self):
+        state = get_loop_state()
+        pid = state.get("pid")
+        if state.get("status") == "running" and pid and not _is_pid_alive(pid):
+            state["status"] = "stopped"
+            state["pid"] = None
+            state["ended_at"] = datetime.now().isoformat()
+            set_loop_state(state)
+
+        uptime = 0
+        if state.get("started_at"):
+            try:
+                started = datetime.fromisoformat(state["started_at"])
+                uptime = int((datetime.now() - started).total_seconds())
+            except (ValueError, TypeError):
+                pass
+        state["uptime_seconds"] = uptime
+        self._send_json(state)
+
+    def _handle_loopcli_start(self):
+        body = self._read_body()
+        iterations = int(body.get("iterations", 0))
+        data, status = start_loopcli_process(iterations)
+        self._send_json(data, status)
+
+    def _handle_loopcli_stop(self):
+        data, status = stop_loopcli_process()
+        self._send_json(data, status)
+
+    def _handle_loopcli_restart(self):
+        stop_loopcli_process()
+        time.sleep(0.5)
+        body = self._read_body()
+        iterations = int(body.get("iterations", 0))
+        data, status = start_loopcli_process(iterations)
+        self._send_json(data, status)
+
+    def _handle_loopcli_dispatch(self):
+        body = self._read_body()
+        agent_id = body.get("agent", "").strip()
+        title = body.get("title", "").strip()
+        if not agent_id or not title:
+            return self._send_json({"error": "agent and title are required"}, status=400)
+
+        agent_dir = LOOPCLI_ROOT / agent_id
+        if not (agent_dir / "AGENT").exists():
+            return self._send_json({"error": f"Agent '{agent_id}' not found"}, status=404)
+
+        # Write task to agent's tasks.json
+        tasks_file = agent_dir / "memory" / "tasks.json"
+        tasks = read_json(tasks_file, [])
+        new_id = max((t.get("id", 0) for t in tasks), default=0) + 1
+        task = {
+            "id": new_id,
+            "status": "pending",
+            "title": title,
+            "description": body.get("description", ""),
+            "created": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+            "assignee": agent_id,
+        }
+        tasks.append(task)
+        write_json(tasks_file, tasks)
+
+        # Start claude process for this agent
+        prompt_file = agent_dir / "PROMPT.md"
+        prompt = ""
+        if prompt_file.exists():
+            prompt = prompt_file.read_text(encoding="utf-8")
+
+        proc = subprocess.Popen(
+            ["claude", "--print", "--dangerously-skip-permissions"],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            cwd=str(agent_dir),
+        )
+        if prompt:
+            proc.stdin.write(prompt.encode("utf-8"))
+            proc.stdin.close()
+
+        self._send_json({
+            "task": task,
+            "pid": proc.pid,
+            "status": "dispatched",
+        }, status=201)
+
+
+class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
+    daemon_threads = True
+
+
+def main():
+    host = "0.0.0.0"
+    port = 8080
+    server = ThreadedHTTPServer((host, port), WebUIHandler)
+    print(f"LoopCLI WebUI Server running on http://{host}:{port}")
+    print(f"Static files served from: {WEBUI_DIR}")
+    print(f"Agent root: {LOOPCLI_ROOT}")
+    print("Press Ctrl+C to stop.")
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        print("\nShutting down.")
+        server.server_close()
+
+
+if __name__ == "__main__":
+    main()

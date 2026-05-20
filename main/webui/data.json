@@ -1,0 +1,16 @@
+{
+  "agents": [
+    { "id": "main", "name": "主 Agent", "department": "调度", "status": "running", "description": "调度、决策、执行核心任务" },
+    { "id": "engineering-frontend-developer", "name": "前端开发者", "department": "工程部", "status": "idle", "description": "精通 React/Vue/Angular 的前端工程专家" },
+    { "id": "engineering-backend-architect", "name": "后端架构师", "department": "工程部", "status": "idle", "description": "精通可扩展系统设计、数据库架构、API 开发" },
+    { "id": "marketing-content-creator", "name": "内容创作者", "department": "营销部", "status": "idle", "description": "擅长多平台内容策划与创作的内容专家" },
+    { "id": "design-ui-designer", "name": "UI 设计师", "department": "设计部", "status": "idle", "description": "精通视觉设计系统、组件库和像素级界面创建" },
+    { "id": "testing-api-tester", "name": "API 测试员", "department": "测试部", "status": "idle", "description": "专注于全面 API 验证、性能测试和质量保证" },
+    { "id": "product-manager", "name": "产品经理", "department": "产品部", "status": "idle", "description": "全局型产品负责人，掌控产品全生命周期" }
+  ],
+  "tasks": [
+    { "id": 1, "title": "开发 WebUI 适配 loopcli 项目", "status": "done", "assignee": "main", "created": "2026-05-21", "description": "查看各 Agent 状态、给 Agent 派发任务" },
+    { "id": 2, "title": "设计品牌视觉规范", "status": "pending", "assignee": null, "created": "2026-05-21", "description": "制定品牌色彩、字体、图标规范" },
+    { "id": 3, "title": "编写 API 接口文档", "status": "pending", "assignee": null, "created": "2026-05-21", "description": "为所有公开 API 编写 OpenAPI 文档" }
+  ]
+}
