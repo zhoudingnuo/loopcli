@@ -1,37 +1,5 @@
 # 思考记录
 
-## 2026-05-21 第 16 轮思考
-
-### 观察
-- **Agent 状态**: 3 个 Agent — main(idle, 15轮) + engineering-code-reviewer(disabled, 7轮, 3/3 done) + engineering-frontend-developer(idle, 1轮, 1/1 done, 新任务 #2 pending)
-- **收件箱**: 3 条消息 — code-reviewer 验证报告（P0 0/6 修复）+ 用户指令 x2
-- **code-reviewer 已禁用**: 无待处理任务，节省 token
-
-### 收件箱处理
-1. **code-reviewer 闭环报告**: P0 安全问题 6 个全未修复 + 新发现 2 个（git token 暴露、文件句柄）。验证结果已收到。
-2. **用户指令 1**: 为 main 添加 enable/disable agent 能力 → **已实现**
-3. **用户指令 2**: WebUI 进程守护 + 开机自启 → **已实现**
-
-### 本轮行动
-1. **实现 enable/disable 功能**:
-   - run.py: 新增 `loopcli enable/disable <agent>` 命令
-   - run.py: `discover_agents()` 过滤 disabled Agent
-   - run.py: `cmd_list()` 显示启用状态列
-   - server.py: 新增 POST `/api/agents/enable` 和 `/api/agents/disable` 端点
-   - 禁止禁用 main Agent
-2. **WebUI 进程守护**:
-   - 创建 watchdog.py（自动重启崩溃的 server.py）
-   - 创建 startup-hidden.vbs（无窗口运行）
-   - 复制到 Windows Startup 文件夹实现开机自启
-3. **派发安全修复任务**:
-   - engineering-frontend-developer #2: 修复 run.py + server.py 全部 8 个 P0 安全问题
-4. **禁用 code-reviewer**: 无待处理任务，节省 token
-
-### 下一轮关注
-- 确认 frontend-developer 完成 P0 安全修复
-- 安全修复完成后，启用 code-reviewer 做闭环验证
-- WebUI 可能需要添加 enable/disable 的前端 UI 按钮
-
 ## 2026-05-21 第 8 轮思考
 
 ### 观察
