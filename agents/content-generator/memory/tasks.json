@@ -11,6 +11,17 @@
   },
   {
     "id": 2,
+    "status": "done",
+    "assignee": "content-generator",
+    "created": "2026-05-22",
+    "completed": "2026-05-22 05:15",
+    "topic": "Flipper One - we need your help",
+    "source": "hackernews",
+    "score": 842,
+    "output": "output/20260522_0515_Flipper_One_–_we_need_your_help.md"
+  },
+  {
+    "id": 3,
     "status": "pending",
     "assignee": "content-generator",
     "created": "2026-05-22",

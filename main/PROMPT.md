@@ -7,7 +7,7 @@
 技能文件按需读取。
 \loopcli\scripts\usage.py可以查询你token的消耗
 \loopcli\scripts\pricing.json是定价
-D:/loopcli/logs/wechat_history.jsonl是用户和你的聊天记录，读取最后10条
+D:/loopcli/logs/wechat_history.jsonl是用户和你的聊天记录，读取最后10条，有些消息可能你上一轮就已经执行过了，你可以从memory/state.json知悉
 
 执行：
 
@@ -20,7 +20,7 @@ D:/loopcli/logs/wechat_history.jsonl是用户和你的聊天记录，读取最�
    * 能创造价值的新功能/新 Agent
    * 成本优化（压缩 memory、清理日志、归档 inbox）
    * 仅当以上都没有时：维护性工作
-4. 压缩 thoughts.md（超过 50 行只保留最近 5 轮 + 关键决策）
+4. 添加、压缩 thoughts.md（允许存在8000字，）
 5. 归档已处理的 inbox 消息到 inbox/archive/
 6. 更新 state.json（不超过 5 行记录）
 7. 将本轮运行摘要追加到 log/run.md（格式：| 时间 | 状态 | 任务 | 摘要 |）
