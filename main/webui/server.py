@@ -22,6 +22,7 @@ from urllib.parse import urlparse, parse_qs
 
 from loopcli_lib import (
     LOOPCLI_ROOT,
+    AGENT_MARKER,
     read_json,
     write_json,
     safe_agent_path,
@@ -34,6 +35,68 @@ from loopcli_lib import (
     get_recent_lines,
     read_file_tail_incremental,
 )
+
+# Import create agent functions from run.py
+SUBAGENT_DIR = str(LOOPCLI_ROOT / "subagent")
+
+DEFAULT_PROMPT = """# 身份与初始化
+- 所有回答用中文
+- 读取 inbox/ 下用户消息（最高优先级）
+- 读取 SOUL.md 作为身份
+- 读取 memory/state.json 了解当前状态
+- 读取 memory/tasks.json 了解任务
+- 技能文件按需读取
+
+# 执行流程
+
+1. **处理用户消息**（有就立即处理）
+2. **做一件最有价值的事**（按优先级选择）
+3. **更新记录**：thoughts.md、state.json、log/run.md
+
+# 成本控制
+
+- 禁用空闲 Agent
+- 压缩 memory
+- 清理 inbox
+"""
+
+def find_template(template_id):
+    """在 subagent 目录下搜索模板文件"""
+    for dept in os.listdir(SUBAGENT_DIR):
+        dept_dir = os.path.join(SUBAGENT_DIR, dept)
+        if not os.path.isdir(dept_dir):
+            continue
+        candidate = os.path.join(dept_dir, f"{template_id}.md")
+        if os.path.isfile(candidate):
+            return candidate
+    return None
+
+def list_templates():
+    """列出所有可用的 Agent 模板"""
+    templates = []
+    for dept in sorted(os.listdir(SUBAGENT_DIR)):
+        dept_dir = os.path.join(SUBAGENT_DIR, dept)
+        if not os.path.isdir(dept_dir):
+            continue
+        for fname in sorted(os.listdir(dept_dir)):
+            if fname.endswith(".md"):
+                template_id = fname[:-3]
+                template_path = os.path.join(dept_dir, fname)
+                # 读取第一行作为描述
+                desc = ""
+                try:
+                    with open(template_path, "r", encoding="utf-8") as f:
+                        first_line = f.readline()
+                        if first_line.startswith("#"):
+                            desc = first_line.strip().lstrip("#").strip()
+                except:
+                    pass
+                templates.append({
+                    "id": template_id,
+                    "category": dept,
+                    "description": desc or template_id
+                })
+    return templates
 
 WEBUI_DIR = Path(__file__).parent.resolve()
 MAIN_DIR = LOOPCLI_ROOT / "main"
@@ -442,6 +505,9 @@ class WebUIHandler(SimpleHTTPRequestHandler):
         if path == "/api/usage":
             return self._send_json(query_usage_summary())
 
+        if path == "/api/templates":
+            return self._send_json(list_templates())
+
         if path == "/api/loopcli/status":
             return self._handle_loopcli_status()
 
@@ -467,6 +533,8 @@ class WebUIHandler(SimpleHTTPRequestHandler):
 
         if path == "/api/tasks":
             return self._handle_create_task()
+        if path == "/api/agents/create":
+            return self._handle_agent_create()
         if path == "/api/agents/start":
             return self._handle_agent_start()
         if path == "/api/loopcli/start":
@@ -543,6 +611,99 @@ class WebUIHandler(SimpleHTTPRequestHandler):
             "pid": proc.pid,
             "status": "started",
         })
+
+    def _handle_agent_create(self):
+        body = self._read_body()
+        if body is None:
+            return
+
+        template_id = body.get("template", "").strip()
+        if not template_id:
+            return self._send_json({"error": "template is required"}, status=400)
+
+        task_desc = body.get("task", "").strip()
+
+        # 查找模板
+        tpl_file = find_template(template_id)
+        if not tpl_file:
+            return self._send_json({"error": f"Template not found: {template_id}"}, status=404)
+
+        # 读取模板内容
+        try:
+            with open(tpl_file, "r", encoding="utf-8") as f:
+                soul_content = f.read()
+        except Exception as e:
+            return self._send_json({"error": f"Failed to read template: {str(e)}"}, status=500)
+
+        # 创建 Agent 目录
+        agent_dir = LOOPCLI_ROOT / "agents" / template_id
+        if agent_dir.exists():
+            # Agent 已存在，如果有任务则添加任务
+            if task_desc:
+                create_task(
+                    agent_dir, task_desc,
+                    description=task_desc,
+                    assignee=template_id,
+                )
+            return self._send_json({
+                "agent": template_id,
+                "status": "existed",
+                "message": "Agent already existed, task added if provided"
+            }, status=200)
+
+        # 创建目录结构
+        try:
+            (agent_dir / "memory" / "results").mkdir(parents=True, exist_ok=True)
+            (agent_dir / "log").mkdir(parents=True, exist_ok=True)
+
+            # 写入 AGENT 标记
+            with open(agent_dir / AGENT_MARKER, "w", encoding="utf-8") as f:
+                f.write("type: main\n")
+
+            # 写入 SOUL.md
+            with open(agent_dir / "SOUL.md", "w", encoding="utf-8") as f:
+                f.write(soul_content)
+
+            # 写入 PROMPT.md
+            with open(agent_dir / "PROMPT.md", "w", encoding="utf-8") as f:
+                f.write(DEFAULT_PROMPT)
+
+            # 写入 state.json
+            state = {
+                "agent": template_id,
+                "status": "idle",
+                "current_task": None,
+                "last_run": None,
+                "run_count": 0,
+                "created": datetime.now().strftime("%Y-%m-%d")
+            }
+            write_json(agent_dir / "memory" / "state.json", state)
+
+            # 写入 tasks.json
+            tasks = []
+            if task_desc:
+                tasks.append({
+                    "id": 1,
+                    "status": "pending",
+                    "title": task_desc,
+                    "description": task_desc,
+                    "created": datetime.now().strftime("%Y-%m-%d"),
+                    "assignee": template_id
+                })
+            write_json(agent_dir / "memory" / "tasks.json", tasks)
+
+            # 初始化日志
+            with open(agent_dir / "log" / "run.md", "w", encoding="utf-8") as f:
+                f.write("# 运行日志\n\n")
+
+            return self._send_json({
+                "agent": template_id,
+                "status": "created",
+                "message": "Agent created successfully"
+            }, status=201)
+
+        except Exception as e:
+            return self._send_json({"error": f"Failed to create agent: {str(e)}"}, status=500)
 
     # --- Loop control handlers ---
 

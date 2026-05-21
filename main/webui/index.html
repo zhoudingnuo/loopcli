@@ -1628,6 +1628,9 @@ body {
       <!-- Agents -->
       <div class="page" id="page-agents">
         <div class="log-toolbar" style="margin-bottom:18px">
+          <button class="btn btn-primary" id="create-agent-btn" style="margin-right:auto">
+            <span style="font-size:16px;margin-right:6px">+</span> 创建 Agent
+          </button>
           <button class="btn" id="export-agents-csv">导出 CSV</button>
           <button class="btn" id="export-agents-json">导出 JSON</button>
         </div>
@@ -4126,6 +4129,193 @@ function generateCostSuggestions() {
 
 // 暴露给全局以便页面切换时调用
 window.loadCostAnalysis = loadCostAnalysis;
+</script>
+
+<!-- 创建 Agent 对话框 -->
+<div id="create-agent-modal" class="modal-overlay" style="display:none">
+  <div class="modal" style="max-width:500px">
+    <div class="modal-header">
+      <h3 class="modal-title">创建新 Agent</h3>
+      <button class="modal-close" onclick="closeCreateAgentModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div style="margin-bottom:16px">
+        <label style="display:block;font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px">选择模板</label>
+        <select id="agent-template-select" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:14px">
+          <option value="">加载中...</option>
+        </select>
+        <div style="font-size:11px;color:var(--text2);margin-top:4px" id="template-desc"></div>
+      </div>
+      <div style="margin-bottom:16px">
+        <label style="display:block;font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px">初始任务（可选）</label>
+        <input type="text" id="agent-initial-task" placeholder="为 Agent 分配的第一个任务" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:14px">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeCreateAgentModal()">取消</button>
+      <button class="btn btn-primary" id="confirm-create-agent">创建</button>
+    </div>
+  </div>
+</div>
+
+<style>
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.modal {
+  background: var(--surface);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--border);
+  width: 90%;
+  max-width: 500px;
+  animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px;
+  border-bottom: 1px solid var(--border);
+}
+.modal-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+}
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: var(--text2);
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all var(--transition-fast);
+}
+.modal-close:hover {
+  background: var(--surface2);
+  color: var(--text);
+}
+.modal-body {
+  padding: 20px;
+}
+.modal-footer {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+}
+</style>
+
+<script>
+// 创建 Agent 相关逻辑
+let templates = [];
+
+async function loadTemplates() {
+  try {
+    const r = await fetch('/api/templates');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    templates = await r.json();
+
+    const select = document.getElementById('agent-template-select');
+    select.innerHTML = '<option value="">请选择模板...</option>';
+    templates.forEach(t => {
+      const opt = document.createElement('option');
+      opt.value = t.id;
+      opt.textContent = `[${t.category}] ${t.description || t.id}`;
+      select.appendChild(opt);
+    });
+
+    select.addEventListener('change', () => {
+      const t = templates.find(x => x.id === select.value);
+      document.getElementById('template-desc').textContent = t ? t.description : '';
+    });
+  } catch (e) {
+    console.error('Failed to load templates:', e);
+    showToast('加载模板失败', 'error');
+  }
+}
+
+function openCreateAgentModal() {
+  document.getElementById('create-agent-modal').style.display = 'flex';
+  if (templates.length === 0) {
+    loadTemplates();
+  }
+}
+
+function closeCreateAgentModal() {
+  document.getElementById('create-agent-modal').style.display = 'none';
+  document.getElementById('agent-template-select').value = '';
+  document.getElementById('agent-initial-task').value = '';
+  document.getElementById('template-desc').textContent = '';
+}
+
+async function createAgent() {
+  const template = document.getElementById('agent-template-select').value;
+  const task = document.getElementById('agent-initial-task').value.trim();
+
+  if (!template) {
+    showToast('请选择模板', 'warn');
+    return;
+  }
+
+  try {
+    const r = await fetch('/api/agents/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ template, task })
+    });
+
+    if (!r.ok) {
+      const err = await r.json();
+      throw new Error(err.error || 'HTTP ' + r.status);
+    }
+
+    const result = await r.json();
+    showToast(result.message || 'Agent 创建成功', 'success');
+    closeCreateAgentModal();
+    loadAgents(); // 刷新 Agent 列表
+  } catch (e) {
+    console.error('Failed to create agent:', e);
+    showToast(e.message || '创建失败', 'error');
+  }
+}
+
+document.getElementById('create-agent-btn').addEventListener('click', openCreateAgentModal);
+document.getElementById('confirm-create-agent').addEventListener('click', createAgent);
 </script>
 </body>
 </html>
