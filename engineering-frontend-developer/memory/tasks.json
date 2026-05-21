@@ -106,5 +106,21 @@
     "created": "2026-05-21",
     "assignee": "engineering-frontend-developer",
     "completed": "2026-05-21 09:05:41"
+  },
+  {
+    "id": 13,
+    "status": "pending",
+    "title": "#13 路径配置化：消除硬编码路径",
+    "description": "将 loopcli_lib.py 中 LOOPCLI_ROOT 硬编码路径改为通过环境变量 LOOPCLI_ROOT 或 CLI 参数动态获取。消除 sys.path.insert hack。确保所有模块通过统一入口发现根目录。保留向后兼容。更新 CONFIGURATION.md。",
+    "created": "2026-05-21",
+    "assignee": "engineering-frontend-developer"
+  },
+  {
+    "id": 14,
+    "status": "pending",
+    "title": "#14 原子写入与SSE心跳机制",
+    "description": "1) write_json 改为原子写入：使用 tempfile.NamedTemporaryFile + os.replace 确保写入过程中崩溃不损坏文件。2) SSE 添加心跳机制：每30秒发送 ': heartbeat\\n\\n' 注释帧，防止客户端/代理超时断开。3) 更新相关测试覆盖。",
+    "created": "2026-05-21",
+    "assignee": "engineering-frontend-developer"
   }
 ]

@@ -61,5 +61,13 @@
     "created": "2026-05-21",
     "assignee": "engineering-code-reviewer",
     "completed": "2026-05-21 09:06"
+  },
+  {
+    "id": 8,
+    "status": "pending",
+    "title": "#8 第六阶段验收审查",
+    "description": "审查 #13 路径配置化和 #14 原子写入+SSE心跳两项重构。重点评估：1) 路径配置化是否完整消除所有硬编码 2) 原子写入实现的正确性和边界情况 3) SSE心跳是否有效防止超时 4) 整体评分是否从8.5提升。等待 #13 #14 完成后再执行。",
+    "created": "2026-05-21",
+    "assignee": "engineering-code-reviewer"
   }
 ]
