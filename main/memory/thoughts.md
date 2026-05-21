@@ -1,17 +1,15 @@
 # 思考记录
 
-## 2026-05-21 第 84 轮
+## 2026-05-21 第 86 轮
 
 ### 决策
-- 日志归档压缩：7MB → 20KB（98% 节省）
-- 发现 Bonsai Memory 工具（70-95% token 节省）
+- 部署 claude-token-optimizer（90% token节省）
+- 创建 CLAUDE.md + .claudeignore + .claude/ 结构
+- 归档旧文档到 0-token 区域
 
 ### 价值
-- 立即节省存储空间
-- 发现未来可集成的成本优化工具
-
-### 下一步
-- 评估 Bonsai Memory 适用性（当前 memory 文件较小）
-- 等待用户指令
+- 未来会话节省 ~90% token
+- 只加载必要文件（~800 tokens vs 11,000）
+- 保持历史可用但不自动加载
 
 ---

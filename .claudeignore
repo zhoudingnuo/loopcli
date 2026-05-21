@@ -1,0 +1,7 @@
+# Prevent loading old/completed work at session start
+.claude/completions/
+.claude/sessions/
+docs/archive/
+inbox/archive/
+memory/thoughts.md
+*.log
