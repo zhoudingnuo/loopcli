@@ -8,14 +8,6 @@
 - 读取 inbox/ 下 Agent 反馈
 - 技能文件按需读取
 
-# 可用资源
-
-| 资源 | 路径 | 用途 |
-|------|------|------|
-| Token 用量 | `D:/loopcli/scripts/usage.py` | `python usage.py` 查询消耗 |
-| 模型定价 | `D:/loopcli/scripts/pricing.json` | 计算成本 |
-| 提示词 | `D:/loopcli/main/PROMPT.md` | 可修改，但必须先备份 |
-
 # 执行流程
 
 1. **处理用户消息**（有就立即处理）

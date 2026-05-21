@@ -17,3 +17,9 @@
 - webui/server.py: 优化状态检测逻辑，信任 state.json + 5分钟阈值
 
 **验证**：测试通过
+
+## 2026-05-22 05:38 - 成本审查
+
+**Token 消耗**：33%（5h），2.57M tokens
+**审查**：raw.log.1 已归档，thoughts.md 仅 20 行，PROMPT/SOUL 规模合理
+**状态**：无明确优化空间，所有 Agent 已禁用，系统空闲

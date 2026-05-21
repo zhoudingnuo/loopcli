@@ -588,11 +588,23 @@ def resolve_git():
     return "git"
 
 
+def _get_api_creds():
+    """获取 API 凭证：优先环境变量，其次 .env.json"""
+    base_url = os.environ.get("ANTHROPIC_BASE_URL", "")
+    token = os.environ.get("ANTHROPIC_AUTH_TOKEN", "")
+    if base_url and token:
+        return base_url, token
+    env_file = os.path.join(LOOPCLI_DIR, ".env.json")
+    if os.path.isfile(env_file):
+        cfg = read_json(env_file, {})
+        return cfg.get("ANTHROPIC_BASE_URL", ""), cfg.get("ANTHROPIC_AUTH_TOKEN", "")
+    return "", ""
+
+
 def query_model_usage():
     """查询各模型的 token 用量，返回 {model: totalTokens}"""
     try:
-        base_url = os.environ.get("ANTHROPIC_BASE_URL", "")
-        token = os.environ.get("ANTHROPIC_AUTH_TOKEN", "")
+        base_url, token = _get_api_creds()
         if not base_url or not token:
             out(f"  {C.YELLOW}⚠ 花费查询失败: 未设置 ANTHROPIC_BASE_URL 或 ANTHROPIC_AUTH_TOKEN{C.RST}")
             return None
