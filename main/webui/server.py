@@ -79,6 +79,9 @@ def scan_agents():
                 if stripped and not stripped.startswith("#"):
                     desc = stripped
                     break
+        tasks = read_json(child / "memory" / "tasks.json", [])
+        done_count = sum(1 for t in tasks if t.get("status") == "done")
+        pending_count = sum(1 for t in tasks if t.get("status") == "pending")
         agents.append({
             "id": child.name,
             "name": state.get("agent", child.name),
@@ -87,12 +90,37 @@ def scan_agents():
             "last_run": state.get("last_run"),
             "run_count": state.get("run_count", 0),
             "current_task": state.get("current_task"),
+            "task_count": len(tasks),
+            "task_done": done_count,
+            "task_pending": pending_count,
         })
     return agents
 
 
 def get_main_tasks():
     return read_json(MAIN_DIR / "memory" / "tasks.json", [])
+
+
+def get_agent_tasks(agent_id: str):
+    agent_dir = _safe_agent_path(agent_id)
+    if not agent_dir:
+        return None
+    tasks_file = agent_dir / "memory" / "tasks.json"
+    return read_json(tasks_file, [])
+
+
+def get_all_agent_tasks():
+    """Aggregate tasks from all agents, each tagged with agent_id."""
+    all_tasks = []
+    for child in LOOPCLI_ROOT.iterdir():
+        if not child.is_dir() or not (child / "AGENT").exists():
+            continue
+        tasks_file = child / "memory" / "tasks.json"
+        tasks = read_json(tasks_file, [])
+        for t in tasks:
+            t["_agent_id"] = child.name
+        all_tasks.extend(tasks)
+    return all_tasks
 
 
 def get_recent_lines(filepath: Path, n=100):
@@ -312,7 +340,23 @@ class WebUIHandler(SimpleHTTPRequestHandler):
             return self._send_json(scan_agents())
 
         if path == "/api/tasks":
+            params = parse_qs(parsed.query)
+            agent_id = params.get("agent", [None])[0]
+            if agent_id == "__all__":
+                return self._send_json(get_all_agent_tasks())
+            if agent_id:
+                tasks = get_agent_tasks(agent_id)
+                if tasks is None:
+                    return self._send_json({"error": "Invalid agent"}, status=400)
+                return self._send_json(tasks)
             return self._send_json(get_main_tasks())
+
+        if path.startswith("/api/agents/") and path.endswith("/tasks"):
+            agent_id = path[len("/api/agents/"):-len("/tasks")]
+            tasks = get_agent_tasks(agent_id)
+            if tasks is None:
+                return self._send_json({"error": "Invalid agent"}, status=400)
+            return self._send_json(tasks)
 
         if path == "/api/logs":
             params = parse_qs(parsed.query)

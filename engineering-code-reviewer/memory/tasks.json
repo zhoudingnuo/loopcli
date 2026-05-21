@@ -37,10 +37,11 @@
   },
   {
     "id": 5,
-    "status": "pending",
+    "status": "done",
     "title": "审查 64 个单元测试的覆盖质量和有效性",
     "description": "engineering-frontend-developer 编写了 64 个单元测试（test_server.py 41个 + test_run.py 23个），全部通过。需要审查：(1) 测试是否覆盖了关键安全修复点（_safe_agent_path、shell=True移除后的调用方式、文件锁）；(2) 是否存在只测 happy path 而忽略 edge case 的测试；(3) Mock/Stub 是否合理；(4) 测试独立性（能否单独运行）；(5) 是否有遗漏的重要测试场景。测试文件在 D:/loopcli/main/tests/。输出报告到 D:/loopcli/main/memory/results/test-review.md。完成后通过 inbox 通知 main。",
     "created": "2026-05-21",
-    "assignee": "engineering-code-reviewer"
+    "assignee": "engineering-code-reviewer",
+    "completed": "2026-05-21"
   }
 ]

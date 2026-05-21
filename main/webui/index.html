@@ -54,6 +54,17 @@ body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; background
 .agent-card .dept { font-size: 12px; color: var(--text2); background: var(--surface2); padding: 2px 8px; border-radius: 4px; }
 .agent-card .desc { font-size: 13px; color: var(--text2); margin-bottom: 12px; line-height: 1.5; }
 .agent-card .bottom { display: flex; justify-content: space-between; align-items: center; }
+.agent-card .task-stats { display: flex; gap: 8px; margin-bottom: 10px; }
+.agent-card .task-stat { font-size: 11px; padding: 2px 8px; border-radius: 4px; }
+.agent-card .task-stat.done-stat { background: rgba(0,184,148,.12); color: var(--green); }
+.agent-card .task-stat.pending-stat { background: rgba(253,203,110,.12); color: var(--yellow); }
+.agent-card .expand-tasks { margin-top: 10px; border-top: 1px solid var(--border); padding-top: 10px; display: none; }
+.agent-card.expanded .expand-tasks { display: block; }
+.agent-card .expand-btn { font-size: 12px; color: var(--accent2); cursor: pointer; background: none; border: none; padding: 0; }
+.agent-card .expand-btn:hover { text-decoration: underline; }
+.agent-card .mini-task-list { max-height: 200px; overflow-y: auto; }
+.agent-card .mini-task { padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 12px; display: flex; justify-content: space-between; align-items: center; }
+.agent-card .mini-task:last-child { border-bottom: none; }
 .status-badge { font-size: 12px; padding: 3px 10px; border-radius: 20px; font-weight: 500; }
 .status-badge.running { background: rgba(0,184,148,.15); color: var(--green); }
 .status-badge.idle { background: rgba(116,185,255,.12); color: var(--blue); }
@@ -180,8 +191,11 @@ body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; background
 
       <!-- Tasks -->
       <div class="page" id="page-tasks">
+        <div class="log-toolbar" style="margin-bottom:14px">
+          <select id="task-agent-filter"><option value="">main</option><option value="__all__">所有 Agent</option></select>
+        </div>
         <table class="task-table">
-          <thead><tr><th>ID</th><th>标题</th><th>状态</th><th>负责人</th><th>创建日期</th></tr></thead>
+          <thead><tr><th>ID</th><th>标题</th><th>状态</th><th>负责人</th><th>Agent</th><th>创建日期</th></tr></thead>
           <tbody id="task-list"></tbody>
         </table>
       </div>
@@ -280,6 +294,7 @@ body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; background
 <script>
 let agents = [];
 let tasks = [];
+let agentTaskCache = {};
 
 async function loadAgents() {
   try {
@@ -288,11 +303,20 @@ async function loadAgents() {
   } catch { agents = []; }
 }
 
-async function loadTasks() {
+async function loadTasks(agentFilter) {
   try {
-    const r = await fetch('/api/tasks');
+    let url = '/api/tasks';
+    if (agentFilter) url += '?agent=' + encodeURIComponent(agentFilter);
+    const r = await fetch(url);
     tasks = await r.json();
   } catch { tasks = []; }
+}
+
+async function loadAgentTasks(agentId) {
+  try {
+    const r = await fetch('/api/agents/' + encodeURIComponent(agentId) + '/tasks');
+    agentTaskCache[agentId] = await r.json();
+  } catch { agentTaskCache[agentId] = []; }
 }
 
 async function loadData() {
@@ -300,19 +324,12 @@ async function loadData() {
   render();
 }
 
-function render() {
-  renderStats();
-  renderAgentCards('dash-agents', agents);
-  renderAgentCards('agent-list', agents);
-  renderTasks();
-  fillAgentSelect();
-}
-
 function renderStats() {
   document.getElementById('stat-agents').textContent = agents.length;
   document.getElementById('stat-running').textContent = agents.filter(a => a.status === 'running').length;
   document.getElementById('stat-idle').textContent = agents.filter(a => a.status === 'idle').length;
-  document.getElementById('stat-pending').textContent = tasks.filter(t => t.status === 'pending').length;
+  const totalPending = agents.reduce((s, a) => s + (a.task_pending || 0), 0);
+  document.getElementById('stat-pending').textContent = totalPending;
 }
 
 function fmtTime(iso) {
@@ -325,32 +342,67 @@ function fmtTime(iso) {
 
 function renderAgentCards(containerId, list) {
   const c = document.getElementById(containerId);
-  c.innerHTML = list.map(a => `
-    <div class="agent-card">
+  c.innerHTML = list.map(a => {
+    const tc = a.task_count || 0;
+    const td = a.task_done || 0;
+    const tp = a.task_pending || 0;
+    return `
+    <div class="agent-card" data-agent-id="${esc(a.id)}">
       <div class="top">
         <div class="name">${esc(a.name)}</div>
         <span class="status-badge ${a.status}">${statusLabel(a.status)}</span>
       </div>
       <div class="desc">${esc(a.description)}</div>
+      <div class="task-stats">
+        <span class="task-stat done-stat">${td} 已完成</span>
+        <span class="task-stat pending-stat">${tp} 待处理</span>
+        <span style="font-size:11px;color:var(--text2)">${tc} 总任务</span>
+      </div>
       <div class="bottom">
         <span style="font-size:12px;color:var(--text2)">最后运行: ${fmtTime(a.last_run)}</span>
-        <span style="font-size:12px;color:var(--text2)">轮次: ${a.run_count ?? 0}</span>
+        <button class="expand-btn" onclick="toggleAgentTasks(this, '${esc(a.id)}')">展开任务 ▼</button>
       </div>
-    </div>
-  `).join('');
+      <div class="expand-tasks">
+        <div class="mini-task-list" id="agent-tasks-${esc(a.id)}">加载中...</div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 function renderTasks() {
   const tbody = document.getElementById('task-list');
+  const showAgent = !!(tasks.length && tasks[0]._agent_id);
   tbody.innerHTML = tasks.map(t => `
     <tr>
       <td>#${t.id}</td>
       <td>${esc(t.title)}</td>
       <td><span class="task-status ${t.status}">${statusLabel(t.status)}</span></td>
       <td>${t.assignee ? esc(t.assignee) : '<span style="color:var(--text2)">未指派</span>'}</td>
+      ${showAgent ? '<td>' + (t._agent_id ? esc(t._agent_id) : '-') + '</td>' : ''}
       <td style="color:var(--text2)">${t.created}</td>
     </tr>
   `).join('');
+}
+
+async function toggleAgentTasks(btn, agentId) {
+  const card = btn.closest('.agent-card');
+  const isExpanded = card.classList.toggle('expanded');
+  btn.textContent = isExpanded ? '收起任务 ▲' : '展开任务 ▼';
+  if (isExpanded) {
+    await loadAgentTasks(agentId);
+    const container = document.getElementById('agent-tasks-' + agentId);
+    const agentTasks = agentTaskCache[agentId] || [];
+    if (!agentTasks.length) {
+      container.innerHTML = '<div style="color:var(--text2);font-size:12px;padding:6px 0">暂无任务</div>';
+    } else {
+      container.innerHTML = agentTasks.map(t => `
+        <div class="mini-task">
+          <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(t.title)}</span>
+          <span class="task-status ${t.status}">${statusLabel(t.status)}</span>
+        </div>
+      `).join('');
+    }
+  }
 }
 
 function fillAgentSelect() {
@@ -358,6 +410,20 @@ function fillAgentSelect() {
   sel.innerHTML = '<option value="">-- 未指派 --</option>' +
     agents.map(a => `<option value="${esc(a.id)}">${esc(a.name)}</option>`).join('');
 }
+
+function fillTaskAgentFilter() {
+  const sel = document.getElementById('task-agent-filter');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">main</option><option value="__all__">所有 Agent</option>' +
+    agents.map(a => `<option value="${esc(a.id)}">${esc(a.name)}</option>`).join('');
+  sel.value = cur;
+}
+
+document.getElementById('task-agent-filter').addEventListener('change', async function() {
+  const agentFilter = this.value;
+  await loadTasks(agentFilter || undefined);
+  renderTasks();
+});
 
 // Navigation
 document.querySelectorAll('.nav-item').forEach(item => {
@@ -476,12 +542,15 @@ function fillLogAgentFilter() {
   sel.value = cur;
 }
 
-// Patch render to also update log filter
-const _origRender = render;
-render = function() {
-  _origRender();
+function render() {
+  renderStats();
+  renderAgentCards('dash-agents', agents);
+  renderAgentCards('agent-list', agents);
+  renderTasks();
+  fillAgentSelect();
+  fillTaskAgentFilter();
   fillLogAgentFilter();
-};
+}
 
 loadData();
 setInterval(loadData, 10000);
@@ -559,9 +628,9 @@ document.getElementById('d-submit').addEventListener('click', async () => {
 });
 
 // Patch render to also update control panel
-const _origRender2 = render;
+const _origRender = render;
 render = function() {
-  _origRender2();
+  _origRender();
   fillDispatchAgentSelect();
   fillMsgAgentSelect();
 };

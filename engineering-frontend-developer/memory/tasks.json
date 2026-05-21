@@ -28,11 +28,12 @@
   },
   {
     "id": 4,
-    "status": "pending",
+    "status": "done",
     "title": "WebUI 多 Agent 统一仪表盘",
     "description": "当前 WebUI 仪表盘只显示单个 Agent（main）的信息。需要改造为多 Agent 统一视图：(1) 仪表盘首页展示所有已注册 Agent 的卡片（名称、状态、任务完成数、最后运行时间）；(2) 点击 Agent 卡片可展开查看该 Agent 的任务列表；(3) 任务管理页面增加 Agent 筛选下拉框；(4) 后端 server.py 可能需要新增 GET /api/agents/:name/tasks 端点。参考 webui/server.py 和 webui/index.html。",
     "created": "2026-05-21",
-    "assignee": "engineering-frontend-developer"
+    "assignee": "engineering-frontend-developer",
+    "completed": "2026-05-21 08:07:28"
   },
   {
     "id": 5,
