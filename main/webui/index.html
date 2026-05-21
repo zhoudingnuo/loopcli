@@ -1481,8 +1481,12 @@ body {
         <div class="icon">📈</div>
         <span>性能分析</span>
       </div>
+      <div class="nav-item" data-page="settings">
+        <div class="icon">🎨</div>
+        <span>系统设置</span>
+      </div>
     </nav>
-    <div class="sidebar-footer">LoopCLI v3.5</div>
+    <div class="sidebar-footer">LoopCLI v3.6</div>
   </aside>
 
   <div class="main">
@@ -2093,6 +2097,131 @@ body {
           </div>
         </div>
       </div>
+
+      <!-- System Settings -->
+      <div class="page" id="page-settings">
+        <div class="stats">
+          <div class="stat-card">
+            <div class="label">当前主题</div>
+            <div class="value" id="settings-current-theme">深色</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">刷新间隔</div>
+            <div class="value" id="settings-refresh-interval">10秒</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">通知状态</div>
+            <div class="value" id="settings-notifications">已启用</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">紧凑模式</div>
+            <div class="value" id="settings-compact">关闭</div>
+          </div>
+        </div>
+
+        <div class="ctrl-section">
+          <h3 class="ctrl-title">🎨 外观设置</h3>
+          <div style="display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">
+            <div style="padding:16px;background:var(--surface2);border-radius:12px">
+              <label style="display:block;margin-bottom:8px;font-weight:700">主题选择</label>
+              <select id="setting-theme" class="btn" style="width:100%">
+                <option value="dark">🌙 深色主题</option>
+                <option value="light">☀️ 浅色主题</option>
+              </select>
+            </div>
+            <div style="padding:16px;background:var(--surface2);border-radius:12px">
+              <label style="display:block;margin-bottom:8px;font-weight:700">紧凑模式</label>
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                <input type="checkbox" id="setting-compact" style="width:auto">
+                <span>启用紧凑布局（减少间距）</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="ctrl-section">
+          <h3 class="ctrl-title">⚙️ 数据设置</h3>
+          <div style="display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">
+            <div style="padding:16px;background:var(--surface2);border-radius:12px">
+              <label style="display:block;margin-bottom:8px;font-weight:700">自动刷新间隔</label>
+              <select id="setting-refresh" class="btn" style="width:100%">
+                <option value="5000">5 秒</option>
+                <option value="10000" selected>10 秒</option>
+                <option value="30000">30 秒</option>
+                <option value="60000">60 秒</option>
+              </select>
+              <div style="font-size:12px;color:var(--text2);margin-top:8px">设置数据自动刷新的时间间隔</div>
+            </div>
+            <div style="padding:16px;background:var(--surface2);border-radius:12px">
+              <label style="display:block;margin-bottom:8px;font-weight:700">数据缓存</label>
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                <input type="checkbox" id="setting-cache" checked style="width:auto">
+                <span>启用数据缓存（提升性能）</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="ctrl-section">
+          <h3 class="ctrl-title">🔔 通知设置</h3>
+          <div style="display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">
+            <div style="padding:16px;background:var(--surface2);border-radius:12px">
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:12px">
+                <input type="checkbox" id="setting-notify-agent" checked style="width:auto">
+                <span>Agent 状态变化通知</span>
+              </label>
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:12px">
+                <input type="checkbox" id="setting-notify-task" checked style="width:auto">
+                <span>任务完成通知</span>
+              </label>
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                <input type="checkbox" id="setting-notify-error" checked style="width:auto">
+                <span>错误警告通知</span>
+              </label>
+            </div>
+            <div style="padding:16px;background:var(--surface2);border-radius:12px">
+              <label style="display:block;margin-bottom:8px;font-weight:700">通知持续时间</label>
+              <select id="setting-notify-duration" class="btn" style="width:100%">
+                <option value="2000">2 秒</option>
+                <option value="3000" selected>3 秒</option>
+                <option value="5000">5 秒</option>
+                <option value="0">手动关闭</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="ctrl-section">
+          <h3 class="ctrl-title">💾 数据管理</h3>
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <button class="btn" id="settings-export-all">📤 导出所有数据</button>
+            <button class="btn" id="settings-clear-cache">🗑️ 清除缓存</button>
+            <button class="btn" id="settings-reset-all">⚠️ 重置所有设置</button>
+          </div>
+        </div>
+
+        <div class="ctrl-section">
+          <h3 class="ctrl-title">📊 系统信息</h3>
+          <div style="display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+            <div style="padding:12px;background:var(--surface2);border-radius:8px">
+              <div style="font-size:11px;color:var(--text2);margin-bottom:4px;font-weight:700">WebUI 版本</div>
+              <div style="font-size:14px;color:var(--text);font-weight:600">v3.6</div>
+            </div>
+            <div style="padding:12px;background:var(--surface2);border-radius:8px">
+              <div style="font-size:11px;color:var(--text2);margin-bottom:4px;font-weight:700">浏览器</div>
+              <div style="font-size:14px;color:var(--text);font-weight:600" id="settings-browser">-</div>
+            </div>
+            <div style="padding:12px;background:var(--surface2);border-radius:8px">
+              <div style="font-size:11px;color:var(--text2);margin-bottom:4px;font-weight:700">屏幕分辨率</div>
+              <div style="font-size:14px;color:var(--text);font-weight:600" id="settings-resolution">-</div>
+            </div>
+            <div style="padding:12px;background:var(--surface2);border-radius:8px">
+              <div style="font-size:11px;color:var(--text2);margin-bottom:4px;font-weight:700">语言</div>
+              <div style="font-size:14px;color:var(--text);font-weight:600" id="settings-language">-</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -2140,6 +2269,7 @@ body {
           <div><span style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-weight:600">7</span> 健康监控</div>
           <div><span style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-weight:600">8</span> 通知中心</div>
           <div><span style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-weight:600">9</span> 成本分析</div>
+          <div><span style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-weight:600">;</span> 系统设置</div>
         </div>
       </div>
       <div style="padding:12px;background:var(--bg);border-radius:8px">
@@ -2179,7 +2309,218 @@ themeToggle.addEventListener('click', () => {
   localStorage.setItem('theme', currentTheme);
   updateThemeIcon();
   showToast('主题已切换', 'info');
+  updateSettingsDisplay();
 });
+
+// ============ 设置系统 ============
+
+// 设置数据
+let appSettings = {
+  theme: 'dark',
+  compact: false,
+  refreshInterval: 10000,
+  cacheEnabled: true,
+  notifications: {
+    agent: true,
+    task: true,
+    error: true
+  },
+  notifyDuration: 3000
+};
+
+// 加载设置
+function loadSettings() {
+  const saved = localStorage.getItem('webui-settings');
+  if (saved) {
+    try {
+      appSettings = { ...appSettings, ...JSON.parse(saved) };
+    } catch (e) {
+      console.error('Failed to parse settings:', e);
+    }
+  }
+
+  // 应用设置
+  applySettings();
+}
+
+// 保存设置
+function saveSettings() {
+  localStorage.setItem('webui-settings', JSON.stringify(appSettings));
+}
+
+// 应用设置
+function applySettings() {
+  // 主题
+  document.documentElement.setAttribute('data-theme', appSettings.theme);
+  updateThemeIcon();
+
+  // 紧凑模式
+  if (appSettings.compact) {
+    document.body.classList.add('compact');
+  } else {
+    document.body.classList.remove('compact');
+  }
+
+  // 刷新间隔
+  updateRefreshInterval();
+
+  // 更新设置页面显示
+  updateSettingsDisplay();
+}
+
+// 更新刷新间隔
+function updateRefreshInterval() {
+  // 这里可以重启定时器（简化版本暂不实现）
+}
+
+// 更新设置页面显示
+function updateSettingsDisplay() {
+  // 主题
+  document.getElementById('setting-theme').value = appSettings.theme;
+  document.getElementById('settings-current-theme').textContent = appSettings.theme === 'dark' ? '深色' : '浅色';
+
+  // 紧凑模式
+  document.getElementById('setting-compact').checked = appSettings.compact;
+  document.getElementById('settings-compact').textContent = appSettings.compact ? '开启' : '关闭';
+
+  // 刷新间隔
+  document.getElementById('setting-refresh').value = appSettings.refreshInterval;
+  const intervalSec = appSettings.refreshInterval / 1000;
+  document.getElementById('settings-refresh-interval').textContent = intervalSec + '秒';
+
+  // 缓存
+  document.getElementById('setting-cache').checked = appSettings.cacheEnabled;
+
+  // 通知
+  document.getElementById('setting-notify-agent').checked = appSettings.notifications.agent;
+  document.getElementById('setting-notify-task').checked = appSettings.notifications.task;
+  document.getElementById('setting-notify-error').checked = appSettings.notifications.error;
+  const notifyCount = [appSettings.notifications.agent, appSettings.notifications.task, appSettings.notifications.error].filter(Boolean).length;
+  document.getElementById('settings-notifications').textContent = notifyCount > 0 ? `${notifyCount}项已启用` : '已禁用';
+
+  // 通知持续时间
+  document.getElementById('setting-notify-duration').value = appSettings.notifyDuration;
+
+  // 系统信息
+  document.getElementById('settings-browser').textContent = navigator.userAgent.split(' ').slice(-1)[0].split('/')[0];
+  document.getElementById('settings-resolution').textContent = `${window.screen.width}x${window.screen.height}`;
+  document.getElementById('settings-language').textContent = navigator.language || 'zh-CN';
+}
+
+// 初始化设置页面事件监听
+function initSettingsPage() {
+  // 主题选择
+  document.getElementById('setting-theme').addEventListener('change', (e) => {
+    appSettings.theme = e.target.value;
+    saveSettings();
+    applySettings();
+    showToast('主题已更新', 'success');
+  });
+
+  // 紧凑模式
+  document.getElementById('setting-compact').addEventListener('change', (e) => {
+    appSettings.compact = e.target.checked;
+    saveSettings();
+    applySettings();
+    showToast(appSettings.compact ? '紧凑模式已启用' : '紧凑模式已关闭', 'info');
+  });
+
+  // 刷新间隔
+  document.getElementById('setting-refresh').addEventListener('change', (e) => {
+    appSettings.refreshInterval = parseInt(e.target.value);
+    saveSettings();
+    applySettings();
+    showToast(`刷新间隔已设置为 ${appSettings.refreshInterval / 1000} 秒`, 'info');
+  });
+
+  // 缓存
+  document.getElementById('setting-cache').addEventListener('change', (e) => {
+    appSettings.cacheEnabled = e.target.checked;
+    saveSettings();
+    showToast(e.target.checked ? '缓存已启用' : '缓存已禁用', 'info');
+  });
+
+  // 通知设置
+  document.getElementById('setting-notify-agent').addEventListener('change', (e) => {
+    appSettings.notifications.agent = e.target.checked;
+    saveSettings();
+    updateSettingsDisplay();
+  });
+
+  document.getElementById('setting-notify-task').addEventListener('change', (e) => {
+    appSettings.notifications.task = e.target.checked;
+    saveSettings();
+    updateSettingsDisplay();
+  });
+
+  document.getElementById('setting-notify-error').addEventListener('change', (e) => {
+    appSettings.notifications.error = e.target.checked;
+    saveSettings();
+    updateSettingsDisplay();
+  });
+
+  // 通知持续时间
+  document.getElementById('setting-notify-duration').addEventListener('change', (e) => {
+    appSettings.notifyDuration = parseInt(e.target.value);
+    saveSettings();
+    showToast('通知持续时间已更新', 'info');
+  });
+
+  // 导出所有数据
+  document.getElementById('settings-export-all').addEventListener('click', () => {
+    const data = {
+      settings: appSettings,
+      agents: agents,
+      tasks: tasks,
+      timestamp: new Date().toISOString()
+    };
+    downloadFile(JSON.stringify(data, null, 2), `loopcli_backup_${Date.now()}.json`, 'application/json');
+    showToast('数据已导出', 'success');
+  });
+
+  // 清除缓存
+  document.getElementById('settings-clear-cache').addEventListener('click', () => {
+    if (confirm('确定要清除所有缓存数据吗？')) {
+      dataCache = { agents: null, tasks: null, timestamp: 0 };
+      showToast('缓存已清除', 'success');
+    }
+  });
+
+  // 重置所有设置
+  document.getElementById('settings-reset-all').addEventListener('click', () => {
+    if (confirm('确定要重置所有设置吗？这将恢复默认配置。')) {
+      localStorage.removeItem('webui-settings');
+      appSettings = {
+        theme: 'dark',
+        compact: false,
+        refreshInterval: 10000,
+        cacheEnabled: true,
+        notifications: { agent: true, task: true, error: true },
+        notifyDuration: 3000
+      };
+      saveSettings();
+      applySettings();
+      showToast('设置已重置', 'success');
+    }
+  });
+}
+
+// 页面切换时更新快捷键帮助
+const originalNavItems = document.querySelectorAll('.nav-item');
+originalNavItems.forEach(item => {
+  item.addEventListener('click', () => {
+    setTimeout(() => {
+      const page = item.dataset.page;
+      if (page === 'settings') {
+        updateSettingsDisplay();
+      }
+    }, 100);
+  });
+});
+
+// 初始化设置
+loadSettings();
+initSettingsPage();
 
 // 侧边栏折叠
 const sidebar = document.getElementById('sidebar');
@@ -2272,6 +2613,12 @@ document.addEventListener('keydown', (e) => {
     const pages = ['analytics', 'dashboard', 'agents', 'tasks', 'logs', 'control', 'messages', 'health', 'notifications', 'cost'];
     const index = e.key === '0' ? 0 : parseInt(e.key);
     const navItem = document.querySelector(`.nav-item[data-page="${pages[index]}"]`);
+    if (navItem) navItem.click();
+  }
+  // 分号键: 切换到设置页面
+  if (e.key === ';' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) {
+    e.preventDefault();
+    const navItem = document.querySelector('.nav-item[data-page="settings"]');
     if (navItem) navItem.click();
   }
 });

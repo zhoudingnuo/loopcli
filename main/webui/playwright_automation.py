@@ -41,6 +41,7 @@ class WebUIAutomation:
             ("health", "7"),
             ("notifications", "8"),
             ("cost", "9"),
+            ("settings", ";"),
         ]
 
         results = []

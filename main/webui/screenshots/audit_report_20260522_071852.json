@@ -1,0 +1,90 @@
+{
+  "timestamp": "2026-05-22T07:18:52.243463",
+  "performance": {
+    "loadTime": 433.79999999701977,
+    "domReady": 406.5,
+    "firstPaint": 436
+  },
+  "pages": [
+    {
+      "page": "analytics",
+      "status": "success",
+      "screenshot": "screenshots\\page_analytics_20260522_071841.png",
+      "timestamp": "2026-05-22T07:18:42.091608"
+    },
+    {
+      "page": "dashboard",
+      "status": "success",
+      "screenshot": "screenshots\\page_dashboard_20260522_071842.png",
+      "timestamp": "2026-05-22T07:18:42.935893"
+    },
+    {
+      "page": "agents",
+      "status": "success",
+      "screenshot": "screenshots\\page_agents_20260522_071843.png",
+      "timestamp": "2026-05-22T07:18:43.781431"
+    },
+    {
+      "page": "tasks",
+      "status": "success",
+      "screenshot": "screenshots\\page_tasks_20260522_071844.png",
+      "timestamp": "2026-05-22T07:18:44.615735"
+    },
+    {
+      "page": "logs",
+      "status": "success",
+      "screenshot": "screenshots\\page_logs_20260522_071845.png",
+      "timestamp": "2026-05-22T07:18:45.386688"
+    },
+    {
+      "page": "control",
+      "status": "success",
+      "screenshot": "screenshots\\page_control_20260522_071845.png",
+      "timestamp": "2026-05-22T07:18:46.202417"
+    },
+    {
+      "page": "messages",
+      "status": "success",
+      "screenshot": "screenshots\\page_messages_20260522_071846.png",
+      "timestamp": "2026-05-22T07:18:46.925710"
+    },
+    {
+      "page": "health",
+      "status": "success",
+      "screenshot": "screenshots\\page_health_20260522_071847.png",
+      "timestamp": "2026-05-22T07:18:47.773364"
+    },
+    {
+      "page": "notifications",
+      "status": "success",
+      "screenshot": "screenshots\\page_notifications_20260522_071848.png",
+      "timestamp": "2026-05-22T07:18:48.535658"
+    },
+    {
+      "page": "cost",
+      "status": "success",
+      "screenshot": "screenshots\\page_cost_20260522_071849.png",
+      "timestamp": "2026-05-22T07:18:49.412286"
+    }
+  ],
+  "features": [
+    {
+      "feature": "theme_toggle",
+      "status": "pass"
+    },
+    {
+      "feature": "sidebar_toggle",
+      "status": "pass"
+    },
+    {
+      "feature": "shortcuts_modal",
+      "status": "pass"
+    }
+  ],
+  "summary": {
+    "total_pages": 10,
+    "successful_pages": 10,
+    "total_features": 3,
+    "passed_features": 3
+  }
+}
