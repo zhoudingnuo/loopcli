@@ -18,10 +18,11 @@
   },
   {
     "id": 3,
-    "status": "pending",
+    "status": "done",
     "title": "安全加固与 P1 修复：CORS 策略、并发限制、SSE 连接管理",
     "description": "server.py 的 P0 已修复，现需处理 P1 安全问题：(1) CORS 当前为 AllowAnyOrigin，改为白名单模式（环境变量 CORS_ORIGINS 配置）；(2) 为所有写操作端点添加并发限制（建议用 threading.Semaphore 或简单计数器）；(3) SSE /api/logs/stream 添加连接超时和最大连接数限制；(4) 验证 _safe_agent_path 在所有路径都正确 resolve；修复完成后通过 inbox 通知 main。",
     "created": "2026-05-21",
-    "assignee": "engineering-security-engineer"
+    "assignee": "engineering-security-engineer",
+    "completed": "2026-05-21T07:58:39"
   }
 ]

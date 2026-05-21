@@ -25,6 +25,15 @@ _loop_proc = None
 _loop_lock = threading.Lock()
 API_KEY = os.environ.get("LOOPCLI_API_KEY", "")
 
+CORS_ORIGINS = [o.strip() for o in os.environ.get("CORS_ORIGINS", "").split(",") if o.strip()]
+
+_write_semaphore = threading.Semaphore(10)
+
+_sse_connections = 0
+_sse_lock = threading.Lock()
+SSE_MAX_CONNECTIONS = 10
+SSE_TIMEOUT_SECONDS = 300
+
 
 def read_json(path: Path, default=None):
     if not path.exists():
@@ -221,7 +230,13 @@ class WebUIHandler(SimpleHTTPRequestHandler):
             return {}
 
     def _cors_headers(self):
-        self.send_header("Access-Control-Allow-Origin", "*")
+        origin = self.headers.get("Origin", "")
+        if CORS_ORIGINS:
+            if origin in CORS_ORIGINS:
+                self.send_header("Access-Control-Allow-Origin", origin)
+                self.send_header("Vary", "Origin")
+        else:
+            self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
 
@@ -233,11 +248,19 @@ class WebUIHandler(SimpleHTTPRequestHandler):
         self.wfile.flush()
 
     def _handle_sse_logs(self):
+        global _sse_connections
+        with _sse_lock:
+            if _sse_connections >= SSE_MAX_CONNECTIONS:
+                return self._send_json({"error": "Max SSE connections reached"}, status=503)
+            _sse_connections += 1
+
         params = parse_qs(urlparse(self.path).query)
         agent_id = params.get("agent", [None])[0]
         if agent_id:
             agent_dir = _safe_agent_path(agent_id)
             if not agent_dir:
+                with _sse_lock:
+                    _sse_connections -= 1
                 return self._send_json({"error": "Invalid agent"}, status=400)
             log_path = agent_dir / "log" / "run.md"
         else:
@@ -252,8 +275,12 @@ class WebUIHandler(SimpleHTTPRequestHandler):
         self.end_headers()
 
         last_size = 0
+        start_time = time.time()
         try:
             while True:
+                if time.time() - start_time > SSE_TIMEOUT_SECONDS:
+                    self._send_sse_event({"event": "timeout", "ts": datetime.now().isoformat()})
+                    break
                 if log_path.exists():
                     current_size = log_path.stat().st_size
                     if current_size != last_size:
@@ -271,6 +298,9 @@ class WebUIHandler(SimpleHTTPRequestHandler):
                 time.sleep(1)
         except (BrokenPipeError, ConnectionResetError, OSError):
             pass
+        finally:
+            with _sse_lock:
+                _sse_connections -= 1
 
     # ---------- GET routes ----------
 
@@ -310,6 +340,14 @@ class WebUIHandler(SimpleHTTPRequestHandler):
     # ---------- POST routes ----------
 
     def do_POST(self):
+        if not _write_semaphore.acquire(timeout=5):
+            return self._send_json({"error": "Server busy, try again"}, status=503)
+        try:
+            self._do_POST_impl()
+        finally:
+            _write_semaphore.release()
+
+    def _do_POST_impl(self):
         parsed = urlparse(self.path)
         path = parsed.path
 
