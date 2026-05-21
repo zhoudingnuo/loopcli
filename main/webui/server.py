@@ -3,6 +3,7 @@ LoopCLI WebUI Backend Server
 REST API + static file hosting for the Agent control console.
 """
 
+import hmac
 import json
 import os
 import signal
@@ -24,6 +25,7 @@ LOOP_STATE_FILE = WEBUI_DIR / "loop_state.json"
 _loop_proc = None
 _loop_lock = threading.Lock()
 API_KEY = os.environ.get("LOOPCLI_API_KEY", "")
+MAX_BODY_SIZE = 10 * 1024  # 10KB
 
 CORS_ORIGINS = [o.strip() for o in os.environ.get("CORS_ORIGINS", "").split(",") if o.strip()]
 
@@ -251,11 +253,23 @@ class WebUIHandler(SimpleHTTPRequestHandler):
         length = int(self.headers.get("Content-Length", 0))
         if length == 0:
             return {}
+        if length > MAX_BODY_SIZE:
+            self._send_json({"error": "Request body too large"}, status=413)
+            return None
         raw = self.rfile.read(length)
         try:
             return json.loads(raw.decode("utf-8"))
         except (json.JSONDecodeError, UnicodeDecodeError):
             return {}
+
+    def _require_auth(self):
+        if not API_KEY:
+            return True
+        key = self.headers.get("X-API-Key", "") or parse_qs(urlparse(self.path).query).get("key", [""])[0]
+        if not hmac.compare_digest(key, API_KEY):
+            self._send_json({"error": "Unauthorized"}, status=401)
+            return False
+        return True
 
     def _cors_headers(self):
         origin = self.headers.get("Origin", "")
@@ -395,11 +409,8 @@ class WebUIHandler(SimpleHTTPRequestHandler):
         parsed = urlparse(self.path)
         path = parsed.path
 
-        # Auth check for sensitive write endpoints when API_KEY is configured
-        if API_KEY and path in ("/api/tasks", "/api/messages/send"):
-            key = self.headers.get("X-API-Key", "") or parse_qs(parsed.query).get("key", [""])[0]
-            if key != API_KEY:
-                return self._send_json({"error": "Unauthorized"}, status=401)
+        if not self._require_auth():
+            return
 
         if path == "/api/tasks":
             return self._handle_create_task()
@@ -433,6 +444,8 @@ class WebUIHandler(SimpleHTTPRequestHandler):
 
     def _handle_create_task(self):
         body = self._read_body()
+        if body is None:
+            return
         title = body.get("title", "").strip()
         if not title:
             return self._send_json({"error": "title is required"}, status=400)
@@ -453,6 +466,8 @@ class WebUIHandler(SimpleHTTPRequestHandler):
 
     def _handle_agent_start(self):
         body = self._read_body()
+        if body is None:
+            return
         agent_id = body.get("agent", "").strip()
         if not agent_id:
             return self._send_json({"error": "agent is required"}, status=400)
@@ -505,6 +520,8 @@ class WebUIHandler(SimpleHTTPRequestHandler):
 
     def _handle_loopcli_start(self):
         body = self._read_body()
+        if body is None:
+            return
         iterations = int(body.get("iterations", 0))
         data, status = start_loopcli_process(iterations)
         self._send_json(data, status)
@@ -515,6 +532,8 @@ class WebUIHandler(SimpleHTTPRequestHandler):
 
     def _handle_loopcli_restart(self):
         body = self._read_body()
+        if body is None:
+            return
         stop_loopcli_process()
         time.sleep(0.5)
         iterations = int(body.get("iterations", 0))
@@ -522,12 +541,9 @@ class WebUIHandler(SimpleHTTPRequestHandler):
         self._send_json(data, status)
 
     def _handle_loopcli_dispatch(self):
-        if API_KEY:
-            key = self.headers.get("X-API-Key", "") or parse_qs(urlparse(self.path).query).get("key", [""])[0]
-            if key != API_KEY:
-                return self._send_json({"error": "Unauthorized"}, status=401)
-
         body = self._read_body()
+        if body is None:
+            return
         agent_id = body.get("agent", "").strip()
         title = body.get("title", "").strip()
         if not agent_id or not title:
@@ -577,6 +593,8 @@ class WebUIHandler(SimpleHTTPRequestHandler):
 
     def _handle_message_send(self):
         body = self._read_body()
+        if body is None:
+            return
         content = body.get("content", "").strip()
         if not content:
             return self._send_json({"error": "content is required"}, status=400)
@@ -602,6 +620,8 @@ class WebUIHandler(SimpleHTTPRequestHandler):
 
     def _handle_agent_enable(self, action):
         body = self._read_body()
+        if body is None:
+            return
         agent_id = body.get("agent", "").strip()
         if not agent_id:
             return self._send_json({"error": "agent is required"}, status=400)
