@@ -8,12 +8,27 @@ import sys
 import threading
 import time
 from datetime import datetime
+from pathlib import Path
 
-LOOPCLI_DIR = r"D:\loopcli"
+sys.path.insert(0, r"D:\loopcli\main\webui")
+from loopcli_lib import (
+    LOOPCLI_ROOT,
+    AGENT_MARKER,
+    read_json,
+    write_json,
+    safe_agent_path,
+    get_agent_marker,
+    is_agent_enabled,
+    discover_agents as _discover_agents,
+    create_task,
+    write_inbox_message,
+    set_agent_enabled,
+)
+
+LOOPCLI_DIR = str(LOOPCLI_ROOT)
 SUBAGENT_DIR = os.path.join(LOOPCLI_DIR, "subagent")
 CLAUDE = os.path.join(os.environ.get("APPDATA", ""), "npm", "claude.cmd")
 
-AGENT_MARKER = "AGENT"
 LOGS_DIR = os.path.join(LOOPCLI_DIR, "logs")
 GIT_TOKEN_FILE = os.path.join(LOOPCLI_DIR, ".gittoken")
 DEFAULT_PROMPT = """读取 SOUL.md 作为你的身份。
@@ -34,32 +49,9 @@ DEFAULT_PROMPT = """读取 SOUL.md 作为你的身份。
 
 # ─── 工具函数 ───
 
-def get_agent_marker(path):
-    """读取 AGENT 标记文件内容"""
-    marker = os.path.join(path, AGENT_MARKER)
-    if os.path.isfile(marker):
-        with open(marker, "r", encoding="utf-8") as f:
-            return f.read().strip()
-    return None
-
-
-def is_agent_enabled(path):
-    """检查 Agent 是否启用（AGENT 文件不含 disabled 标记）"""
-    content = get_agent_marker(path)
-    if content is None:
-        return False
-    return "disabled" not in content
-
-
 def discover_agents(include_disabled=False):
-    agents = []
-    for name in os.listdir(LOOPCLI_DIR):
-        path = os.path.join(LOOPCLI_DIR, name)
-        marker = os.path.join(path, AGENT_MARKER)
-        if os.path.isdir(path) and os.path.isfile(marker):
-            if include_disabled or is_agent_enabled(path):
-                agents.append({"name": name, "path": path})
-    return agents
+    """Wrapper that returns same format as before (name+path strings)."""
+    return _discover_agents(include_disabled=include_disabled)
 
 
 def find_template(template_id):
@@ -77,16 +69,14 @@ def find_template(template_id):
 def load_agent_state(agent_path):
     state_file = os.path.join(agent_path, "memory", "state.json")
     if os.path.isfile(state_file):
-        with open(state_file, "r", encoding="utf-8") as f:
-            return json.load(f)
+        return read_json(state_file)
     return None
 
 
 def load_agent_tasks(agent_path):
     tasks_file = os.path.join(agent_path, "memory", "tasks.json")
     if os.path.isfile(tasks_file):
-        with open(tasks_file, "r", encoding="utf-8") as f:
-            return json.load(f)
+        return read_json(tasks_file, [])
     return []
 
 
@@ -99,17 +89,14 @@ def rotate_log(log_path, max_size=1_000_000, max_backups=3):
             return
     except OSError:
         return
-    # 删除最老的归档
     oldest = f"{log_path}.{max_backups}"
     if os.path.isfile(oldest):
         os.remove(oldest)
-    # 依次重命名 .2->.3, .1->.2
     for i in range(max_backups, 1, -1):
         src = f"{log_path}.{i - 1}"
         dst = f"{log_path}.{i}"
         if os.path.isfile(src):
             os.rename(src, dst)
-    # 当前日志 -> .1
     os.rename(log_path, f"{log_path}.1")
 
 
@@ -135,35 +122,26 @@ def cmd_create(args):
             cmd_task_inner(template_id, task_desc, "")
         return
 
-    # 创建目录结构
     os.makedirs(os.path.join(agent_dir, "memory", "results"), exist_ok=True)
     os.makedirs(os.path.join(agent_dir, "log"), exist_ok=True)
 
-    # AGENT 标记
     with open(os.path.join(agent_dir, AGENT_MARKER), "w", encoding="utf-8") as f:
         f.write("type: main\n")
 
-    # SOUL.md（模板内容）
     with open(os.path.join(agent_dir, "SOUL.md"), "w", encoding="utf-8") as f:
         f.write(soul_content)
 
-    # PROMPT.md
     with open(os.path.join(agent_dir, "PROMPT.md"), "w", encoding="utf-8") as f:
         f.write(DEFAULT_PROMPT)
 
-    # state.json
     state = {"agent": template_id, "status": "idle", "current_task": None, "last_run": None, "run_count": 0, "created": datetime.now().strftime("%Y-%m-%d")}
-    with open(os.path.join(agent_dir, "memory", "state.json"), "w", encoding="utf-8") as f:
-        json.dump(state, f, indent=2, ensure_ascii=False)
+    write_json(os.path.join(agent_dir, "memory", "state.json"), state)
 
-    # tasks.json
     tasks = []
     if task_desc:
         tasks.append({"id": 1, "status": "pending", "title": task_desc, "description": task_desc, "created": datetime.now().strftime("%Y-%m-%d"), "assignee": template_id})
-    with open(os.path.join(agent_dir, "memory", "tasks.json"), "w", encoding="utf-8") as f:
-        json.dump(tasks, f, indent=2, ensure_ascii=False)
+    write_json(os.path.join(agent_dir, "memory", "tasks.json"), tasks)
 
-    # run.md
     with open(os.path.join(agent_dir, "log", "run.md"), "w", encoding="utf-8") as f:
         f.write("# 运行日志\n\n| 时间 | 状态 | 任务 | 摘要 |\n|------|------|------|------|\n")
 
@@ -182,20 +160,13 @@ def cmd_task_inner(agent_name, title, desc):
         print(f"[错误] 不是有效的 Agent: {agent_name}")
         sys.exit(1)
 
-    tasks_file = os.path.join(agent_dir, "memory", "tasks.json")
-    tasks = load_agent_tasks(agent_dir)
-    next_id = max((t["id"] for t in tasks), default=0) + 1
-    tasks.append({
-        "id": next_id,
-        "status": "pending",
-        "title": title,
-        "description": desc or title,
-        "created": datetime.now().strftime("%Y-%m-%d"),
-        "assignee": agent_name
-    })
-    with open(tasks_file, "w", encoding="utf-8") as f:
-        json.dump(tasks, f, indent=2, ensure_ascii=False)
-    print(f"[派发成功] {agent_name} <- #{next_id} {title}")
+    task = create_task(
+        agent_dir, title,
+        description=desc or title,
+        assignee=agent_name,
+        created=datetime.now().strftime("%Y-%m-%d"),
+    )
+    print(f"[派发成功] {agent_name} <- #{task['id']} {title}")
 
 
 def cmd_task(args):
@@ -396,7 +367,6 @@ def git_push():
             [git, "commit", "-m", f"auto: loopcli sync {datetime.now().strftime('%Y-%m-%d %H:%M')}"],
             cwd=LOOPCLI_DIR, capture_output=True, timeout=30
         )
-        # Use GIT_ASKPASS to avoid exposing token in command line
         askpass_script = os.path.join(LOOPCLI_DIR, ".git_askpass.bat")
         with open(askpass_script, "w") as f:
             f.write("@echo %GH_TOKEN%\n")
@@ -422,7 +392,6 @@ def resolve_git():
         candidate = os.path.join(p, "git.exe")
         if os.path.isfile(candidate):
             return candidate
-    # 常见安装路径
     for d in [r"C:\Program Files\Git\cmd", r"C:\Program Files\Git\bin"]:
         candidate = os.path.join(d, "git.exe")
         if os.path.isfile(candidate):
@@ -436,20 +405,17 @@ def cmd_run(args):
         print("未发现任何 Agent（需要目录下有 AGENT 标记文件）")
         sys.exit(1)
 
-    # 创建本次运行日志目录
     run_id = datetime.now().strftime("run_%Y%m%d_%H%M%S")
     run_log_dir = os.path.join(LOGS_DIR, run_id)
     os.makedirs(run_log_dir, exist_ok=True)
 
-    # 写入运行元信息
     meta = {
         "run_id": run_id,
         "started": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "iterations": args.iterations or "无限",
         "agents": [a["name"] for a in agents],
     }
-    with open(os.path.join(run_log_dir, "meta.json"), "w", encoding="utf-8") as f:
-        json.dump(meta, f, indent=2, ensure_ascii=False)
+    write_json(os.path.join(run_log_dir, "meta.json"), meta)
 
     print(f"运行 ID: {run_id}")
     print(f"日志目录: {run_log_dir}")
@@ -458,7 +424,6 @@ def cmd_run(args):
     count = 0
     while args.iterations == 0 or count < args.iterations:
         count += 1
-        # 每轮重新扫描（可能有新 Agent）
         agents = discover_agents()
         ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         print(f"\n{'='*60}")
@@ -474,10 +439,8 @@ def cmd_run(args):
         for t in threads:
             t.join()
 
-        # 每轮结束后同步到 GitHub
         git_push()
 
-        # 等待下一轮，期间可输入消息
         if args.iterations == 0 or count < args.iterations:
             print(f"\n{'─'*60}", flush=True)
             print(f"输入消息发给 main（直接回车跳过，输入 exit 停止）:", flush=True)
@@ -487,12 +450,11 @@ def cmd_run(args):
                     print("用户终止运行")
                     break
                 if user_input:
-                    ts = datetime.now().strftime("%Y%m%d_%H%M")
-                    inbox_dir = os.path.join(LOOPCLI_DIR, "main", "inbox")
-                    os.makedirs(inbox_dir, exist_ok=True)
-                    msg_file = os.path.join(inbox_dir, f"user_{ts}.md")
-                    with open(msg_file, "w", encoding="utf-8") as f:
-                        f.write(f"# 来自 zhoudingnuo 的消息\n- 类型：指令\n- 时间：{datetime.now().strftime('%Y-%m-%d %H:%M')}\n\n## 内容\n{user_input}\n")
+                    msg_file = write_inbox_message(
+                        os.path.join(LOOPCLI_DIR, "main"),
+                        "user",
+                        user_input,
+                    )
                     print(f"  [已发送] -> main/inbox/", flush=True)
             except EOFError:
                 pass
@@ -500,8 +462,7 @@ def cmd_run(args):
             time.sleep(args.wait)
     meta["finished"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     meta["total_iterations"] = count
-    with open(os.path.join(run_log_dir, "meta.json"), "w", encoding="utf-8") as f:
-        json.dump(meta, f, indent=2, ensure_ascii=False)
+    write_json(os.path.join(run_log_dir, "meta.json"), meta)
 
     print(f"\n运行结束，日志保存在: {run_log_dir}")
 
@@ -511,37 +472,30 @@ def cmd_run(args):
 parser = argparse.ArgumentParser(description="LoopCLI — 多 Agent 自治系统")
 sub = parser.add_subparsers(dest="command")
 
-# loopcli run [-n N]
 p_run = sub.add_parser("run", help="启动 Agent 循环（默认）")
 p_run.add_argument("-n", "--iterations", type=int, default=0, help="迭代次数，0=无限")
 p_run.add_argument("-w", "--wait", type=int, default=10, help="每轮间隔秒数（默认 10）")
 
-# loopcli create <template> [--task TASK]
 p_create = sub.add_parser("create", help="从模板创建新 Agent")
 p_create.add_argument("template", help="模板 ID，如 engineering-frontend-developer")
 p_create.add_argument("--task", "-t", help="初始任务描述")
 
-# loopcli task <agent> <title> [--desc DESC]
 p_task = sub.add_parser("task", help="给 Agent 派发任务")
 p_task.add_argument("agent", help="Agent 目录名")
 p_task.add_argument("title", help="任务标题")
 p_task.add_argument("--desc", "-d", default="", help="任务描述")
 
-# loopcli list
 sub.add_parser("list", help="列出所有 Agent 及状态")
 
-# loopcli templates [--filter X]
 p_tpl = sub.add_parser("templates", help="列出可用模板")
 p_tpl.add_argument("--filter", "-f", default="", help="按关键词筛选")
 
 def cmd_enable(args):
     agent_dir = os.path.join(LOOPCLI_DIR, args.agent)
-    marker = os.path.join(agent_dir, AGENT_MARKER)
-    if not os.path.isfile(marker):
+    if not os.path.isfile(os.path.join(agent_dir, AGENT_MARKER)):
         print(f"[错误] 不是有效的 Agent: {args.agent}")
         sys.exit(1)
-    with open(marker, "w", encoding="utf-8") as f:
-        f.write("type: main\n")
+    set_agent_enabled(agent_dir, True)
     print(f"[已启用] {args.agent}")
 
 
@@ -550,44 +504,33 @@ def cmd_disable(args):
         print("[错误] 不能禁用 main Agent")
         sys.exit(1)
     agent_dir = os.path.join(LOOPCLI_DIR, args.agent)
-    marker = os.path.join(agent_dir, AGENT_MARKER)
-    if not os.path.isfile(marker):
+    if not os.path.isfile(os.path.join(agent_dir, AGENT_MARKER)):
         print(f"[错误] 不是有效的 Agent: {args.agent}")
         sys.exit(1)
-    with open(marker, "w", encoding="utf-8") as f:
-        f.write("type: main\ndisabled: true\n")
+    set_agent_enabled(agent_dir, False)
     print(f"[已禁用] {args.agent}（loopcli run 将跳过此 Agent）")
 
 
-# loopcli msg <内容> [--agent AGENT]
 p_msg = sub.add_parser("msg", help="给 Agent 发消息")
 p_msg.add_argument("content", help="消息内容")
 p_msg.add_argument("--agent", "-a", default="main", help="目标 Agent（默认 main）")
 
-# loopcli enable <agent>
 p_enable = sub.add_parser("enable", help="启用 Agent（可被 loopcli run 调度）")
 p_enable.add_argument("agent", help="Agent 目录名")
 
-# loopcli disable <agent>
 p_disable = sub.add_parser("disable", help="禁用 Agent（跳过调度，节省 token）")
 p_disable.add_argument("agent", help="Agent 目录名")
 
-# 预处理：把裸数字参数（如 -n 5）转为 run 子命令
+
 def cmd_msg(args):
     agent_dir = os.path.join(LOOPCLI_DIR, args.agent)
-    inbox = os.path.join(agent_dir, "inbox")
     if not os.path.isfile(os.path.join(agent_dir, AGENT_MARKER)):
         print(f"[错误] 不是有效的 Agent: {args.agent}")
         sys.exit(1)
-    os.makedirs(inbox, exist_ok=True)
-    ts = datetime.now().strftime("%Y%m%d_%H%M")
-    msg_file = os.path.join(inbox, f"user_{ts}.md")
-    with open(msg_file, "w", encoding="utf-8") as f:
-        f.write(f"# 来自 zhoudingnuo 的消息\n- 类型：指令\n- 时间：{datetime.now().strftime('%Y-%m-%d %H:%M')}\n\n## 内容\n{args.content}\n")
+    msg_file = write_inbox_message(agent_dir, "user", args.content)
     print(f"[已发送] -> {args.agent}/inbox/  {args.content}")
 
 
-# 预处理：把裸数字参数（如 -n 5）转为 run 子命令
 if sys.argv[1:] and sys.argv[1] not in ("run", "create", "task", "list", "templates", "msg", "enable", "disable", "-h", "--help"):
     sys.argv.insert(1, "run")
 
@@ -608,7 +551,6 @@ elif args.command == "enable":
 elif args.command == "disable":
     cmd_disable(args)
 else:
-    # run 或无子命令
     if not hasattr(args, "iterations"):
         args.iterations = 0
     if not hasattr(args, "wait"):

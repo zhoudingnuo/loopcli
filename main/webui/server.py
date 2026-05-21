@@ -18,14 +18,27 @@ from socketserver import ThreadingMixIn
 from pathlib import Path
 from urllib.parse import urlparse, parse_qs
 
-LOOPCLI_ROOT = Path(r"D:\loopcli")
+from loopcli_lib import (
+    LOOPCLI_ROOT,
+    read_json,
+    write_json,
+    safe_agent_path,
+    scan_agents,
+    create_task,
+    get_agent_tasks,
+    get_all_agent_tasks,
+    write_inbox_message,
+    set_agent_enabled,
+    get_recent_lines,
+    read_file_tail_incremental,
+)
+
 WEBUI_DIR = Path(__file__).parent.resolve()
 MAIN_DIR = LOOPCLI_ROOT / "main"
 LOOP_STATE_FILE = WEBUI_DIR / "loop_state.json"
 
 _loop_proc = None
 _loop_lock = threading.Lock()
-_json_lock = threading.Lock()
 API_KEY = os.environ.get("LOOPCLI_API_KEY", "")
 MAX_BODY_SIZE = 10 * 1024  # 10KB
 
@@ -43,104 +56,8 @@ SSE_MAX_CONNECTIONS = 10
 SSE_TIMEOUT_SECONDS = 300
 
 
-def read_json(path: Path, default=None):
-    if not path.exists():
-        return default if default is not None else {}
-    try:
-        return json.loads(path.read_text(encoding="utf-8"))
-    except (json.JSONDecodeError, OSError):
-        return default if default is not None else {}
-
-
-def write_json(path: Path, data):
-    with _json_lock:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
-
-
-def _safe_agent_path(agent_id: str) -> Path | None:
-    if not agent_id or '/' in agent_id or '\\' in agent_id or '..' in agent_id or '\x00' in agent_id:
-        return None
-    agent_dir = LOOPCLI_ROOT / agent_id
-    try:
-        agent_dir.resolve().relative_to(LOOPCLI_ROOT.resolve())
-    except ValueError:
-        return None
-    return agent_dir
-
-
-def scan_agents():
-    """Scan loopcli root for agent directories (containing AGENT marker file)."""
-    agents = []
-    for child in LOOPCLI_ROOT.iterdir():
-        if not child.is_dir():
-            continue
-        agent_marker = child / "AGENT"
-        if not agent_marker.exists():
-            continue
-        state = read_json(child / "memory" / "state.json", {})
-        soul_path = child / "SOUL.md"
-        desc = ""
-        if soul_path.exists():
-            lines = soul_path.read_text(encoding="utf-8").strip().splitlines()
-            for line in lines:
-                stripped = line.strip()
-                if stripped and not stripped.startswith("#"):
-                    desc = stripped
-                    break
-        tasks = read_json(child / "memory" / "tasks.json", [])
-        done_count = sum(1 for t in tasks if t.get("status") == "done")
-        pending_count = sum(1 for t in tasks if t.get("status") == "pending")
-        agents.append({
-            "id": child.name,
-            "name": state.get("agent", child.name),
-            "status": state.get("status", "unknown"),
-            "description": desc,
-            "last_run": state.get("last_run"),
-            "run_count": state.get("run_count", 0),
-            "current_task": state.get("current_task"),
-            "task_count": len(tasks),
-            "task_done": done_count,
-            "task_pending": pending_count,
-        })
-    return agents
-
-
 def get_main_tasks():
     return read_json(MAIN_DIR / "memory" / "tasks.json", [])
-
-
-def get_agent_tasks(agent_id: str):
-    agent_dir = _safe_agent_path(agent_id)
-    if not agent_dir:
-        return None
-    tasks_file = agent_dir / "memory" / "tasks.json"
-    return read_json(tasks_file, [])
-
-
-def get_all_agent_tasks():
-    """Aggregate tasks from all agents, each tagged with agent_id."""
-    all_tasks = []
-    for child in LOOPCLI_ROOT.iterdir():
-        if not child.is_dir() or not (child / "AGENT").exists():
-            continue
-        tasks_file = child / "memory" / "tasks.json"
-        tasks = read_json(tasks_file, [])
-        for t in tasks:
-            t["_agent_id"] = child.name
-        all_tasks.extend(tasks)
-    return all_tasks
-
-
-def get_recent_lines(filepath: Path, n=100):
-    if not filepath.exists():
-        return []
-    try:
-        with open(filepath, "r", encoding="utf-8", errors="replace") as f:
-            lines = f.readlines()
-        return [l.rstrip("\n\r") for l in lines[-n:]]
-    except OSError:
-        return []
 
 
 # --- Loop Process Management ---
@@ -266,8 +183,9 @@ class WebUIHandler(SimpleHTTPRequestHandler):
         raw = self.rfile.read(length)
         try:
             return json.loads(raw.decode("utf-8"))
-        except (json.JSONDecodeError, UnicodeDecodeError):
-            return {}
+        except (json.JSONDecodeError, UnicodeDecodeError) as e:
+            self._send_json({"error": f"Invalid JSON: {e}"}, status=400)
+            return None
 
     def _require_auth(self):
         if not API_KEY:
@@ -306,7 +224,7 @@ class WebUIHandler(SimpleHTTPRequestHandler):
         params = parse_qs(urlparse(self.path).query)
         agent_id = params.get("agent", [None])[0]
         if agent_id:
-            agent_dir = _safe_agent_path(agent_id)
+            agent_dir = safe_agent_path(agent_id)
             if not agent_dir:
                 with _sse_lock:
                     _sse_connections -= 1
@@ -323,7 +241,7 @@ class WebUIHandler(SimpleHTTPRequestHandler):
         self._cors_headers()
         self.end_headers()
 
-        last_size = 0
+        last_pos = 0
         start_time = time.time()
         try:
             while True:
@@ -331,19 +249,17 @@ class WebUIHandler(SimpleHTTPRequestHandler):
                     self._send_sse_event({"event": "timeout", "ts": datetime.now().isoformat()})
                     break
                 if log_path.exists():
-                    current_size = log_path.stat().st_size
-                    if current_size != last_size:
-                        lines = get_recent_lines(log_path, 500)
+                    lines, last_pos = read_file_tail_incremental(log_path, last_pos)
+                    if lines:
                         self._send_sse_event({
                             "agent": agent_id,
                             "lines": lines,
                             "ts": datetime.now().isoformat(),
                         })
-                        last_size = current_size
                 else:
-                    if last_size != -1:
+                    if last_pos != -1:
                         self._send_sse_event({"agent": agent_id, "lines": [], "ts": datetime.now().isoformat()})
-                        last_size = -1
+                        last_pos = -1
                 time.sleep(1)
         except (BrokenPipeError, ConnectionResetError, OSError):
             pass
@@ -384,7 +300,7 @@ class WebUIHandler(SimpleHTTPRequestHandler):
             n = int(params.get("n", ["100"])[0])
             agent_id = params.get("agent", [None])[0]
             if agent_id:
-                agent_dir = _safe_agent_path(agent_id)
+                agent_dir = safe_agent_path(agent_id)
                 if not agent_dir:
                     return self._send_json({"error": "Invalid agent"}, status=400)
                 log_path = agent_dir / "log" / "run.md"
@@ -457,18 +373,12 @@ class WebUIHandler(SimpleHTTPRequestHandler):
         if not title:
             return self._send_json({"error": "title is required"}, status=400)
 
-        tasks = get_main_tasks()
-        new_id = max((t.get("id", 0) for t in tasks), default=0) + 1
-        task = {
-            "id": new_id,
-            "status": "pending",
-            "title": title,
-            "description": body.get("description", ""),
-            "created": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
-            "assignee": body.get("assignee") or "main",
-        }
-        tasks.append(task)
-        write_json(MAIN_DIR / "memory" / "tasks.json", tasks)
+        assignee = body.get("assignee") or "main"
+        task = create_task(
+            MAIN_DIR, title,
+            description=body.get("description", ""),
+            assignee=assignee,
+        )
         self._send_json(task, status=201)
 
     def _handle_agent_start(self):
@@ -479,7 +389,7 @@ class WebUIHandler(SimpleHTTPRequestHandler):
         if not agent_id:
             return self._send_json({"error": "agent is required"}, status=400)
 
-        agent_dir = _safe_agent_path(agent_id)
+        agent_dir = safe_agent_path(agent_id)
         if not agent_dir:
             return self._send_json({"error": "Invalid agent"}, status=400)
 
@@ -556,24 +466,15 @@ class WebUIHandler(SimpleHTTPRequestHandler):
         if not agent_id or not title:
             return self._send_json({"error": "agent and title are required"}, status=400)
 
-        agent_dir = _safe_agent_path(agent_id)
+        agent_dir = safe_agent_path(agent_id)
         if not agent_dir or not (agent_dir / "AGENT").exists():
             return self._send_json({"error": f"Agent '{agent_id}' not found"}, status=404)
 
-        # Write task to agent's tasks.json
-        tasks_file = agent_dir / "memory" / "tasks.json"
-        tasks = read_json(tasks_file, [])
-        new_id = max((t.get("id", 0) for t in tasks), default=0) + 1
-        task = {
-            "id": new_id,
-            "status": "pending",
-            "title": title,
-            "description": body.get("description", ""),
-            "created": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
-            "assignee": agent_id,
-        }
-        tasks.append(task)
-        write_json(tasks_file, tasks)
+        task = create_task(
+            agent_dir, title,
+            description=body.get("description", ""),
+            assignee=agent_id,
+        )
 
         # Start claude process for this agent
         prompt_file = agent_dir / "PROMPT.md"
@@ -607,22 +508,13 @@ class WebUIHandler(SimpleHTTPRequestHandler):
             return self._send_json({"error": "content is required"}, status=400)
 
         agent_id = body.get("agent", "main").strip() or "main"
-        agent_dir = _safe_agent_path(agent_id)
+        agent_dir = safe_agent_path(agent_id)
         if not agent_dir:
             return self._send_json({"error": "Invalid agent"}, status=400)
         if not (agent_dir / "AGENT").exists():
             return self._send_json({"error": f"Agent '{agent_id}' not found"}, status=404)
 
-        inbox_dir = agent_dir / "inbox"
-        inbox_dir.mkdir(parents=True, exist_ok=True)
-
-        now = datetime.now()
-        ts = now.strftime("%Y%m%d_%H%M")
-        msg_file = inbox_dir / f"webui_{ts}_{uuid.uuid4().hex[:8]}.md"
-        msg_file.write_text(
-            f"# 来自 WebUI 的消息\n- 类型：指令\n- 时间：{now.strftime('%Y-%m-%d %H:%M')}\n\n## 内容\n{content}\n",
-            encoding="utf-8",
-        )
+        msg_file = write_inbox_message(agent_dir, "webui", content)
         self._send_json({"status": "sent", "agent": agent_id, "file": msg_file.name}, status=201)
 
     def _handle_agent_enable(self, action):
@@ -635,18 +527,13 @@ class WebUIHandler(SimpleHTTPRequestHandler):
         if agent_id == "main":
             return self._send_json({"error": "cannot disable main agent"}, status=400)
 
-        agent_dir = _safe_agent_path(agent_id)
+        agent_dir = safe_agent_path(agent_id)
         if not agent_dir:
             return self._send_json({"error": "Invalid agent"}, status=400)
-        marker = agent_dir / "AGENT"
-        if not marker.exists():
+        if not (agent_dir / "AGENT").exists():
             return self._send_json({"error": f"Agent '{agent_id}' not found"}, status=404)
 
-        if action == "enable":
-            marker.write_text("type: main\n", encoding="utf-8")
-        else:
-            marker.write_text("type: main\ndisabled: true\n", encoding="utf-8")
-
+        set_agent_enabled(agent_dir, action == "enable")
         self._send_json({"status": "ok", "agent": agent_id, "enabled": action == "enable"})
 
 

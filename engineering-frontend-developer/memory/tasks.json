@@ -1,100 +1,101 @@
 [
-    {
-        "id": 1,
-        "status": "done",
-        "title": "为 WebUI 添加 loopcli msg 消息发送功能",
-        "description": "为 WebUI 添加 loopcli msg 消息发送功能。要求：1) 后端 server.py 新增 POST /api/messages/send 端点，接收 {agent, content}，默认 agent=main，将消息写入目标 Agent 的 inbox/<sender>_<timestamp>.md；2) 前端 index.html 新增消息发送 UI 组件：一个文本框输入消息内容、一个下拉选择目标 Agent（默认 main）、一个发送按钮；3) 消息格式与 loopcli msg CLI 命令保持一致。",
-        "created": "2026-05-21",
-        "assignee": "engineering-frontend-developer",
-        "completed": "2026-05-21 06:40:37"
-    },
-    {
-        "id": 2,
-        "status": "done",
-        "title": "修复 run.py + server.py 全部 P0 安全问题",
-        "description": "已修复全部 P0 安全问题：shell=True 移除、路径遍历防护、API 鉴权、文件句柄安全、文件锁、token 保护",
-        "created": "2026-05-21",
-        "assignee": "engineering-frontend-developer",
-        "completed": "2026-05-21 07:00:00"
-    },
-    {
-        "id": 3,
-        "status": "done",
-        "title": "为 server.py 和 run.py 编写单元测试",
-        "description": "使用 pytest 框架编写单元测试，覆盖 API 端点和核心函数",
-        "created": "2026-05-21",
-        "assignee": "engineering-frontend-developer",
-        "completed": "2026-05-21 08:00:21"
-    },
-    {
-        "id": 4,
-        "status": "done",
-        "title": "WebUI 多 Agent 统一仪表盘",
-        "description": "改造为多 Agent 统一视图：Agent 卡片、任务列表、筛选",
-        "created": "2026-05-21",
-        "assignee": "engineering-frontend-developer",
-        "completed": "2026-05-21 08:07:28"
-    },
-    {
-        "id": 5,
-        "status": "done",
-        "title": "为 run.py 添加日志轮转机制",
-        "description": "1MB 自动轮转，最多 3 个归档",
-        "created": "2026-05-21",
-        "assignee": "engineering-frontend-developer",
-        "completed": "2026-05-21 08:09:30"
-    },
-    {
-        "id": 6,
-        "status": "done",
-        "title": "修复单元测试质量缺口",
-        "description": "null byte 测试、API Key 测试、文件锁测试、副作用修复",
-        "created": "2026-05-21",
-        "assignee": "engineering-frontend-developer",
-        "completed": "2026-05-21 08:21:16"
-    },
-    {
-        "id": 7,
-        "status": "done",
-        "title": "修复安全审计发现的 High 问题",
-        "description": "请求体大小限制 + 未认证端点保护",
-        "created": "2026-05-21",
-        "assignee": "engineering-frontend-developer",
-        "completed": "2026-05-21 08:24:15"
-    },
-    {
-        "id": 8,
-        "status": "done",
-        "title": "修复安全审计 Medium x3 + Low x2 残留问题",
-        "description": "CORS/并发锁/UUID文件名/绑定地址/git add",
-        "created": "2026-05-21",
-        "assignee": "engineering-frontend-developer",
-        "completed": "2026-05-21 08:32:20"
-    },
-    {
-        "id": 9,
-        "status": "done",
-        "title": "WebUI UX 优化：响应式布局 + 错误提示 + Agent 状态轮询",
-        "description": "响应式+Toast+轮询+SSE暂停/继续",
-        "created": "2026-05-21",
-        "assignee": "engineering-frontend-developer",
-        "completed": "2026-05-21 08:39:47"
-    },
-    {
-        "id": 10,
-        "status": "done",
-        "title": "端到端集成测试",
-        "description": "所有安全修复和功能开发已完成，需要进行端到端集成测试验证整体系统可用性。要求：(1) 启动 WebUI server（python webui/server.py），验证所有 API 端点返回正确状态码和响应格式（GET /api/agents、GET /api/tasks、POST /api/tasks、POST /api/messages/send、GET /api/logs/stream）；(2) 验证 Agent 生命周期流程：通过 API 创建任务→查看任务列表→发送消息→确认 inbox 文件生成；(3) 验证安全机制在生产环境生效：未带 API Key 的 POST 请求被拒绝（401）、路径遍历请求被拒绝（403）、超大请求体被拒绝（413）；(4) 验证 WebUI 前端页面加载正常（GET / 返回 200、静态资源可访问）；(5) 所有集成测试脚本放在 D:/loopcli/main/tests/test_integration.py。测试完成后通过 inbox 通知 main。",
-        "created": "2026-05-21",
-        "assignee": "engineering-frontend-developer",
-        "completed": "2026-05-21 08:50:20"
-    },
-    {
-        "id": 11,
-        "status": "pending",
-        "title": "提取共享模块 loopcli_lib.py + SSE 性能优化",
-        "description": "基于 code-reviewer #6 最终审查反馈（评分 7.5/10），执行以下重构：\n\n优先级1：提取共享模块\nserver.py 和 run.py 存在大量重复代码（JSON读写、Agent发现、任务创建、消息写入、启用/禁用），提取为 D:/loopcli/main/webui/loopcli_lib.py。\n(1) 识别两文件中所有重复函数/逻辑\n(2) 创建 loopcli_lib.py 共享模块\n(3) 更新 import，确保功能不变\n(4) 所有79+现有测试必须通过\n\n优先级2：SSE性能优化\nSSE日志轮询每秒读整个文件，多连接有性能隐患。\n(1) 使用 seek+tell 记录读取位置，只读新增内容\n(2) 确保多客户端SSE不导致重复读取\n\n优先级3：错误处理改进\n(1) _read_body() 不静默吞JSON错误，返回400\n(2) API路由风格统一为RESTful\n(3) 任务ID生成逻辑统一到共享模块\n\n验证：重构后所有测试通过，WebUI无回归。报告写入 memory/results/refactoring-report.md，完成后通过inbox通知main。",
-        "created": "2026-05-21",
-        "assignee": "engineering-frontend-developer"
-    }
+  {
+    "id": 1,
+    "status": "done",
+    "title": "为 WebUI 添加 loopcli msg 消息发送功能",
+    "description": "为 WebUI 添加 loopcli msg 消息发送功能。要求：1) 后端 server.py 新增 POST /api/messages/send 端点，接收 {agent, content}，默认 agent=main，将消息写入目标 Agent 的 inbox/<sender>_<timestamp>.md；2) 前端 index.html 新增消息发送 UI 组件：一个文本框输入消息内容、一个下拉选择目标 Agent（默认 main）、一个发送按钮；3) 消息格式与 loopcli msg CLI 命令保持一致。",
+    "created": "2026-05-21",
+    "assignee": "engineering-frontend-developer",
+    "completed": "2026-05-21 06:40:37"
+  },
+  {
+    "id": 2,
+    "status": "done",
+    "title": "修复 run.py + server.py 全部 P0 安全问题",
+    "description": "已修复全部 P0 安全问题：shell=True 移除、路径遍历防护、API 鉴权、文件句柄安全、文件锁、token 保护",
+    "created": "2026-05-21",
+    "assignee": "engineering-frontend-developer",
+    "completed": "2026-05-21 07:00:00"
+  },
+  {
+    "id": 3,
+    "status": "done",
+    "title": "为 server.py 和 run.py 编写单元测试",
+    "description": "使用 pytest 框架编写单元测试，覆盖 API 端点和核心函数",
+    "created": "2026-05-21",
+    "assignee": "engineering-frontend-developer",
+    "completed": "2026-05-21 08:00:21"
+  },
+  {
+    "id": 4,
+    "status": "done",
+    "title": "WebUI 多 Agent 统一仪表盘",
+    "description": "改造为多 Agent 统一视图：Agent 卡片、任务列表、筛选",
+    "created": "2026-05-21",
+    "assignee": "engineering-frontend-developer",
+    "completed": "2026-05-21 08:07:28"
+  },
+  {
+    "id": 5,
+    "status": "done",
+    "title": "为 run.py 添加日志轮转机制",
+    "description": "1MB 自动轮转，最多 3 个归档",
+    "created": "2026-05-21",
+    "assignee": "engineering-frontend-developer",
+    "completed": "2026-05-21 08:09:30"
+  },
+  {
+    "id": 6,
+    "status": "done",
+    "title": "修复单元测试质量缺口",
+    "description": "null byte 测试、API Key 测试、文件锁测试、副作用修复",
+    "created": "2026-05-21",
+    "assignee": "engineering-frontend-developer",
+    "completed": "2026-05-21 08:21:16"
+  },
+  {
+    "id": 7,
+    "status": "done",
+    "title": "修复安全审计发现的 High 问题",
+    "description": "请求体大小限制 + 未认证端点保护",
+    "created": "2026-05-21",
+    "assignee": "engineering-frontend-developer",
+    "completed": "2026-05-21 08:24:15"
+  },
+  {
+    "id": 8,
+    "status": "done",
+    "title": "修复安全审计 Medium x3 + Low x2 残留问题",
+    "description": "CORS/并发锁/UUID文件名/绑定地址/git add",
+    "created": "2026-05-21",
+    "assignee": "engineering-frontend-developer",
+    "completed": "2026-05-21 08:32:20"
+  },
+  {
+    "id": 9,
+    "status": "done",
+    "title": "WebUI UX 优化：响应式布局 + 错误提示 + Agent 状态轮询",
+    "description": "响应式+Toast+轮询+SSE暂停/继续",
+    "created": "2026-05-21",
+    "assignee": "engineering-frontend-developer",
+    "completed": "2026-05-21 08:39:47"
+  },
+  {
+    "id": 10,
+    "status": "done",
+    "title": "端到端集成测试",
+    "description": "所有安全修复和功能开发已完成，需要进行端到端集成测试验证整体系统可用性。要求：(1) 启动 WebUI server（python webui/server.py），验证所有 API 端点返回正确状态码和响应格式（GET /api/agents、GET /api/tasks、POST /api/tasks、POST /api/messages/send、GET /api/logs/stream）；(2) 验证 Agent 生命周期流程：通过 API 创建任务→查看任务列表→发送消息→确认 inbox 文件生成；(3) 验证安全机制在生产环境生效：未带 API Key 的 POST 请求被拒绝（401）、路径遍历请求被拒绝（403）、超大请求体被拒绝（413）；(4) 验证 WebUI 前端页面加载正常（GET / 返回 200、静态资源可访问）；(5) 所有集成测试脚本放在 D:/loopcli/main/tests/test_integration.py。测试完成后通过 inbox 通知 main。",
+    "created": "2026-05-21",
+    "assignee": "engineering-frontend-developer",
+    "completed": "2026-05-21 08:50:20"
+  },
+  {
+    "id": 11,
+    "status": "done",
+    "title": "提取共享模块 loopcli_lib.py + SSE 性能优化",
+    "description": "基于 code-reviewer #6 最终审查反馈（评分 7.5/10），执行以下重构：\n\n优先级1：提取共享模块\nserver.py 和 run.py 存在大量重复代码（JSON读写、Agent发现、任务创建、消息写入、启用/禁用），提取为 D:/loopcli/main/webui/loopcli_lib.py。\n(1) 识别两文件中所有重复函数/逻辑\n(2) 创建 loopcli_lib.py 共享模块\n(3) 更新 import，确保功能不变\n(4) 所有79+现有测试必须通过\n\n优先级2：SSE性能优化\nSSE日志轮询每秒读整个文件，多连接有性能隐患。\n(1) 使用 seek+tell 记录读取位置，只读新增内容\n(2) 确保多客户端SSE不导致重复读取\n\n优先级3：错误处理改进\n(1) _read_body() 不静默吞JSON错误，返回400\n(2) API路由风格统一为RESTful\n(3) 任务ID生成逻辑统一到共享模块\n\n验证：重构后所有测试通过，WebUI无回归。报告写入 memory/results/refactoring-report.md，完成后通过inbox通知main。",
+    "created": "2026-05-21",
+    "assignee": "engineering-frontend-developer",
+    "completed": "2026-05-21 08:58:36"
+  }
 ]

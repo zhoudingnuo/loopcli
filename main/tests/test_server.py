@@ -16,16 +16,17 @@ from unittest.mock import patch
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "webui"))
 
 from server import (
-    _safe_agent_path,
+    WebUIHandler,
+    ThreadedHTTPServer,
+    MAIN_DIR,
+)
+from loopcli_lib import (
+    safe_agent_path as _safe_agent_path,
     read_json,
     write_json,
     scan_agents,
-    get_main_tasks,
     get_recent_lines,
-    WebUIHandler,
-    ThreadedHTTPServer,
     LOOPCLI_ROOT,
-    MAIN_DIR,
 )
 from pathlib import Path
 
@@ -66,7 +67,7 @@ class TestSafeAgentPath:
     def test_valid_agent(self):
         result = _safe_agent_path("main")
         assert result is not None
-        assert result == LOOPCLI_ROOT / "main"
+        assert str(result) == str(LOOPCLI_ROOT / "main")
 
     def test_empty_string(self):
         assert _safe_agent_path("") is None

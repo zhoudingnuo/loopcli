@@ -21,14 +21,16 @@ from unittest.mock import patch
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "webui"))
 
 from server import (
-    _safe_agent_path,
+    WebUIHandler,
+    ThreadedHTTPServer,
+    MAIN_DIR,
+)
+from loopcli_lib import (
+    safe_agent_path as _safe_agent_path,
     read_json,
     write_json,
     scan_agents,
-    WebUIHandler,
-    ThreadedHTTPServer,
     LOOPCLI_ROOT,
-    MAIN_DIR,
 )
 
 # ─── Server fixture ───
