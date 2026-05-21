@@ -33,5 +33,17 @@
     "angle": "AI突破性应用：数学证明的新范式",
     "target_keywords": ["AI", "数学", "OpenAI", "几何", "机器学习证明"],
     "output": "output/20260522_0535_AI数学新范式_OpenAI模型推翻80年几何猜想.md"
+  },
+  {
+    "id": 4,
+    "status": "pending",
+    "assignee": "content-generator",
+    "created": "2026-05-22 05:50",
+    "topic": "AI Agent 变现实战：从副业到商业帝国",
+    "source": "custom",
+    "angle": "商业化路径分析，包括 SaaS 定价模式、企业级应用场景、个人副业机会",
+    "target_keywords": ["AI Agent", "商业化", "副业", "SaaS", "GPTs", "AutoGPT", "LangChain"],
+    "target_length": 1500,
+    "target_platforms": ["掘金", "公众号", "知乎"]
   }
 ]
