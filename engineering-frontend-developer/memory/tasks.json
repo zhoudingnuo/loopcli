@@ -2,8 +2,8 @@
   {
     "id": 1,
     "status": "done",
-    "title": "为 WebUI 添加 loopcli msg 消息发送功能。要求：1) 后端 server.py 新增 POST /api/messages/send 端点，接收 {agent, content}，默认 agent=main，将消息写入目标 Agent 的 inbox/<sender>_<timestamp>.md；2) 前端 index.html 新增消息发送 UI 组件：一个文本框输入消息内容、一个下拉选择目标 Agent（默认 main）、一个发送按钮；3) 消息格式与 loopcli msg CLI 命令保持一致。参考 webui/server.py 和 webui/index.html。",
-    "description": "为 WebUI 添加 loopcli msg 消息发送功能。要求：1) 后端 server.py 新增 POST /api/messages/send 端点，接收 {agent, content}，默认 agent=main，将消息写入目标 Agent 的 inbox/<sender>_<timestamp>.md；2) 前端 index.html 新增消息发送 UI 组件：一个文本框输入消息内容、一个下拉选择目标 Agent（默认 main）、一个发送按钮；3) 消息格式与 loopcli msg CLI 命令保持一致。参考 webui/server.py 和 webui/index.html。",
+    "title": "为 WebUI 添加 loopcli msg 消息发送功能",
+    "description": "为 WebUI 添加 loopcli msg 消息发送功能。要求：1) 后端 server.py 新增 POST /api/messages/send 端点，接收 {agent, content}，默认 agent=main，将消息写入目标 Agent 的 inbox/<sender>_<timestamp>.md；2) 前端 index.html 新增消息发送 UI 组件：一个文本框输入消息内容、一个下拉选择目标 Agent（默认 main）、一个发送按钮；3) 消息格式与 loopcli msg CLI 命令保持一致。",
     "created": "2026-05-21",
     "assignee": "engineering-frontend-developer",
     "completed": "2026-05-21 06:40:37"
@@ -21,7 +21,7 @@
     "id": 3,
     "status": "done",
     "title": "为 server.py 和 run.py 编写单元测试",
-    "description": "当前整个项目零测试覆盖，这是严重的质量缺口。要求：(1) 使用 pytest 框架；(2) 为 server.py 编写 API 端点测试（用 httpx/TestClient 或 urllib），覆盖 GET /api/agents、GET /api/tasks、POST /api/tasks、POST /api/messages/send、路径遍历拒绝（_safe_agent_path）；(3) 为 run.py 的 load_agent_tasks、cmd_task_inner、_safe_agent_path（如果有）编写单元测试；(4) 测试文件放在 D:/loopcli/main/tests/ 目录下；(5) 确保测试可独立运行不依赖 WebUI 服务器启动。完成后通过 inbox 通知 main。",
+    "description": "使用 pytest 框架编写单元测试，覆盖 API 端点和核心函数",
     "created": "2026-05-21",
     "assignee": "engineering-frontend-developer",
     "completed": "2026-05-21 08:00:21"
@@ -30,7 +30,7 @@
     "id": 4,
     "status": "done",
     "title": "WebUI 多 Agent 统一仪表盘",
-    "description": "当前 WebUI 仪表盘只显示单个 Agent（main）的信息。需要改造为多 Agent 统一视图：(1) 仪表盘首页展示所有已注册 Agent 的卡片（名称、状态、任务完成数、最后运行时间）；(2) 点击 Agent 卡片可展开查看该 Agent 的任务列表；(3) 任务管理页面增加 Agent 筛选下拉框；(4) 后端 server.py 可能需要新增 GET /api/agents/:name/tasks 端点。参考 webui/server.py 和 webui/index.html。",
+    "description": "改造为多 Agent 统一视图：Agent 卡片、任务列表、筛选",
     "created": "2026-05-21",
     "assignee": "engineering-frontend-developer",
     "completed": "2026-05-21 08:07:28"
@@ -39,7 +39,7 @@
     "id": 5,
     "status": "done",
     "title": "为 run.py 添加日志轮转机制",
-    "description": "当前 raw.log 无限增长，缺乏轮转机制。要求：(1) 在 run.py 的日志写入逻辑中添加轮转：当 raw.log 超过 1MB 时自动归档为 raw.log.1、raw.log.2（最多保留 3 个归档）；(2) 使用简单的文件大小检查 + 重命名实现，不引入外部依赖；(3) 确保轮转时不丢失正在写入的日志。参考 D:/loopcli/run.py。",
+    "description": "1MB 自动轮转，最多 3 个归档",
     "created": "2026-05-21",
     "assignee": "engineering-frontend-developer",
     "completed": "2026-05-21 08:09:30"
@@ -48,7 +48,7 @@
     "id": 6,
     "status": "done",
     "title": "修复单元测试质量缺口",
-    "description": "code-reviewer 审查发现测试评分 7/10，需修复以下问题：(1) 为 _safe_agent_path 添加 null byte 注入测试（%00、\\x00）；(2) 为 API Key 认证端点添加测试（POST /api/tasks、POST /api/messages/send 的鉴权验证）；(3) 为文件锁机制添加测试（验证并发写入时锁的正确行为）；(4) 修复 test_create_task_success 和 test_adds_task_to_real_agent 两个测试对生产文件的副作用（添加 try/finally 清理或使用临时目录）。测试文件在 D:/loopcli/main/tests/。完成后运行 pytest 确保全部通过，通过 inbox 通知 main。",
+    "description": "null byte 测试、API Key 测试、文件锁测试、副作用修复",
     "created": "2026-05-21",
     "assignee": "engineering-frontend-developer",
     "completed": "2026-05-21 08:21:16"
@@ -57,7 +57,7 @@
     "id": 7,
     "status": "done",
     "title": "修复安全审计发现的 High 问题",
-    "description": "安全最终审计发现 2 个 High 问题需修复：(1) POST /api/messages/send 和 POST /api/tasks 缺少请求体大小限制，需添加 MAX_BODY_SIZE 限制（建议 10KB），超限返回 413；(2) 未认证的 dispatch 端点暴露，确认哪些端点缺少 API Key 认证并添加保护。参考 webui/server.py 和 memory/results/security-final-audit.md。完成后通过 inbox 通知 main。",
+    "description": "请求体大小限制 + 未认证端点保护",
     "created": "2026-05-21",
     "assignee": "engineering-frontend-developer",
     "completed": "2026-05-21 08:24:15"
@@ -66,7 +66,7 @@
     "id": 8,
     "status": "done",
     "title": "修复安全审计 Medium x3 + Low x2 残留问题",
-    "description": "安全最终审计发现以下残留问题需修复：(1) CORS 默认策略过于宽松——server.py 的 CORS_ORIGINS 如未配置环境变量应默认为 localhost:3000 而非 wildcard，修改默认值；(2) write_json 并发竞态——多个请求同时写同一 tasks.json 可能丢失数据，添加 threading.Lock 或文件锁保护 write_json 调用；(3) 消息文件名冲突——并发的 inbox 写入可能产生同名文件覆盖，在文件名中加入随机后缀或 UUID 防冲突；(4) Low: 默认绑定 0.0.0.0 改为 127.0.0.1（生产环境用环境变量覆盖）；(5) Low: 检查代码中是否有 git add -A 等宽泛操作，确保只 add 特定文件。参考 webui/server.py。完成后运行 pytest 确保无回归，通过 inbox 通知 main。",
+    "description": "CORS/并发锁/UUID文件名/绑定地址/git add",
     "created": "2026-05-21",
     "assignee": "engineering-frontend-developer",
     "completed": "2026-05-21 08:32:20"
@@ -74,9 +74,17 @@
   {
     "id": 9,
     "status": "done",
-    "completed": "2026-05-21 08:39:47",
     "title": "WebUI UX 优化：响应式布局 + 错误提示 + Agent 状态轮询",
-    "description": "当前 WebUI 功能完整但用户体验需要提升。要求：(1) 响应式布局：让 index.html 适配移动端（viewport meta、flex/grid 响应式、卡片在小屏堆叠）；(2) 错误提示优化：API 调用失败时显示友好错误消息（红色 toast/banner），取代当前的静默失败；(3) Agent 状态自动轮询：每 10 秒 GET /api/agents 刷新 Agent 状态，无需手动刷新页面；(4) SSE 日志流 UI：为 SSE /api/logs/stream 添加前端展示（日志面板自动滚动、暂停/继续按钮）。参考 webui/server.py 和 webui/index.html。",
+    "description": "响应式+Toast+轮询+SSE暂停/继续",
+    "created": "2026-05-21",
+    "assignee": "engineering-frontend-developer",
+    "completed": "2026-05-21 08:39:47"
+  },
+  {
+    "id": 10,
+    "status": "pending",
+    "title": "端到端集成测试",
+    "description": "所有安全修复和功能开发已完成，需要进行端到端集成测试验证整体系统可用性。要求：(1) 启动 WebUI server（python webui/server.py），验证所有 API 端点返回正确状态码和响应格式（GET /api/agents、GET /api/tasks、POST /api/tasks、POST /api/messages/send、GET /api/logs/stream）；(2) 验证 Agent 生命周期流程：通过 API 创建任务→查看任务列表→发送消息→确认 inbox 文件生成；(3) 验证安全机制在生产环境生效：未带 API Key 的 POST 请求被拒绝（401）、路径遍历请求被拒绝（403）、超大请求体被拒绝（413）；(4) 验证 WebUI 前端页面加载正常（GET / 返回 200、静态资源可访问）；(5) 所有集成测试脚本放在 D:/loopcli/main/tests/test_integration.py。测试完成后通过 inbox 通知 main。",
     "created": "2026-05-21",
     "assignee": "engineering-frontend-developer"
   }
