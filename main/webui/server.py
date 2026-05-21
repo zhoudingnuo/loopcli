@@ -11,6 +11,7 @@ import subprocess
 import sys
 import time
 import threading
+import uuid
 from datetime import datetime, timezone
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from socketserver import ThreadingMixIn
@@ -24,10 +25,15 @@ LOOP_STATE_FILE = WEBUI_DIR / "loop_state.json"
 
 _loop_proc = None
 _loop_lock = threading.Lock()
+_json_lock = threading.Lock()
 API_KEY = os.environ.get("LOOPCLI_API_KEY", "")
 MAX_BODY_SIZE = 10 * 1024  # 10KB
 
-CORS_ORIGINS = [o.strip() for o in os.environ.get("CORS_ORIGINS", "").split(",") if o.strip()]
+_raw_cors = os.environ.get("CORS_ORIGINS", "").strip()
+if _raw_cors:
+    CORS_ORIGINS = [o.strip() for o in _raw_cors.split(",") if o.strip()]
+else:
+    CORS_ORIGINS = ["http://localhost:3000"]
 
 _write_semaphore = threading.Semaphore(10)
 
@@ -47,8 +53,9 @@ def read_json(path: Path, default=None):
 
 
 def write_json(path: Path, data):
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    with _json_lock:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
 def _safe_agent_path(agent_id: str) -> Path | None:
@@ -611,7 +618,7 @@ class WebUIHandler(SimpleHTTPRequestHandler):
 
         now = datetime.now()
         ts = now.strftime("%Y%m%d_%H%M")
-        msg_file = inbox_dir / f"webui_{ts}.md"
+        msg_file = inbox_dir / f"webui_{ts}_{uuid.uuid4().hex[:8]}.md"
         msg_file.write_text(
             f"# 来自 WebUI 的消息\n- 类型：指令\n- 时间：{now.strftime('%Y-%m-%d %H:%M')}\n\n## 内容\n{content}\n",
             encoding="utf-8",
@@ -648,7 +655,7 @@ class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
 
 
 def main():
-    host = "0.0.0.0"
+    host = os.environ.get("LOOPCLI_HOST", "127.0.0.1")
     port = 8080
     server = ThreadedHTTPServer((host, port), WebUIHandler)
     print(f"LoopCLI WebUI Server running on http://{host}:{port}")

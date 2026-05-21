@@ -391,7 +391,7 @@ def git_push():
         return
     try:
         git = resolve_git()
-        subprocess.run([git, "add", "-A"], cwd=LOOPCLI_DIR, capture_output=True, timeout=30)
+        subprocess.run([git, "add", "memory/", "log/", "inbox/"], cwd=LOOPCLI_DIR, capture_output=True, timeout=30)
         subprocess.run(
             [git, "commit", "-m", f"auto: loopcli sync {datetime.now().strftime('%Y-%m-%d %H:%M')}"],
             cwd=LOOPCLI_DIR, capture_output=True, timeout=30

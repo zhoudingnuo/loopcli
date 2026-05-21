@@ -36,10 +36,11 @@
   },
   {
     "id": 5,
-    "status": "pending",
+    "status": "done",
     "title": "验证 #7 安全修复 + 针对 Medium 问题的渗透测试",
     "description": "frontend-developer 完成了 #7 安全修复（请求体大小限制 + 统一 POST 认证 + 时序安全比较）。需要验证：(1) 发送超过 10KB 的请求体到 POST /api/tasks 和 POST /api/messages/send，确认返回 413；(2) 不带 API Key 发送 POST 请求到所有 POST 端点，确认全部返回 401/403；(3) 对 API Key 认证进行时序攻击测试（多次发送错误 key 测量响应时间差异）；(4) 同时检查 Medium 问题（CORS/并发竞态/文件名冲突）的存在状态。参考 webui/server.py。输出报告到 memory/results/，通过 inbox 通知 main。",
     "created": "2026-05-21",
-    "assignee": "engineering-security-engineer"
+    "assignee": "engineering-security-engineer",
+    "completed": "2026-05-21T08:30:00"
   }
 ]

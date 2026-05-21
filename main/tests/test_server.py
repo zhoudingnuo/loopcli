@@ -332,7 +332,16 @@ class TestCORS:
     def test_options_returns_204(self, client):
         r = client.options("/api/agents")
         assert r.status_code == 204
-        assert r.headers.get("access-control-allow-origin") == "*"
+
+    def test_cors_allows_configured_origin(self, client):
+        r = client.options("/api/agents", headers={"Origin": "http://localhost:3000"})
+        assert r.status_code == 204
+        assert r.headers.get("access-control-allow-origin") == "http://localhost:3000"
+
+    def test_cors_rejects_unknown_origin(self, client):
+        r = client.options("/api/agents", headers={"Origin": "http://evil.com"})
+        assert r.status_code == 204
+        assert r.headers.get("access-control-allow-origin") is None
 
 
 # ─── API: 404 for unknown POST ───
