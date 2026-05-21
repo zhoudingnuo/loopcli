@@ -1,6 +1,6 @@
 读取 SOUL.md 作为身份。
 读取 memory/state.json。
-读取 inbox/ 下来自 user 的消息（最高优先级）。
+读取 inbox/ 下来自 user 的消息（最高优先级），判断是否要添加任务，是否要指派agent去完成；如果是用户告知的信息，可以添加到记忆之中。
 读取 inbox/ 下来自 Agent 的反馈。
 技能文件按需读取。
 \loopcli\scripts\usage.py可以查询你token的消耗

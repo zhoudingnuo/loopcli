@@ -81,6 +81,4 @@
 2. 运行 `python tests/test_core_changes.py`
 3. 测试通过后再部署
 
-## 限制
-- 每轮不超过 15 个工具调用
-- thoughts.md 不超过 5 行
+

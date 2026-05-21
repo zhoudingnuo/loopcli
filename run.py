@@ -560,6 +560,48 @@ def resolve_git():
     return "git"
 
 
+def query_usage_summary():
+    """查询 token 使用摘要（从 GLM API）"""
+    try:
+        base_url = os.environ.get("ANTHROPIC_BASE_URL", "")
+        token = os.environ.get("ANTHROPIC_AUTH_TOKEN", "")
+        if not base_url or not token:
+            return None
+
+        from urllib.parse import urlparse
+        parsed = urlparse(base_url)
+        domain = f"{parsed.scheme}://{parsed.netloc}"
+
+        now = datetime.now()
+        start = (now - __import__("datetime").timedelta(hours=24)).strftime("%Y-%m-%d %H:00:00")
+        end = now.strftime("%Y-%m-%d %H:%M:%S")
+        import urllib.parse
+        params = f"?startTime={urllib.parse.quote(start)}&endTime={urllib.parse.quote(end)}"
+
+        headers = {"Authorization": token, "Content-Type": "application/json"}
+
+        req = __import__("urllib.request").request.Request(
+            domain + "/api/monitor/usage/model-usage" + params,
+            headers=headers
+        )
+        with __import__("urllib.request").request.urlopen(req, timeout=10) as resp:
+            data = json.loads(resp.read().decode())
+            summary = data.get("data", {}).get("totalUsage", {})
+            total_tokens = summary.get("totalTokensUsage", 0)
+            call_count = summary.get("totalModelCallCount", 0)
+
+            # 简单成本估算（基于 GLM-4.7 定价）
+            estimated_cost_usd = (total_tokens / 1_000_000) * 0.40
+
+            return {
+                "total_tokens": total_tokens,
+                "call_count": call_count,
+                "estimated_cost_usd": estimated_cost_usd
+            }
+    except Exception as e:
+        return None
+
+
 def cmd_run(args):
     agents = discover_agents()
     if not agents:
@@ -680,6 +722,11 @@ def cmd_run(args):
             t.join()
 
         git_push()
+
+        # 显示本轮 token 消耗
+        usage = query_usage_summary()
+        if usage:
+            out(f"  {C.DIM}💰 本轮统计: {usage['call_count']:,} 次调用 | {usage['total_tokens']:,} tokens | 预估成本 ${usage['estimated_cost_usd']:.4f}{C.RST}")
 
         if not process_queue():
             break

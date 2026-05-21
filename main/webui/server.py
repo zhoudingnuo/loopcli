@@ -64,8 +64,9 @@ def get_main_tasks():
 # --- Agent Activity Detection ---
 
 def get_main_agent_activity():
-    """Get main agent's real-time activity status based on log file modification time."""
+    """Get main agent's real-time activity status based on log file and state.json."""
     log_path = MAIN_DIR / "log" / "run.md"
+    state_path = MAIN_DIR / "memory" / "state.json"
     result = {
         "agent_id": "main",
         "status": "idle",  # idle, running, error
@@ -88,11 +89,18 @@ def get_main_agent_activity():
         result["last_log_time"] = last_update.isoformat()
         result["seconds_since_last_update"] = int((datetime.now() - last_update).total_seconds())
 
-        # Determine status based on last update time
-        # If updated within 2 minutes, consider it running
-        if result["seconds_since_last_update"] <= 120:
+        # Check state.json for more accurate status
+        state = read_json(state_path, {})
+        state_status = state.get("status", "idle")
+
+        # Determine status: use state.json if available, otherwise fallback to mtime check
+        if state_status == "running":
             result["status"] = "running"
-        elif result["seconds_since_last_update"] > 3600:  # 1 hour
+        elif state_status == "error":
+            result["status"] = "error"
+        elif result["seconds_since_last_update"] <= 120:
+            result["status"] = "running"
+        elif result["seconds_since_last_update"] > 3600:
             result["status"] = "idle"
 
         # Get last few log entries
