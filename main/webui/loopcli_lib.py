@@ -7,7 +7,17 @@ import os
 import threading
 from pathlib import Path
 
-LOOPCLI_ROOT = Path(r"D:\loopcli")
+
+def _resolve_root():
+    """Resolve LOOPCLI_ROOT: env var > auto-detect from file location."""
+    env = os.environ.get("LOOPCLI_ROOT", "").strip()
+    if env:
+        return Path(env).resolve()
+    # loopcli_lib.py lives at LOOPCLI_ROOT/main/webui/loopcli_lib.py
+    return Path(__file__).resolve().parent.parent.parent
+
+
+LOOPCLI_ROOT = _resolve_root()
 AGENT_MARKER = "AGENT"
 
 _json_lock = threading.Lock()

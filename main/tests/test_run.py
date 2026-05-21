@@ -7,12 +7,13 @@ import os
 import sys
 import threading
 import pytest
+from pathlib import Path
 
 # run.py calls parser.parse_args() at module level, so we must
 # provide valid argv before importing. "list" is a safe no-side-effect command.
 _original_argv = sys.argv.copy()
 sys.argv = ["run.py", "list"]
-sys.path.insert(0, r"D:\loopcli")
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 from run import (
     get_agent_marker,
     is_agent_enabled,
@@ -25,8 +26,6 @@ from run import (
     AGENT_MARKER,
 )
 sys.argv = _original_argv
-
-from pathlib import Path
 
 
 # ─── Fixtures ───

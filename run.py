@@ -10,7 +10,7 @@ import time
 from datetime import datetime
 from pathlib import Path
 
-sys.path.insert(0, r"D:\loopcli\main\webui")
+sys.path.insert(0, str(Path(__file__).resolve().parent / "main" / "webui"))
 from loopcli_lib import (
     LOOPCLI_ROOT,
     AGENT_MARKER,

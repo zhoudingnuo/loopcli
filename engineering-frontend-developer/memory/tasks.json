@@ -109,11 +109,12 @@
   },
   {
     "id": 13,
-    "status": "pending",
+    "status": "done",
     "title": "#13 路径配置化：消除硬编码路径",
     "description": "将 loopcli_lib.py 中 LOOPCLI_ROOT 硬编码路径改为通过环境变量 LOOPCLI_ROOT 或 CLI 参数动态获取。消除 sys.path.insert hack。确保所有模块通过统一入口发现根目录。保留向后兼容。更新 CONFIGURATION.md。",
     "created": "2026-05-21",
-    "assignee": "engineering-frontend-developer"
+    "assignee": "engineering-frontend-developer",
+    "completed": "2026-05-21 12:55:25"
   },
   {
     "id": 14,
