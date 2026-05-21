@@ -358,8 +358,9 @@ def handle_event(agent_name, line):
                 out(f"  {tag} {C.GREEN}{ln}{C.RST}")
         cost = event.get("cost_usd", "")
         duration = event.get("duration_ms", "")
-        if cost or duration:
-            out(f"  {tag} {C.DIM}⏱ {duration}ms  💰 ${cost}{C.RST}")
+        if duration:
+            cost_part = f"  💰 ${cost}" if cost else ""
+            out(f"  {tag} {C.DIM}⏱ {duration}ms{cost_part}{C.RST}")
 
     elif event_type == "error":
         out(f"  {tag} {C.RED}✘ {event.get('error', '')}{C.RST}")
@@ -507,6 +508,21 @@ def run_agent(agent, iteration, run_log_dir):
     color = C.GREEN if "完成" in status else C.RED
     sym = "✔" if "完成" in status else "✘"
     out(f"  {color}{sym} {name} {status}{C.RST}")
+
+    # 查询本轮花费
+    current = query_model_usage()
+    pricing = load_pricing()
+    if current and pricing:
+        prev = load_last_usage()
+        diff = {}
+        for model in set(list(prev.keys()) + list(current.keys())):
+            d = current.get(model, 0) - prev.get(model, 0)
+            if d > 0:
+                diff[model] = d
+        if diff:
+            total_cost, _ = calc_cost(diff, pricing)
+            out(f"  {C.DIM}  💰 ${total_cost:.4f}{C.RST}")
+        save_last_usage(current)
 
 
 def git_push():
