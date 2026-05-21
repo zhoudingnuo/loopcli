@@ -47,6 +47,15 @@ CLAUDE = os.path.join(os.environ.get("APPDATA", ""), "npm", "claude.cmd")
 
 LOGS_DIR = os.path.join(LOOPCLI_DIR, "logs")
 GIT_TOKEN_FILE = os.path.join(LOOPCLI_DIR, ".gittoken")
+PRICING_FILE = os.path.join(LOOPCLI_DIR, "scripts", "pricing.json")
+
+# 加载定价
+def load_pricing():
+    try:
+        with open(PRICING_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
 DEFAULT_PROMPT = """读取 SOUL.md 作为你的身份。
 读取 memory/tasks.json 获取分配给你的任务。
 技能文件在 D:/loopcli/skill/（全局），按需读取，不要开局全读。
@@ -560,46 +569,73 @@ def resolve_git():
     return "git"
 
 
-def query_usage_summary():
-    """查询 token 使用摘要（从 GLM API）"""
+def query_model_usage():
+    """查询各模型的 token 用量，返回 {model: totalTokens}"""
     try:
         base_url = os.environ.get("ANTHROPIC_BASE_URL", "")
         token = os.environ.get("ANTHROPIC_AUTH_TOKEN", "")
         if not base_url or not token:
+            out(f"  {C.YELLOW}⚠ 花费查询失败: 未设置 ANTHROPIC_BASE_URL 或 ANTHROPIC_AUTH_TOKEN{C.RST}")
             return None
 
         from urllib.parse import urlparse
+        import urllib.parse, urllib.request
+        from datetime import timedelta
+
         parsed = urlparse(base_url)
         domain = f"{parsed.scheme}://{parsed.netloc}"
 
         now = datetime.now()
-        start = (now - __import__("datetime").timedelta(hours=24)).strftime("%Y-%m-%d %H:00:00")
+        start = (now - timedelta(hours=24)).strftime("%Y-%m-%d %H:00:00")
         end = now.strftime("%Y-%m-%d %H:%M:%S")
-        import urllib.parse
         params = f"?startTime={urllib.parse.quote(start)}&endTime={urllib.parse.quote(end)}"
 
-        headers = {"Authorization": token, "Content-Type": "application/json"}
-
-        req = __import__("urllib.request").request.Request(
+        req = urllib.request.Request(
             domain + "/api/monitor/usage/model-usage" + params,
-            headers=headers
+            headers={"Authorization": token, "Content-Type": "application/json"}
         )
-        with __import__("urllib.request").request.urlopen(req, timeout=10) as resp:
+        with urllib.request.urlopen(req, timeout=10) as resp:
             data = json.loads(resp.read().decode())
             summary = data.get("data", {}).get("totalUsage", {})
-            total_tokens = summary.get("totalTokensUsage", 0)
-            call_count = summary.get("totalModelCallCount", 0)
-
-            # 简单成本估算（基于 GLM-4.7 定价）
-            estimated_cost_usd = (total_tokens / 1_000_000) * 0.40
-
-            return {
-                "total_tokens": total_tokens,
-                "call_count": call_count,
-                "estimated_cost_usd": estimated_cost_usd
-            }
-    except Exception as e:
+            models = {}
+            for m in summary.get("modelSummaryList", []):
+                models[m["modelName"]] = m["totalTokens"]
+            return models
+    except urllib.error.HTTPError as e:
+        out(f"  {C.YELLOW}⚠ 花费查询失败: HTTP {e.code} - {e.reason}{C.RST}")
         return None
+    except urllib.error.URLError as e:
+        out(f"  {C.YELLOW}⚠ 花费查询失败: 网络错误 - {e.reason}{C.RST}")
+        return None
+    except Exception as e:
+        out(f"  {C.YELLOW}⚠ 花费查询失败: {e}{C.RST}")
+        return None
+
+
+def calc_cost(models, pricing):
+    """根据模型用量和定价计算总费用"""
+    total = 0.0
+    details = []
+    for model, tokens in models.items():
+        p = pricing.get(model, {})
+        avg_price = (p.get("input_per_million", 0) + p.get("output_per_million", 0)) / 2
+        cost = (tokens / 1_000_000) * avg_price
+        total += cost
+        details.append((model, tokens, cost))
+    return total, details
+
+
+LAST_USAGE_FILE = os.path.join(LOOPCLI_DIR, "logs", ".last_usage.json")
+
+
+def load_last_usage():
+    """读取上次保存的用量快照"""
+    return read_json(LAST_USAGE_FILE, {})
+
+
+def save_last_usage(usage):
+    """保存用量快照到本地"""
+    write_json(LAST_USAGE_FILE, usage)
 
 
 def cmd_run(args):
@@ -703,6 +739,7 @@ def cmd_run(args):
         return True
 
     # ─── 主循环 ───
+    pricing = load_pricing()
     count = 0
     while args.iterations == 0 or count < args.iterations:
         count += 1
@@ -723,10 +760,23 @@ def cmd_run(args):
 
         git_push()
 
-        # 显示本轮 token 消耗
-        usage = query_usage_summary()
-        if usage:
-            out(f"  {C.DIM}💰 本轮统计: {usage['call_count']:,} 次调用 | {usage['total_tokens']:,} tokens | 预估成本 ${usage['estimated_cost_usd']:.4f}{C.RST}")
+        # 查询用量，和上次保存的做差
+        current = query_model_usage()
+        if current and pricing:
+            prev = load_last_usage()
+            diff = {}
+            for model in set(list(prev.keys()) + list(current.keys())):
+                d = current.get(model, 0) - prev.get(model, 0)
+                if d > 0:
+                    diff[model] = d
+            if diff:
+                total_cost, details = calc_cost(diff, pricing)
+                for model, tokens, cost in details:
+                    out(f"  {C.DIM}  {model}: +{tokens:,} tokens → ${cost:.4f}{C.RST}")
+                out(f"  {C.BOLD}💰 本轮花费: ${total_cost:.4f}{C.RST}")
+            else:
+                out(f"  {C.DIM}💰 本轮无新增 token 消耗{C.RST}")
+            save_last_usage(current)
 
         if not process_queue():
             break

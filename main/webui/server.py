@@ -100,10 +100,18 @@ def get_main_agent_activity():
             result["status"] = "running"
         elif state_status == "error":
             result["status"] = "error"
-        elif result["seconds_since_last_update"] <= 120:
-            result["status"] = "running"
-        elif result["seconds_since_last_update"] > 3600:
-            result["status"] = "idle"
+        elif state_status == "idle":
+            # Agent 报告空闲，但根据日志更新时间验证
+            if result["seconds_since_last_update"] <= 120:
+                result["status"] = "running"  # 日志刚更新，可能还在运行
+            else:
+                result["status"] = "idle"
+        else:
+            # 未知状态，根据日志时间判断
+            if result["seconds_since_last_update"] <= 120:
+                result["status"] = "running"
+            else:
+                result["status"] = "idle"
 
         # Get last few log entries
         lines = get_recent_lines(log_path, 20)
