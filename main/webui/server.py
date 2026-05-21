@@ -50,7 +50,7 @@ def write_json(path: Path, data):
 
 
 def _safe_agent_path(agent_id: str) -> Path | None:
-    if not agent_id or '/' in agent_id or '\\' in agent_id or '..' in agent_id:
+    if not agent_id or '/' in agent_id or '\\' in agent_id or '..' in agent_id or '\x00' in agent_id:
         return None
     agent_dir = LOOPCLI_ROOT / agent_id
     try:
@@ -394,6 +394,12 @@ class WebUIHandler(SimpleHTTPRequestHandler):
     def _do_POST_impl(self):
         parsed = urlparse(self.path)
         path = parsed.path
+
+        # Auth check for sensitive write endpoints when API_KEY is configured
+        if API_KEY and path in ("/api/tasks", "/api/messages/send"):
+            key = self.headers.get("X-API-Key", "") or parse_qs(parsed.query).get("key", [""])[0]
+            if key != API_KEY:
+                return self._send_json({"error": "Unauthorized"}, status=401)
 
         if path == "/api/tasks":
             return self._handle_create_task()

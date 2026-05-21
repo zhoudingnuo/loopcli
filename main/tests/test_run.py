@@ -5,6 +5,7 @@ Tests for run.py — agent discovery, task management, and helper functions.
 import json
 import os
 import sys
+import threading
 import pytest
 
 # run.py calls parser.parse_args() at module level, so we must
@@ -178,19 +179,18 @@ class TestCmdTaskInner:
         tasks_before = load_agent_tasks(agent_dir)
         count_before = len(tasks_before)
 
-        cmd_task_inner(agent_name, "[TEST] unit test task", "[TEST] desc")
+        try:
+            cmd_task_inner(agent_name, "[TEST] unit test task", "[TEST] desc")
 
-        tasks_after = load_agent_tasks(agent_dir)
-        assert len(tasks_after) == count_before + 1
+            tasks_after = load_agent_tasks(agent_dir)
+            assert len(tasks_after) == count_before + 1
 
-        new_task = tasks_after[-1]
-        assert new_task["title"] == "[TEST] unit test task"
-        assert new_task["status"] == "pending"
-
-        # Cleanup: remove the test task
-        tasks_after.pop()
-        with open(os.path.join(agent_dir, "memory", "tasks.json"), "w", encoding="utf-8") as f:
-            json.dump(tasks_after, f, indent=2, ensure_ascii=False)
+            new_task = tasks_after[-1]
+            assert new_task["title"] == "[TEST] unit test task"
+            assert new_task["status"] == "pending"
+        finally:
+            with open(os.path.join(agent_dir, "memory", "tasks.json"), "w", encoding="utf-8") as f:
+                json.dump(tasks_before, f, indent=2, ensure_ascii=False)
 
     def test_task_id_auto_increments(self):
         agent_name = "engineering-frontend-developer"
@@ -201,16 +201,15 @@ class TestCmdTaskInner:
         tasks_before = load_agent_tasks(agent_dir)
         max_id = max((t["id"] for t in tasks_before), default=0)
 
-        cmd_task_inner(agent_name, "[TEST] increment test", "")
+        try:
+            cmd_task_inner(agent_name, "[TEST] increment test", "")
 
-        tasks_after = load_agent_tasks(agent_dir)
-        new_task = tasks_after[-1]
-        assert new_task["id"] == max_id + 1
-
-        # Cleanup
-        tasks_after.pop()
-        with open(os.path.join(agent_dir, "memory", "tasks.json"), "w", encoding="utf-8") as f:
-            json.dump(tasks_after, f, indent=2, ensure_ascii=False)
+            tasks_after = load_agent_tasks(agent_dir)
+            new_task = tasks_after[-1]
+            assert new_task["id"] == max_id + 1
+        finally:
+            with open(os.path.join(agent_dir, "memory", "tasks.json"), "w", encoding="utf-8") as f:
+                json.dump(tasks_before, f, indent=2, ensure_ascii=False)
 
 
 # ─── Integration: agent directory structure ───
@@ -229,3 +228,104 @@ class TestAgentStructure:
         assert (agent_dir / "SOUL.md").exists()
         assert (agent_dir / "memory" / "state.json").exists()
         assert (agent_dir / "memory" / "tasks.json").exists()
+
+
+# ─── File lock mechanism ───
+
+class TestFileLock:
+    """Tests that verify msvcrt file locking prevents data corruption."""
+
+    def _locked_state_update(self, state_file):
+        """Simulates the state update logic from run_agent with file locking."""
+        import msvcrt
+        with open(state_file, "r+") as f:
+            msvcrt.locking(f.fileno(), msvcrt.LK_LOCK, 1)
+            try:
+                state = json.load(f)
+                state["run_count"] = state.get("run_count", 0) + 1
+                f.seek(0)
+                f.truncate()
+                json.dump(state, f, indent=2, ensure_ascii=False)
+            finally:
+                f.seek(0)
+                msvcrt.locking(f.fileno(), msvcrt.LK_UNLCK, 1)
+
+    def test_concurrent_writes_no_corruption(self, tmp_path):
+        """Multiple threads updating state concurrently must produce correct result."""
+        state_file = str(tmp_path / "state.json")
+        with open(state_file, "w", encoding="utf-8") as f:
+            json.dump({"run_count": 0}, f)
+
+        N = 10
+        barrier = threading.Barrier(N)
+        errors = []
+
+        def worker():
+            barrier.wait()
+            try:
+                self._locked_state_update(state_file)
+            except Exception as e:
+                errors.append(e)
+
+        threads = [threading.Thread(target=worker) for _ in range(N)]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join()
+
+        assert not errors, f"Errors during concurrent writes: {errors}"
+        with open(state_file, encoding="utf-8") as f:
+            final = json.load(f)
+        assert final["run_count"] == N
+
+    def test_lock_produces_valid_json(self, tmp_path):
+        """Even under heavy contention, the output file must be valid JSON."""
+        import msvcrt
+        state_file = str(tmp_path / "state.json")
+        with open(state_file, "w", encoding="utf-8") as f:
+            json.dump({"counter": 0}, f)
+
+        N = 10
+
+        def update():
+            for _ in range(50):
+                try:
+                    with open(state_file, "r+") as f:
+                        msvcrt.locking(f.fileno(), msvcrt.LK_LOCK, 1)
+                        try:
+                            state = json.load(f)
+                            state["counter"] = state.get("counter", 0) + 1
+                            f.seek(0)
+                            f.truncate()
+                            json.dump(state, f, indent=2, ensure_ascii=False)
+                        finally:
+                            f.seek(0)
+                            msvcrt.locking(f.fileno(), msvcrt.LK_UNLCK, 1)
+                    return
+                except OSError:
+                    import time as _time
+                    _time.sleep(0.01)
+
+        threads = [threading.Thread(target=update) for _ in range(N)]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join()
+
+        with open(state_file, encoding="utf-8") as f:
+            final = json.load(f)
+        assert final["counter"] == N
+
+    def test_single_write_preserves_data(self, tmp_path):
+        """A single locked write preserves all existing fields."""
+        state_file = str(tmp_path / "state.json")
+        with open(state_file, "w", encoding="utf-8") as f:
+            json.dump({"agent": "test", "status": "running", "run_count": 5}, f)
+
+        self._locked_state_update(state_file)
+
+        with open(state_file, encoding="utf-8") as f:
+            final = json.load(f)
+        assert final["agent"] == "test"
+        assert final["status"] == "running"
+        assert final["run_count"] == 6

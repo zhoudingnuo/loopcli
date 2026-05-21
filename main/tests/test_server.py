@@ -10,6 +10,7 @@ import time
 import threading
 import pytest
 import httpx
+from unittest.mock import patch
 
 # Add webui directory to path so we can import server
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "webui"))
@@ -89,6 +90,18 @@ class TestSafeAgentPath:
         result = _safe_agent_path("engineering-frontend-developer")
         assert result is not None
         assert result.name == "engineering-frontend-developer"
+
+    def test_null_byte_injection(self):
+        assert _safe_agent_path("main\x00") is None
+
+    def test_null_byte_in_middle(self):
+        assert _safe_agent_path("main\x00evil") is None
+
+    def test_null_byte_at_start(self):
+        assert _safe_agent_path("\x00main") is None
+
+    def test_null_byte_with_suffix(self):
+        assert _safe_agent_path("main\x00.sh") is None
 
 
 # ─── Helper: read_json / write_json ───
@@ -199,24 +212,18 @@ class TestGetTasks:
 
 class TestCreateTask:
     def test_create_task_success(self, client):
-        # Read current tasks to find a safe ID range
         tasks_before = client.get("/api/tasks").json()
-        r = client.post("/api/tasks", json={
-            "title": f"[TEST] unit test task {time.time()}",
-            "description": "created by automated test",
-            "assignee": "main",
-        })
-        assert r.status_code == 201
-        data = r.json()
-        assert data["status"] == "pending"
-        assert data["title"].startswith("[TEST]")
-
-        # Cleanup: remove the test task
-        tasks_after = client.get("/api/tasks").json()
-        test_tasks = [t for t in tasks_after if t["title"].startswith("[TEST]")]
-        if test_tasks:
-            cleaned = [t for t in tasks_after if not t["title"].startswith("[TEST]")]
-            # Restore original tasks
+        try:
+            r = client.post("/api/tasks", json={
+                "title": f"[TEST] unit test task {time.time()}",
+                "description": "created by automated test",
+                "assignee": "main",
+            })
+            assert r.status_code == 201
+            data = r.json()
+            assert data["status"] == "pending"
+            assert data["title"].startswith("[TEST]")
+        finally:
             write_json(MAIN_DIR / "memory" / "tasks.json", tasks_before)
 
     def test_create_task_missing_title(self, client):
@@ -334,3 +341,69 @@ class TestNotFound:
     def test_unknown_post_returns_404(self, client):
         r = client.post("/api/nonexistent")
         assert r.status_code == 404
+
+
+# ─── API Key authentication ───
+
+class TestApiKeyAuth:
+    @patch("server.API_KEY", "test-secret-key-12345")
+    def test_create_task_rejects_without_key(self, client):
+        r = client.post("/api/tasks", json={
+            "title": "[TEST] should be rejected",
+            "description": "no api key",
+        })
+        assert r.status_code == 401
+        assert "error" in r.json()
+
+    @patch("server.API_KEY", "test-secret-key-12345")
+    def test_create_task_rejects_wrong_key(self, client):
+        r = client.post("/api/tasks", json={
+            "title": "[TEST] wrong key",
+            "description": "bad api key",
+        }, headers={"X-API-Key": "wrong-key"})
+        assert r.status_code == 401
+
+    @patch("server.API_KEY", "test-secret-key-12345")
+    def test_create_task_accepts_valid_key(self, client):
+        tasks_before = client.get("/api/tasks").json()
+        try:
+            r = client.post("/api/tasks", json={
+                "title": "[TEST] auth validated task",
+                "description": "with correct api key",
+            }, headers={"X-API-Key": "test-secret-key-12345"})
+            assert r.status_code == 201
+            assert r.json()["status"] == "pending"
+        finally:
+            write_json(MAIN_DIR / "memory" / "tasks.json", tasks_before)
+
+    @patch("server.API_KEY", "test-secret-key-12345")
+    def test_message_send_rejects_without_key(self, client):
+        r = client.post("/api/messages/send", json={
+            "content": "should be rejected",
+        })
+        assert r.status_code == 401
+
+    @patch("server.API_KEY", "test-secret-key-12345")
+    def test_message_send_accepts_valid_key(self, client):
+        r = client.post("/api/messages/send", json={
+            "content": "auth test message",
+        }, headers={"X-API-Key": "test-secret-key-12345"})
+        assert r.status_code == 201
+        data = r.json()
+        assert data["status"] == "sent"
+        if data.get("file"):
+            msg_path = LOOPCLI_ROOT / "main" / "inbox" / data["file"]
+            if msg_path.exists():
+                msg_path.unlink()
+
+    @patch("server.API_KEY", "test-secret-key-12345")
+    def test_message_send_key_in_query_params(self, client):
+        r = client.post("/api/messages/send?key=test-secret-key-12345", json={
+            "content": "query param key test",
+        })
+        assert r.status_code == 201
+        data = r.json()
+        if data.get("file"):
+            msg_path = LOOPCLI_ROOT / "main" / "inbox" / data["file"]
+            if msg_path.exists():
+                msg_path.unlink()

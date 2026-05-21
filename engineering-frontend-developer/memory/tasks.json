@@ -46,9 +46,18 @@
   },
   {
     "id": 6,
-    "status": "pending",
+    "status": "done",
     "title": "修复单元测试质量缺口",
     "description": "code-reviewer 审查发现测试评分 7/10，需修复以下问题：(1) 为 _safe_agent_path 添加 null byte 注入测试（%00、\\x00）；(2) 为 API Key 认证端点添加测试（POST /api/tasks、POST /api/messages/send 的鉴权验证）；(3) 为文件锁机制添加测试（验证并发写入时锁的正确行为）；(4) 修复 test_create_task_success 和 test_adds_task_to_real_agent 两个测试对生产文件的副作用（添加 try/finally 清理或使用临时目录）。测试文件在 D:/loopcli/main/tests/。完成后运行 pytest 确保全部通过，通过 inbox 通知 main。",
+    "created": "2026-05-21",
+    "assignee": "engineering-frontend-developer",
+    "completed": "2026-05-21 08:21:16"
+  },
+  {
+    "id": 7,
+    "status": "pending",
+    "title": "修复安全审计发现的 High 问题",
+    "description": "安全最终审计发现 2 个 High 问题需修复：(1) POST /api/messages/send 和 POST /api/tasks 缺少请求体大小限制，需添加 MAX_BODY_SIZE 限制（建议 10KB），超限返回 413；(2) 未认证的 dispatch 端点暴露，确认哪些端点缺少 API Key 认证并添加保护。参考 webui/server.py 和 memory/results/security-final-audit.md。完成后通过 inbox 通知 main。",
     "created": "2026-05-21",
     "assignee": "engineering-frontend-developer"
   }
