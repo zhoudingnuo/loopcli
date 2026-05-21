@@ -70,5 +70,13 @@
     "created": "2026-05-21",
     "assignee": "engineering-frontend-developer",
     "completed": "2026-05-21 08:32:20"
+  },
+  {
+    "id": 9,
+    "status": "pending",
+    "title": "WebUI UX 优化：响应式布局 + 错误提示 + Agent 状态轮询",
+    "description": "当前 WebUI 功能完整但用户体验需要提升。要求：(1) 响应式布局：让 index.html 适配移动端（viewport meta、flex/grid 响应式、卡片在小屏堆叠）；(2) 错误提示优化：API 调用失败时显示友好错误消息（红色 toast/banner），取代当前的静默失败；(3) Agent 状态自动轮询：每 10 秒 GET /api/agents 刷新 Agent 状态，无需手动刷新页面；(4) SSE 日志流 UI：为 SSE /api/logs/stream 添加前端展示（日志面板自动滚动、暂停/继续按钮）。参考 webui/server.py 和 webui/index.html。",
+    "created": "2026-05-21",
+    "assignee": "engineering-frontend-developer"
   }
 ]

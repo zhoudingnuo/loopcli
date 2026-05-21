@@ -42,5 +42,13 @@
     "created": "2026-05-21",
     "assignee": "engineering-security-engineer",
     "completed": "2026-05-21T08:30:00"
+  },
+  {
+    "id": 6,
+    "status": "pending",
+    "title": "重新验证 #8 Medium/Low 修复（frontend-developer 已在 08:33 完成修复）",
+    "description": "frontend-developer #8 已修复以下问题，但你的 #5 验证是在修复之前完成的，需要重新验证：(1) CORS: CORS_ORIGINS 未设置时默认 http://localhost:3000 而非 *；(2) 并发竞态: write_json 新增 _json_lock = threading.Lock()；(3) 消息文件名: inbox 文件名加入 uuid4().hex[:8] 随机后缀；(4) 绑定地址: 默认 127.0.0.1 替代 0.0.0.0；(5) git add: 替换 -A 为精确路径。请对每项进行渗透测试验证，报告修复状态。",
+    "created": "2026-05-21",
+    "assignee": "engineering-security-engineer"
   }
 ]
