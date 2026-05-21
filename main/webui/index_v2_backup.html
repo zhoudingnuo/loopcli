@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LoopCLI - Agent 控制台 v3</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0f1117; --surface: #1a1d27; --surface2: #242834;
+  --border: #2e3345; --text: #e4e6ed; --text2: #8b90a0;
+  --accent: #6c5ce7; --accent2: #a29bfe;
+  --green: #00b894; --yellow: #fdcb6e; --red: #e17055; --blue: #74b9ff;
+  --purple: #a29bfe; --orange: #fd79a8;
+  --radius: 10px;
+}
+body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* Layout */
+.app { display: flex; height: 100vh; }
+.sidebar { width: 240px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+/* Sidebar */
+.brand { padding: 20px; border-bottom: 1px solid var(--border); }
+.brand h1 { font-size: 18px; font-weight: 700; }
+.brand span { color: var(--accent2); }
+.nav { padding: 12px 8px; flex: 1; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--radius); cursor: pointer; color: var(--text2); transition: all .15s; font-size: 14px; }
+.nav-item:hover { background: var(--surface2); color: var(--text); }
+.nav-item.active { background: rgba(108,92,231,.15); color: var(--accent2); }
+.nav-item .icon { width: 20px; text-align: center; font-size: 16px; }
+.sidebar-footer { padding: 16px 20px; border-top: 1px solid var(--border); font-size: 12px; color: var(--text2); }
+
+/* Header */
+.header { padding: 16px 28px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.header h2 { font-size: 18px; font-weight: 600; }
+.header-actions { display: flex; gap: 10px; }
+
+/* Content */
+.content { flex: 1; overflow-y: auto; padding: 24px 28px; }
+
+/* Stats bar */
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 24px; }
+.stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+.stat-card .label { font-size: 12px; color: var(--text2); margin-bottom: 6px; }
+.stat-card .value { font-size: 26px; font-weight: 700; }
+
+/* Agent cards */
+.agent-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+.agent-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; transition: border-color .15s; }
+.agent-card:hover { border-color: var(--accent); }
+.agent-card .top { display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px; }
+.agent-card .name { font-weight: 600; font-size: 15px; }
+.agent-card .dept { font-size: 12px; color: var(--text2); background: var(--surface2); padding: 2px 8px; border-radius: 4px; }
+.agent-card .desc { font-size: 13px; color: var(--text2); margin-bottom: 12px; line-height: 1.5; }
+.agent-card .bottom { display: flex; justify-content: space-between; align-items: center; }
+.agent-card .task-stats { display: flex; gap: 8px; margin-bottom: 10px; }
+.agent-card .task-stat { font-size: 11px; padding: 2px 8px; border-radius: 4px; }
+.agent-card .task-stat.done-stat { background: rgba(0,184,148,.12); color: var(--green); }
+.agent-card .task-stat.pending-stat { background: rgba(253,203,110,.12); color: var(--yellow); }
+.agent-card .expand-tasks { margin-top: 10px; border-top: 1px solid var(--border); padding-top: 10px; display: none; }
+.agent-card.expanded .expand-tasks { display: block; }
+.agent-card .expand-btn { font-size: 12px; color: var(--accent2); cursor: pointer; background: none; border: none; padding: 0; }
+.agent-card .expand-btn:hover { text-decoration: underline; }
+.agent-card .mini-task-list { max-height: 200px; overflow-y: auto; }
+.agent-card .mini-task { padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 12px; display: flex; justify-content: space-between; align-items: center; }
+.agent-card .mini-task:last-child { border-bottom: none; }
+.status-badge { font-size: 12px; padding: 3px 10px; border-radius: 20px; font-weight: 500; }
+.status-badge.running { background: rgba(0,184,148,.15); color: var(--green); }
+.status-badge.idle { background: rgba(116,185,255,.12); color: var(--blue); }
+.status-badge.busy { background: rgba(253,203,110,.15); color: var(--yellow); }
+.status-badge.error { background: rgba(225,112,85,.15); color: var(--red); }
+
+/* Task table */
+.task-table { width: 100%; border-collapse: collapse; }
+.task-table th { text-align: left; padding: 10px 14px; font-size: 12px; color: var(--text2); border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: .5px; }
+.task-table td { padding: 12px 14px; font-size: 14px; border-bottom: 1px solid var(--border); }
+.task-table tr:hover td { background: var(--surface2); }
+.task-status { font-size: 12px; padding: 2px 8px; border-radius: 4px; }
+.task-status.done { background: rgba(0,184,148,.15); color: var(--green); }
+.task-status.pending { background: rgba(253,203,110,.15); color: var(--yellow); }
+.task-status.in_progress { background: rgba(108,92,231,.15); color: var(--accent2); }
+.task-status.blocked { background: rgba(225,112,85,.15); color: var(--red); }
+
+/* Button */
+.btn { padding: 8px 16px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface2); color: var(--text); font-size: 13px; cursor: pointer; transition: all .15s; }
+.btn:hover { border-color: var(--accent); }
+.btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent2); border-color: var(--accent2); }
+
+/* Modal */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: none; justify-content: center; align-items: center; z-index: 100; }
+.modal-overlay.show { display: flex; }
+.modal { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 28px; width: 480px; max-width: 90vw; }
+.modal h3 { margin-bottom: 20px; font-size: 17px; }
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 13px; color: var(--text2); margin-bottom: 6px; }
+.form-group input, .form-group textarea, .form-group select { width: 100%; padding: 9px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-size: 14px; outline: none; }
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--accent); }
+.form-group textarea { min-height: 70px; resize: vertical; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+
+/* Page hidden */
+.page { display: none; }
+.page.active { display: block; }
+
+/* Logs */
+.log-toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+.log-toolbar select, .log-toolbar input { padding: 7px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-size: 13px; outline: none; }
+.log-toolbar select:focus, .log-toolbar input:focus { border-color: var(--accent); }
+.log-toolbar input { flex: 1; min-width: 180px; }
+.log-auto-scroll { font-size: 13px; color: var(--text2); display: flex; align-items: center; gap: 5px; cursor: pointer; }
+.log-auto-scroll input { accent-color: var(--accent); }
+.log-container { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); height: calc(100vh - 220px); overflow-y: auto; }
+.log-container pre { padding: 14px; font-family: "Cascadia Code", "Fira Code", "Consolas", monospace; font-size: 13px; line-height: 1.6; color: var(--text); margin: 0; white-space: pre-wrap; word-break: break-all; }
+.log-container .log-line { border-bottom: 1px solid var(--border); padding: 2px 0; }
+.log-container .log-line.highlight { background: rgba(108,92,231,.15); }
+.log-container .log-time { color: var(--text2); margin-right: 8px; }
+.log-container .log-agent-tag { color: var(--accent2); margin-right: 8px; font-size: 12px; }
+.log-connected { color: var(--green); font-size: 12px; }
+.log-disconnected { color: var(--red); font-size: 12px; }
+
+/* Control Panel */
+.ctrl-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; margin-bottom: 20px; }
+.ctrl-title { font-size: 15px; font-weight: 600; margin-bottom: 16px; }
+.ctrl-status-card { margin-bottom: 18px; }
+.ctrl-status-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; font-size: 15px; font-weight: 600; }
+.ctrl-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--red); display: inline-block; }
+.ctrl-dot.running { background: var(--green); animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%,100%{ opacity:1 } 50%{ opacity:.4 } }
+.ctrl-info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+.ctrl-info { background: var(--bg); border-radius: 8px; padding: 10px 14px; }
+.ctrl-label { font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: .5px; }
+.ctrl-val { font-size: 17px; font-weight: 700; display: block; margin-top: 4px; }
+.ctrl-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.ctrl-start-group { display: flex; gap: 8px; align-items: center; }
+.ctrl-input { padding: 8px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-size: 13px; outline: none; width: 180px; }
+.ctrl-input:focus { border-color: var(--accent); }
+.ctrl-dispatch-form { max-width: 500px; }
+
+/* Toast */
+.toast-container { position: fixed; top: 16px; right: 16px; z-index: 200; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+.toast { pointer-events: auto; padding: 12px 18px; border-radius: var(--radius); font-size: 13px; max-width: 380px; box-shadow: 0 4px 20px rgba(0,0,0,.4); display: flex; align-items: center; gap: 10px; animation: toast-in .25s ease; }
+.toast.error { background: var(--red); color: #fff; }
+.toast.success { background: var(--green); color: #fff; }
+.toast.warn { background: var(--yellow); color: #222; }
+.toast.info { background: var(--blue); color: #fff; }
+@keyframes toast-in { from { opacity:0; transform:translateX(40px) } to { opacity:1; transform:translateX(0) } }
+.toast-exit { animation: toast-out .2s ease forwards; }
+@keyframes toast-out { to { opacity:0; transform:translateX(40px) } }
+
+/* Poll indicator */
+.poll-indicator { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text2); }
+.poll-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+.poll-dot.error { background: var(--red); }
+
+/* Log stream controls */
+.log-stream-controls { display: flex; align-items: center; gap: 10px; }
+.log-conn-status { font-size: 12px; display: flex; align-items: center; gap: 5px; }
+.log-conn-dot { width: 6px; height: 6px; border-radius: 50%; }
+.log-conn-dot.connected { background: var(--green); }
+.log-conn-dot.disconnected { background: var(--red); }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sidebar { width: 56px; }
+  .brand h1, .nav-item span, .sidebar-footer { display: none; }
+  .nav-item { justify-content: center; padding: 10px; }
+  .content { padding: 16px; }
+  .header { flex-direction: column; gap: 10px; align-items: flex-start; padding: 12px 16px; }
+  .header-actions { width: 100%; justify-content: space-between; }
+  .stats { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .stat-card .value { font-size: 20px; }
+  .agent-grid { grid-template-columns: 1fr; }
+  .task-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .modal { width: 96vw; max-width: 96vw; padding: 18px; }
+  .ctrl-actions { flex-direction: column; }
+  .ctrl-start-group { flex-wrap: wrap; }
+  .ctrl-input { width: 100%; }
+  .ctrl-info-grid { grid-template-columns: repeat(2, 1fr); }
+  .ctrl-dispatch-form { max-width: 100%; }
+  .log-toolbar { flex-direction: column; align-items: stretch; }
+  .log-toolbar select, .log-toolbar input { width: 100%; }
+  .log-container { height: calc(100vh - 320px); }
+}
+@media (max-width: 480px) {
+  .stats { grid-template-columns: 1fr; }
+  .stat-card { padding: 12px; }
+  .stat-card .value { font-size: 18px; }
+  .ctrl-info-grid { grid-template-columns: 1fr; }
+  .content { padding: 10px; }
+  .btn { padding: 7px 12px; font-size: 12px; }
+}
+</style>
+</head>
+<body>
+<div class="toast-container" id="toast-container"></div>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><h1><span>Loop</span>CLI</h1></div>
+    <nav class="nav">
+      <div class="nav-item active" data-page="dashboard"><div class="icon">📊</div><span>仪表盘</span></div>
+      <div class="nav-item" data-page="agents"><div class="icon">🤖</div><span>Agent 列表</span></div>
+      <div class="nav-item" data-page="tasks"><div class="icon">📋</div><span>任务管理</span></div>
+      <div class="nav-item" data-page="logs"><div class="icon">📄</div><span>实时日志</span></div>
+      <div class="nav-item" data-page="control"><div class="icon">⚙️</div><span>控制面板</span></div>
+      <div class="nav-item" data-page="messages"><div class="icon">✉️</div><span>发送消息</span></div>
+    </nav>
+    <div class="sidebar-footer">LoopCLI v0.1</div>
+  </aside>
+
+  <div class="main">
+    <div class="header">
+      <h2 id="pageTitle">仪表盘</h2>
+      <div class="header-actions">
+        <span class="poll-indicator" id="poll-indicator"><span class="poll-dot" id="poll-dot"></span><span id="poll-time">-</span></span>
+        <span id="log-status"></span>
+        <button class="btn btn-primary" id="newTaskBtn">+ 新任务</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- Dashboard -->
+      <div class="page active" id="page-dashboard">
+        <div class="stats">
+          <div class="stat-card"><div class="label">Agent 总数</div><div class="value" id="stat-agents">-</div></div>
+          <div class="stat-card"><div class="label">运行中</div><div class="value" style="color:var(--green)" id="stat-running">-</div></div>
+          <div class="stat-card"><div class="label">空闲</div><div class="value" style="color:var(--blue)" id="stat-idle">-</div></div>
+          <div class="stat-card"><div class="label">待处理任务</div><div class="value" style="color:var(--yellow)" id="stat-pending">-</div></div>
+          <div class="stat-card"><div class="label">Token 用量</div><div class="value" style="color:var(--purple)" id="stat-tokens">-</div></div>
+          <div class="stat-card"><div class="label">预估成本</div><div class="value" style="color:var(--orange)" id="stat-cost">-</div></div>
+        </div>
+
+        <!-- Main Agent Activity -->
+        <div class="ctrl-section" style="margin-bottom:20px">
+          <h3 class="ctrl-title">Main Agent 实时状态</h3>
+          <div class="ctrl-status-card">
+            <div class="ctrl-status-row">
+              <span class="ctrl-dot" id="main-agent-dot"></span>
+              <span id="main-agent-status">检测中...</span>
+              <span style="font-size:12px;color:var(--text2);margin-left:auto" id="main-agent-last-update"></span>
+            </div>
+            <div class="ctrl-info-grid">
+              <div class="ctrl-info"><span class="ctrl-label">日志文件</span><span class="ctrl-val" id="main-agent-log-file" style="font-size:12px">-</span></div>
+              <div class="ctrl-info"><span class="ctrl-label">最后更新</span><span class="ctrl-val" id="main-agent-last-time">-</span></div>
+              <div class="ctrl-info"><span class="ctrl-label">距离现在</span><span class="ctrl-val" id="main-agent-seconds-ago">-</span></div>
+            </div>
+          </div>
+          <div style="margin-top:14px">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:8px">最新输出（最近5条）</div>
+            <div id="main-agent-latest-output" style="background:var(--bg);border-radius:8px;padding:12px;font-size:12px;font-family:monospace;max-height:150px;overflow-y:auto;color:var(--text2)">
+              加载中...
+            </div>
+          </div>
+        </div>
+
+        <h3 style="margin-bottom:14px;font-size:15px">Agent 概览</h3>
+        <div class="agent-grid" id="dash-agents"></div>
+      </div>
+
+      <!-- Agents -->
+      <div class="page" id="page-agents">
+        <div class="agent-grid" id="agent-list"></div>
+      </div>
+
+      <!-- Tasks -->
+      <div class="page" id="page-tasks">
+        <div class="log-toolbar" style="margin-bottom:14px">
+          <select id="task-agent-filter"><option value="">main</option><option value="__all__">所有 Agent</option></select>
+        </div>
+        <table class="task-table">
+          <thead><tr><th>ID</th><th>标题</th><th>状态</th><th>负责人</th><th>Agent</th><th>创建日期</th></tr></thead>
+          <tbody id="task-list"></tbody>
+        </table>
+      </div>
+
+      <!-- Logs -->
+      <div class="page" id="page-logs">
+        <div class="log-toolbar">
+          <select id="log-agent-filter"><option value="">All Agents</option></select>
+          <input id="log-search" placeholder="搜索日志..." />
+          <div class="log-stream-controls">
+            <span class="log-conn-status"><span class="log-conn-dot disconnected" id="log-conn-dot"></span><span id="log-conn-text">未连接</span></span>
+            <button class="btn" id="log-pause-btn" style="display:none">暂停</button>
+            <button class="btn" id="log-resume-btn" style="display:none">继续</button>
+          </div>
+          <button class="btn" id="log-clear-btn">清空显示</button>
+          <label class="log-auto-scroll"><input type="checkbox" id="log-autoscroll" checked /> 自动滚动</label>
+        </div>
+        <div class="log-container" id="log-container"><pre id="log-output"></pre></div>
+      </div>
+
+      <!-- Control Panel -->
+      <div class="page" id="page-control">
+        <div class="ctrl-section">
+          <h3 class="ctrl-title">Loop 进程控制</h3>
+          <div class="ctrl-status-card">
+            <div class="ctrl-status-row">
+              <span class="ctrl-dot" id="ctrl-dot"></span>
+              <span id="ctrl-status-text">已停止</span>
+            </div>
+            <div class="ctrl-info-grid">
+              <div class="ctrl-info"><span class="ctrl-label">PID</span><span class="ctrl-val" id="ctrl-pid">-</span></div>
+              <div class="ctrl-info"><span class="ctrl-label">运行时长</span><span class="ctrl-val" id="ctrl-uptime">-</span></div>
+              <div class="ctrl-info"><span class="ctrl-label">迭代次数</span><span class="ctrl-val" id="ctrl-iterations">-</span></div>
+              <div class="ctrl-info"><span class="ctrl-label">启动时间</span><span class="ctrl-val" id="ctrl-started">-</span></div>
+            </div>
+          </div>
+          <div class="ctrl-actions">
+            <div class="ctrl-start-group">
+              <input type="number" id="ctrl-iter-input" placeholder="迭代次数 (0=无限)" min="0" value="0" class="ctrl-input" />
+              <button class="btn btn-primary" id="ctrl-start-btn">启动 Loop</button>
+            </div>
+            <button class="btn" id="ctrl-stop-btn">停止</button>
+            <button class="btn" id="ctrl-restart-btn">重启</button>
+          </div>
+        </div>
+
+        <div class="ctrl-section">
+          <h3 class="ctrl-title">一键派发任务</h3>
+          <div class="ctrl-dispatch-form">
+            <div class="form-group"><label>目标 Agent</label>
+              <select id="d-agent"><option value="">-- 选择 Agent --</option></select>
+            </div>
+            <div class="form-group"><label>任务标题</label><input id="d-title" placeholder="输入任务标题"></div>
+            <div class="form-group"><label>任务描述</label><textarea id="d-desc" placeholder="描述任务内容"></textarea></div>
+            <button class="btn btn-primary" id="d-submit">派发并执行</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Messages -->
+      <div class="page" id="page-messages">
+        <div class="ctrl-section">
+          <h3 class="ctrl-title">发送消息给 Agent</h3>
+          <div class="ctrl-dispatch-form">
+            <div class="form-group"><label>目标 Agent</label>
+              <select id="msg-agent"><option value="main">main (默认)</option></select>
+            </div>
+            <div class="form-group"><label>消息内容</label><textarea id="msg-content" placeholder="输入要发送的消息内容..." style="min-height:120px"></textarea></div>
+            <div style="display:flex;align-items:center;gap:12px">
+              <button class="btn btn-primary" id="msg-send-btn">发送</button>
+              <span id="msg-status" style="font-size:13px;color:var(--text2)"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="ctrl-section">
+          <h3 class="ctrl-title">最近发送</h3>
+          <div id="msg-history" style="font-size:13px;color:var(--text2)">暂无记录</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- New Task Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h3>创建新任务</h3>
+    <div class="form-group"><label>任务标题</label><input id="f-title" placeholder="输入任务标题"></div>
+    <div class="form-group"><label>任务描述</label><textarea id="f-desc" placeholder="描述任务内容"></textarea></div>
+    <div class="form-group"><label>指派 Agent</label>
+      <select id="f-agent"><option value="">-- 未指派 --</option></select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" id="modalCancel">取消</button>
+      <button class="btn btn-primary" id="modalSubmit">创建</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let agents = [];
+let tasks = [];
+let agentTaskCache = {};
+
+// --- Toast Notification System ---
+function showToast(message, type = 'error') {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = 'toast ' + type;
+  toast.textContent = message;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add('toast-exit');
+    setTimeout(() => toast.remove(), 200);
+  }, 4000);
+}
+
+// --- Poll Indicator ---
+function updatePollIndicator(error) {
+  const dot = document.getElementById('poll-dot');
+  const timeEl = document.getElementById('poll-time');
+  if (error) {
+    dot.className = 'poll-dot error';
+    timeEl.textContent = '连接失败';
+  } else {
+    dot.className = 'poll-dot';
+    timeEl.textContent = '更新于 ' + new Date().toLocaleTimeString('zh-CN');
+  }
+}
+
+async function loadAgents() {
+  try {
+    const r = await fetch('/api/agents');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    agents = await r.json();
+  } catch (e) {
+    agents = [];
+    showToast('获取 Agent 列表失败: ' + e.message, 'error');
+    updatePollIndicator(true);
+  }
+}
+
+async function loadTasks(agentFilter) {
+  try {
+    let url = '/api/tasks';
+    if (agentFilter) url += '?agent=' + encodeURIComponent(agentFilter);
+    const r = await fetch(url);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    tasks = await r.json();
+  } catch (e) {
+    tasks = [];
+    showToast('获取任务列表失败: ' + e.message, 'error');
+  }
+}
+
+async function loadAgentTasks(agentId) {
+  try {
+    const r = await fetch('/api/agents/' + encodeURIComponent(agentId) + '/tasks');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    agentTaskCache[agentId] = await r.json();
+  } catch (e) {
+    agentTaskCache[agentId] = [];
+    showToast('获取 Agent 任务失败: ' + e.message, 'error');
+  }
+}
+
+async function loadData() {
+  await Promise.all([loadAgents(), loadTasks()]);
+  const hasError = agents.length === 0 && tasks.length === 0;
+  if (!hasError) updatePollIndicator(false);
+  render();
+}
+
+function renderStats() {
+  document.getElementById('stat-agents').textContent = agents.length;
+  document.getElementById('stat-running').textContent = agents.filter(a => a.status === 'running').length;
+  document.getElementById('stat-idle').textContent = agents.filter(a => a.status === 'idle').length;
+  const totalPending = agents.reduce((s, a) => s + (a.task_pending || 0), 0);
+  document.getElementById('stat-pending').textContent = totalPending;
+}
+
+function fmtTime(iso) {
+  if (!iso) return '-';
+  try {
+    const d = new Date(iso);
+    return d.toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+  } catch { return iso; }
+}
+
+function renderAgentCards(containerId, list) {
+  const c = document.getElementById(containerId);
+  c.innerHTML = list.map(a => {
+    const tc = a.task_count || 0;
+    const td = a.task_done || 0;
+    const tp = a.task_pending || 0;
+    return `
+    <div class="agent-card" data-agent-id="${esc(a.id)}">
+      <div class="top">
+        <div class="name">${esc(a.name)}</div>
+        <span class="status-badge ${a.status}">${statusLabel(a.status)}</span>
+      </div>
+      <div class="desc">${esc(a.description)}</div>
+      <div class="task-stats">
+        <span class="task-stat done-stat">${td} 已完成</span>
+        <span class="task-stat pending-stat">${tp} 待处理</span>
+        <span style="font-size:11px;color:var(--text2)">${tc} 总任务</span>
+      </div>
+      <div class="bottom">
+        <span style="font-size:12px;color:var(--text2)">最后运行: ${fmtTime(a.last_run)}</span>
+        <button class="expand-btn" onclick="toggleAgentTasks(this, '${esc(a.id)}')">展开任务 ▼</button>
+      </div>
+      <div class="expand-tasks">
+        <div class="mini-task-list" id="agent-tasks-${esc(a.id)}">加载中...</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderTasks() {
+  const tbody = document.getElementById('task-list');
+  const showAgent = !!(tasks.length && tasks[0]._agent_id);
+  tbody.innerHTML = tasks.map(t => `
+    <tr>
+      <td>#${t.id}</td>
+      <td>${esc(t.title)}</td>
+      <td><span class="task-status ${t.status}">${statusLabel(t.status)}</span></td>
+      <td>${t.assignee ? esc(t.assignee) : '<span style="color:var(--text2)">未指派</span>'}</td>
+      ${showAgent ? '<td>' + (t._agent_id ? esc(t._agent_id) : '-') + '</td>' : ''}
+      <td style="color:var(--text2)">${t.created}</td>
+    </tr>
+  `).join('');
+}
+
+async function toggleAgentTasks(btn, agentId) {
+  const card = btn.closest('.agent-card');
+  const isExpanded = card.classList.toggle('expanded');
+  btn.textContent = isExpanded ? '收起任务 ▲' : '展开任务 ▼';
+  if (isExpanded) {
+    await loadAgentTasks(agentId);
+    const container = document.getElementById('agent-tasks-' + agentId);
+    const agentTasks = agentTaskCache[agentId] || [];
+    if (!agentTasks.length) {
+      container.innerHTML = '<div style="color:var(--text2);font-size:12px;padding:6px 0">暂无任务</div>';
+    } else {
+      container.innerHTML = agentTasks.map(t => `
+        <div class="mini-task">
+          <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(t.title)}</span>
+          <span class="task-status ${t.status}">${statusLabel(t.status)}</span>
+        </div>
+      `).join('');
+    }
+  }
+}
+
+function fillAgentSelect() {
+  const sel = document.getElementById('f-agent');
+  sel.innerHTML = '<option value="">-- 未指派 --</option>' +
+    agents.map(a => `<option value="${esc(a.id)}">${esc(a.name)}</option>`).join('');
+}
+
+function fillTaskAgentFilter() {
+  const sel = document.getElementById('task-agent-filter');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">main</option><option value="__all__">所有 Agent</option>' +
+    agents.map(a => `<option value="${esc(a.id)}">${esc(a.name)}</option>`).join('');
+  sel.value = cur;
+}
+
+document.getElementById('task-agent-filter').addEventListener('change', async function() {
+  const agentFilter = this.value;
+  await loadTasks(agentFilter || undefined);
+  renderTasks();
+});
+
+// Navigation
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    item.classList.add('active');
+    const page = item.dataset.page;
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + page).classList.add('active');
+    const titles = { dashboard: '仪表盘', agents: 'Agent 列表', tasks: '任务管理', logs: '实时日志', control: '控制面板', messages: '发送消息' };
+    document.getElementById('pageTitle').textContent = titles[page];
+    if (page === 'logs') { initLogStream(); } else { closeLogStream(); }
+  });
+});
+
+// Modal
+const modal = document.getElementById('modal');
+document.getElementById('newTaskBtn').addEventListener('click', () => modal.classList.add('show'));
+document.getElementById('modalCancel').addEventListener('click', () => modal.classList.remove('show'));
+modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('show'); });
+
+document.getElementById('modalSubmit').addEventListener('click', async () => {
+  const title = document.getElementById('f-title').value.trim();
+  const desc = document.getElementById('f-desc').value.trim();
+  const agent = document.getElementById('f-agent').value;
+  if (!title) { showToast('请输入任务标题', 'warn'); return; }
+  try {
+    const r = await fetch('/api/tasks', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, description: desc, assignee: agent || undefined })
+    });
+    if (!r.ok) {
+      const data = await r.json().catch(() => ({}));
+      throw new Error(data.error || 'HTTP ' + r.status);
+    }
+    showToast('任务创建成功', 'success');
+  } catch (e) {
+    showToast('创建任务失败: ' + e.message, 'error');
+  }
+  modal.classList.remove('show');
+  document.getElementById('f-title').value = '';
+  document.getElementById('f-desc').value = '';
+  document.getElementById('f-agent').value = '';
+  await loadData();
+});
+
+function statusLabel(s) {
+  return { running: '运行中', idle: '空闲', busy: '忙碌', error: '异常', done: '已完成', pending: '待处理', in_progress: '进行中', blocked: '已阻塞' }[s] || s;
+}
+function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
+// --- Log SSE Stream ---
+let logEventSource = null;
+let logLines = [];
+let logPaused = false;
+const MAX_LOG_LINES = 2000;
+
+function updateLogConnUI(connected) {
+  const dot = document.getElementById('log-conn-dot');
+  const text = document.getElementById('log-conn-text');
+  const pauseBtn = document.getElementById('log-pause-btn');
+  const resumeBtn = document.getElementById('log-resume-btn');
+  if (connected) {
+    dot.className = 'log-conn-dot connected';
+    text.textContent = '已连接';
+    if (logPaused) {
+      pauseBtn.style.display = 'none';
+      resumeBtn.style.display = '';
+    } else {
+      pauseBtn.style.display = '';
+      resumeBtn.style.display = 'none';
+    }
+  } else {
+    dot.className = 'log-conn-dot disconnected';
+    text.textContent = '未连接';
+    pauseBtn.style.display = 'none';
+    resumeBtn.style.display = 'none';
+  }
+}
+
+function initLogStream() {
+  if (logEventSource) return;
+  const agent = document.getElementById('log-agent-filter').value;
+  const url = '/api/logs/stream' + (agent ? '?agent=' + encodeURIComponent(agent) : '');
+  logEventSource = new EventSource(url);
+  updateLogConnUI(true);
+
+  logEventSource.onopen = function() {
+    updateLogConnUI(true);
+  };
+
+  logEventSource.onmessage = function(e) {
+    if (logPaused) return;
+    try {
+      const data = JSON.parse(e.data);
+      const newLines = data.lines || [];
+      const agentTag = data.agent || 'main';
+      const joined = newLines.join('\n');
+      if (logLines.map(l => l.text).join('\n') !== joined) {
+        logLines = newLines.map(l => ({ text: l, agent: agentTag }));
+        if (logLines.length > MAX_LOG_LINES) logLines = logLines.slice(-MAX_LOG_LINES);
+        renderLogOutput();
+      }
+    } catch {}
+  };
+
+  logEventSource.onerror = function() {
+    updateLogConnUI(false);
+    if (logEventSource) { logEventSource.close(); logEventSource = null; }
+    showToast('日志流连接断开', 'warn');
+    setTimeout(() => {
+      const activePage = document.querySelector('.page.active');
+      if (activePage && activePage.id === 'page-logs') initLogStream();
+    }, 5000);
+  };
+}
+
+function closeLogStream() {
+  if (logEventSource) { logEventSource.close(); logEventSource = null; }
+  updateLogConnUI(false);
+  logPaused = false;
+}
+
+document.getElementById('log-pause-btn').addEventListener('click', function() {
+  logPaused = true;
+  updateLogConnUI(true);
+  this.style.display = 'none';
+  document.getElementById('log-resume-btn').style.display = '';
+});
+
+document.getElementById('log-resume-btn').addEventListener('click', function() {
+  logPaused = false;
+  updateLogConnUI(true);
+  this.style.display = 'none';
+  document.getElementById('log-pause-btn').style.display = '';
+});
+
+function renderLogOutput() {
+  const pre = document.getElementById('log-output');
+  const container = document.getElementById('log-container');
+  const search = document.getElementById('log-search').value.toLowerCase();
+  const autoScroll = document.getElementById('log-autoscroll').checked;
+
+  const html = logLines.map(l => {
+    const text = esc(l.text);
+    const match = !search || l.text.toLowerCase().includes(search);
+    const hl = search && match ? ' highlight' : '';
+    const agentTag = l.agent ? `<span class="log-agent-tag">[${esc(l.agent)}]</span>` : '';
+    return match ? `<div class="log-line${hl}">${agentTag}${text}</div>` : '';
+  }).join('');
+  pre.innerHTML = html || '<div style="color:var(--text2)">暂无日志</div>';
+
+  if (autoScroll) container.scrollTop = container.scrollHeight;
+}
+
+document.getElementById('log-agent-filter').addEventListener('change', function() {
+  logLines = [];
+  closeLogStream();
+  initLogStream();
+});
+
+document.getElementById('log-search').addEventListener('input', renderLogOutput);
+document.getElementById('log-clear-btn').addEventListener('click', function() {
+  logLines = [];
+  renderLogOutput();
+});
+
+function fillLogAgentFilter() {
+  const sel = document.getElementById('log-agent-filter');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">All Agents</option>' +
+    agents.map(a => `<option value="${esc(a.id)}">${esc(a.name)}</option>`).join('');
+  sel.value = cur;
+}
+
+function render() {
+  renderStats();
+  renderAgentCards('dash-agents', agents);
+  renderAgentCards('agent-list', agents);
+  renderTasks();
+  fillAgentSelect();
+  fillTaskAgentFilter();
+  fillLogAgentFilter();
+}
+
+loadData();
+setInterval(loadData, 10000);
+
+// --- Control Panel ---
+function fmtDuration(sec) {
+  if (!sec || sec < 0) return '-';
+  const h = Math.floor(sec / 3600);
+  const m = Math.floor((sec % 3600) / 60);
+  const s = sec % 60;
+  return h > 0 ? `${h}h ${String(m).padStart(2,'0')}m ${String(s).padStart(2,'0')}s` : `${m}m ${String(s).padStart(2,'0')}s`;
+}
+
+async function loadLoopStatus() {
+  try {
+    const r = await fetch('/api/loopcli/status');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const st = await r.json();
+    const dot = document.getElementById('ctrl-dot');
+    const txt = document.getElementById('ctrl-status-text');
+    if (st.status === 'running') {
+      dot.className = 'ctrl-dot running';
+      txt.textContent = '运行中';
+      txt.style.color = 'var(--green)';
+    } else {
+      dot.className = 'ctrl-dot';
+      txt.textContent = '已停止';
+      txt.style.color = 'var(--text2)';
+    }
+    document.getElementById('ctrl-pid').textContent = st.pid || '-';
+    document.getElementById('ctrl-uptime').textContent = fmtDuration(st.uptime_seconds);
+    document.getElementById('ctrl-iterations').textContent = st.iterations > 0 ? st.iterations : '∞';
+    document.getElementById('ctrl-started').textContent = st.started_at ? new Date(st.started_at).toLocaleString('zh-CN') : '-';
+  } catch (e) {
+    // silently retry
+  }
+}
+
+document.getElementById('ctrl-start-btn').addEventListener('click', async () => {
+  const n = parseInt(document.getElementById('ctrl-iter-input').value) || 0;
+  try {
+    const r = await fetch('/api/loopcli/start', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({iterations: n}) });
+    if (!r.ok) { const d = await r.json().catch(() => ({})); throw new Error(d.error || '启动失败'); }
+    showToast('Loop 已启动', 'success');
+  } catch (e) { showToast(e.message, 'error'); }
+  setTimeout(loadLoopStatus, 500);
+});
+
+document.getElementById('ctrl-stop-btn').addEventListener('click', async () => {
+  try {
+    const r = await fetch('/api/loopcli/stop', { method: 'POST' });
+    if (!r.ok) { const d = await r.json().catch(() => ({})); throw new Error(d.error || '停止失败'); }
+    showToast('Loop 已停止', 'success');
+  } catch (e) { showToast(e.message, 'error'); }
+  setTimeout(loadLoopStatus, 500);
+});
+
+document.getElementById('ctrl-restart-btn').addEventListener('click', async () => {
+  const n = parseInt(document.getElementById('ctrl-iter-input').value) || 0;
+  try {
+    const r = await fetch('/api/loopcli/restart', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({iterations: n}) });
+    if (!r.ok) { const d = await r.json().catch(() => ({})); throw new Error(d.error || '重启失败'); }
+    showToast('Loop 已重启', 'success');
+  } catch (e) { showToast(e.message, 'error'); }
+  setTimeout(loadLoopStatus, 500);
+});
+
+// Dispatch
+function fillDispatchAgentSelect() {
+  const sel = document.getElementById('d-agent');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">-- 选择 Agent --</option>' +
+    agents.map(a => `<option value="${esc(a.id)}">${esc(a.name)}</option>`).join('');
+  sel.value = cur;
+}
+
+document.getElementById('d-submit').addEventListener('click', async () => {
+  const agent = document.getElementById('d-agent').value;
+  const title = document.getElementById('d-title').value.trim();
+  const desc = document.getElementById('d-desc').value.trim();
+  if (!agent) { showToast('请选择目标 Agent', 'warn'); return; }
+  if (!title) { showToast('请输入任务标题', 'warn'); return; }
+  try {
+    const r = await fetch('/api/loopcli/dispatch', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({agent, title, description: desc}),
+    });
+    if (!r.ok) { const d = await r.json().catch(() => ({})); throw new Error(d.error || '派发失败'); }
+    showToast('任务已派发并执行', 'success');
+  } catch (e) { showToast('派发失败: ' + e.message, 'error'); }
+  document.getElementById('d-title').value = '';
+  document.getElementById('d-desc').value = '';
+  await loadData();
+});
+
+// Patch render to also update control panel
+const _origRender = render;
+render = function() {
+  _origRender();
+  fillDispatchAgentSelect();
+  fillMsgAgentSelect();
+};
+
+loadLoopStatus();
+setInterval(loadLoopStatus, 3000);
+
+// --- Main Agent Activity ---
+async function loadMainAgentActivity() {
+  try {
+    const r = await fetch('/api/agent/activity');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+
+    // Update status dot and text
+    const dot = document.getElementById('main-agent-dot');
+    const statusText = document.getElementById('main-agent-status');
+    const lastUpdateEl = document.getElementById('main-agent-last-update');
+
+    if (data.status === 'running') {
+      dot.className = 'ctrl-dot running';
+      statusText.textContent = '运行中';
+      statusText.style.color = 'var(--green)';
+    } else if (data.status === 'idle') {
+      dot.className = 'ctrl-dot';
+      statusText.textContent = '空闲';
+      statusText.style.color = 'var(--blue)';
+    } else {
+      dot.className = 'ctrl-dot';
+      dot.style.background = 'var(--red)';
+      statusText.textContent = '异常';
+      statusText.style.color = 'var(--red)';
+    }
+
+    // Update info grid
+    document.getElementById('main-agent-log-file').textContent = data.log_file_exists ? '存在' : '不存在';
+
+    if (data.last_log_time) {
+      const lastTime = new Date(data.last_log_time);
+      document.getElementById('main-agent-last-time').textContent = fmtTime(data.last_log_time);
+
+      if (data.seconds_since_last_update !== null) {
+        const secs = data.seconds_since_last_update;
+        let timeStr = '';
+        if (secs < 60) timeStr = secs + '秒前';
+        else if (secs < 3600) timeStr = Math.floor(secs / 60) + '分钟前';
+        else timeStr = Math.floor(secs / 3600) + '小时前';
+        document.getElementById('main-agent-seconds-ago').textContent = timeStr;
+      }
+
+      lastUpdateEl.textContent = '更新于 ' + lastTime.toLocaleTimeString('zh-CN');
+    } else {
+      document.getElementById('main-agent-last-time').textContent = '-';
+      document.getElementById('main-agent-seconds-ago').textContent = '-';
+      lastUpdateEl.textContent = '';
+    }
+
+    // Update latest output
+    const outputEl = document.getElementById('main-agent-latest-output');
+    if (data.latest_output && data.latest_output.length > 0) {
+      outputEl.innerHTML = data.latest_output.map(line => {
+        // Parse markdown table format: | 时间 | 状态 | 任务 | 摘要 |
+        const parts = line.split('|').filter(p => p.trim());
+        if (parts.length >= 4) {
+          const time = parts[0].trim();
+          const status = parts[1].trim();
+          const task = parts[2].trim();
+          const summary = parts[3].trim();
+          return `<div style="padding:4px 0;border-bottom:1px solid var(--border)">
+            <span style="color:var(--text2)">[${time}]</span>
+            <span style="color:${status === 'done' ? 'var(--green)' : status === 'doing' ? 'var(--yellow)' : 'var(--text2)'}">${status}</span>
+            <span style="color:var(--accent2)">${task}</span>
+            <span style="color:var(--text)">${summary}</span>
+          </div>`;
+        }
+        return `<div style="padding:4px 0;border-bottom:1px solid var(--border)">${line}</div>`;
+      }).join('');
+    } else {
+      outputEl.innerHTML = '<div style="color:var(--text2)">暂无输出</div>';
+    }
+
+  } catch (e) {
+    console.error('Failed to load main agent activity:', e);
+  }
+}
+
+loadMainAgentActivity();
+setInterval(loadMainAgentActivity, 5000);
+
+// --- Token Usage ---
+async function loadUsage() {
+  try {
+    const r = await fetch('/api/usage');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+
+    if (data.error) {
+      document.getElementById('stat-tokens').textContent = 'N/A';
+      document.getElementById('stat-cost').textContent = 'N/A';
+      return;
+    }
+
+    // Format tokens: 238826681 -> 238.8M
+    const tokens = data.total_tokens || 0;
+    let tokenStr = '';
+    if (tokens >= 1_000_000) {
+      tokenStr = (tokens / 1_000_000).toFixed(1) + 'M';
+    } else if (tokens >= 1_000) {
+      tokenStr = (tokens / 1_000).toFixed(1) + 'K';
+    } else {
+      tokenStr = tokens.toString();
+    }
+    document.getElementById('stat-tokens').textContent = tokenStr;
+
+    // Format cost: $95.53
+    const cost = data.estimated_cost_usd || 0;
+    document.getElementById('stat-cost').textContent = '$' + cost.toFixed(2);
+
+  } catch (e) {
+    console.error('Failed to load usage:', e);
+    document.getElementById('stat-tokens').textContent = 'Err';
+    document.getElementById('stat-cost').textContent = 'Err';
+  }
+}
+
+loadUsage();
+setInterval(loadUsage, 30000); // Update every 30 seconds
+
+// --- Message Send ---
+function fillMsgAgentSelect() {
+  const sel = document.getElementById('msg-agent');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="main">main (默认)</option>' +
+    agents.map(a => `<option value="${esc(a.id)}">${esc(a.name)}</option>`).join('');
+  sel.value = cur || 'main';
+}
+
+const msgHistory = [];
+
+document.getElementById('msg-send-btn').addEventListener('click', async () => {
+  const agent = document.getElementById('msg-agent').value || 'main';
+  const content = document.getElementById('msg-content').value.trim();
+  const statusEl = document.getElementById('msg-status');
+  if (!content) { statusEl.textContent = '请输入消息内容'; statusEl.style.color = 'var(--red)'; showToast('请输入消息内容', 'warn'); return; }
+
+  statusEl.textContent = '发送中...';
+  statusEl.style.color = 'var(--yellow)';
+  try {
+    const r = await fetch('/api/messages/send', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({agent, content}),
+    });
+    const data = await r.json();
+    if (!r.ok) { throw new Error(data.error || '发送失败'); }
+    statusEl.textContent = '已发送 -> ' + agent;
+    statusEl.style.color = 'var(--green)';
+    showToast('消息已发送给 ' + agent, 'success');
+    msgHistory.unshift({ agent, content, time: new Date().toLocaleTimeString('zh-CN'), file: data.file });
+    renderMsgHistory();
+    document.getElementById('msg-content').value = '';
+  } catch(e) {
+    statusEl.textContent = '发送失败: ' + e.message;
+    statusEl.style.color = 'var(--red)';
+    showToast('消息发送失败: ' + e.message, 'error');
+  }
+});
+
+function renderMsgHistory() {
+  const el = document.getElementById('msg-history');
+  if (!msgHistory.length) { el.innerHTML = '暂无记录'; return; }
+  el.innerHTML = '<table class="task-table"><thead><tr><th>时间</th><th>目标</th><th>内容</th><th>文件</th></tr></thead><tbody>' +
+    msgHistory.slice(0, 20).map(m => `<tr><td>${esc(m.time)}</td><td>${esc(m.agent)}</td><td>${esc(m.content.slice(0,80))}${m.content.length > 80 ? '...' : ''}</td><td style="color:var(--text2)">${esc(m.file)}</td></tr>`).join('') +
+    '</tbody></table>';
+}
+</script>
+</body>
+</html>

@@ -1040,67 +1040,44 @@ body {
 
 /* 响应式 */
 @media (max-width: 768px) {
-  .sidebar {
-    position: fixed;
-    left: -280px;
-    top: 0;
-    bottom: 0;
-    z-index: 1000;
-    transition: left var(--transition-normal);
-  }
-  .sidebar.mobile-open { left: 0; }
-  .sidebar-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 999;
-  }
-  .sidebar-overlay.show { display: block; }
-  .sidebar-toggle {
-    display: flex;
-    right: -12px;
-  }
-  .content { padding: 20px 16px; }
+  .sidebar { width: 70px; }
+  .sidebar .brand h1, .sidebar .brand-tag, .sidebar .nav-item span, .sidebar .sidebar-footer { display: none; }
+  .sidebar .nav-item { justify-content: center; padding: 14px; }
+  .sidebar-toggle { display: none; }
+  .content { padding: 20px; }
   .header {
     flex-direction: column;
-    gap: 12px;
+    gap: 14px;
     align-items: flex-start;
-    padding: 16px;
+    padding: 16px 20px;
   }
-  .header-actions { width: 100%; justify-content: space-between; flex-wrap: wrap; }
+  .header-actions { width: 100%; justify-content: space-between; }
   .stats { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-  .stat-card { padding: 16px; }
   .stat-card .value { font-size: 24px; }
   .agent-grid { grid-template-columns: 1fr; }
   .task-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  .modal { width: 96vw; max-width: 96vw; padding: 24px; margin: 16px; }
+  .modal { width: 96vw; max-width: 96vw; padding: 24px; }
   .ctrl-actions { flex-direction: column; }
-  .ctrl-start-group { flex-wrap: wrap; width: 100%; }
+  .ctrl-start-group { flex-wrap: wrap; }
   .ctrl-input { width: 100%; }
   .ctrl-info-grid { grid-template-columns: repeat(2, 1fr); }
   .ctrl-dispatch-form { max-width: 100%; }
   .log-toolbar { flex-direction: column; align-items: stretch; }
   .log-toolbar select, .log-toolbar input { width: 100%; }
   .log-container { height: calc(100vh - 340px); }
-  .chart-container { padding: 16px; }
-  .kb-hint { display: none; }
-  .btn { padding: 10px 16px; font-size: 13px; }
 }
 @media (max-width: 480px) {
   .stats { grid-template-columns: 1fr; }
-  .stat-card { padding: 14px; }
+  .stat-card { padding: 16px; }
   .stat-card .value { font-size: 20px; }
   .ctrl-info-grid { grid-template-columns: 1fr; }
-  .content { padding: 16px 12px; }
-  .btn { padding: 9px 14px; font-size: 12px; }
-  .header h2 { font-size: 18px; }
+  .content { padding: 16px; }
+  .btn { padding: 10px 16px; font-size: 12px; }
 }
 </style>
 </head>
 <body>
 <div class="toast-container" id="toast-container"></div>
-<div class="sidebar-overlay" id="sidebar-overlay"></div>
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-toggle" id="sidebar-toggle" title="折叠/展开 (Ctrl+B)">◀</div>
@@ -1183,44 +1160,6 @@ body {
           </div>
         </div>
 
-        <!-- Quick Actions -->
-        <div class="chart-container" style="padding:20px;background:linear-gradient(135deg,var(--surface) 0%,var(--surface2) 100%)">
-          <div class="chart-title">快捷操作</div>
-          <div style="display:flex;gap:12px;flex-wrap:wrap">
-            <button class="btn btn-primary" onclick="document.getElementById('newTaskBtn').click()">
-              <span style="font-size:16px;margin-right:6px">+</span> 新建任务 <span class="kb-hint">N</span>
-            </button>
-            <button class="btn" onclick="document.querySelector('[data-page=\"control\"]').click()">
-              <span style="font-size:16px;margin-right:6px">⚙</span> 控制面板
-            </button>
-            <button class="btn" onclick="document.querySelector('[data-page=\"logs\"]').click()">
-              <span style="font-size:16px;margin-right:6px">📝</span> 查看日志
-            </button>
-            <button class="btn" onclick="document.getElementById('theme-toggle').click()">
-              <span style="font-size:16px;margin-right:6px">🌓</span> 切换主题 <span class="kb-hint">Ctrl+T</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Activity Chart -->
-        <div class="chart-container">
-          <div class="chart-title">系统活跃度趋势</div>
-          <div class="chart" id="activity-chart">
-            <svg width="100%" height="100%" viewBox="0 0 800 200" preserveAspectRatio="none">
-              <defs>
-                <linearGradient id="chartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" style="stop-color:var(--accent);stop-opacity:0.3" />
-                  <stop offset="100%" style="stop-color:var(--accent);stop-opacity:0" />
-                </linearGradient>
-              </defs>
-              <g id="chart-grid"></g>
-              <path id="chart-area" fill="url(#chartGradient)"></path>
-              <path id="chart-line" fill="none" stroke="var(--accent)" stroke-width="2"></path>
-              <g id="chart-dots"></g>
-            </svg>
-          </div>
-        </div>
-
         <!-- Main Agent Activity -->
         <div class="ctrl-section" style="margin-bottom:28px">
           <h3 class="ctrl-title">Main Agent 实时状态</h3>
@@ -1255,29 +1194,6 @@ body {
 
         <h3 style="margin-bottom:18px;font-size:17px;font-weight:800;background:var(--accent-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Agent 概览</h3>
         <div class="agent-grid" id="dash-agents"></div>
-
-        <!-- Performance Metrics -->
-        <div class="chart-container" style="margin-top:28px">
-          <div class="chart-title">性能指标</div>
-          <div class="ctrl-info-grid">
-            <div class="ctrl-info">
-              <span class="ctrl-label">WebUI 版本</span>
-              <span class="ctrl-val" style="font-size:14px;color:var(--accent)">v3.0</span>
-            </div>
-            <div class="ctrl-info">
-              <span class="ctrl-label">页面加载</span>
-              <span class="ctrl-val" id="perf-load-time">-</span>
-            </div>
-            <div class="ctrl-info">
-              <span class="ctrl-label">刷新间隔</span>
-              <span class="ctrl-val">10s</span>
-            </div>
-            <div class="ctrl-info">
-              <span class="ctrl-label">运行时间</span>
-              <span class="ctrl-val" id="perf-uptime">-</span>
-            </div>
-          </div>
-        </div>
       </div>
 
       <!-- Agents -->
@@ -1472,23 +1388,9 @@ themeToggle.addEventListener('click', () => {
 // 侧边栏折叠
 const sidebar = document.getElementById('sidebar');
 const sidebarToggle = document.getElementById('sidebar-toggle');
-const sidebarOverlay = document.getElementById('sidebar-overlay');
-
 sidebarToggle.addEventListener('click', () => {
-  if (window.innerWidth <= 768) {
-    // 移动端：滑出侧边栏
-    sidebar.classList.toggle('mobile-open');
-    sidebarOverlay.classList.toggle('show');
-  } else {
-    // 桌面端：折叠侧边栏
-    sidebar.classList.toggle('collapsed');
-    sidebarToggle.textContent = sidebar.classList.contains('collapsed') ? '▶' : '◀';
-  }
-});
-
-sidebarOverlay.addEventListener('click', () => {
-  sidebar.classList.remove('mobile-open');
-  sidebarOverlay.classList.remove('show');
+  sidebar.classList.toggle('collapsed');
+  sidebarToggle.textContent = sidebar.classList.contains('collapsed') ? '▶' : '◀';
 });
 
 // 全屏模式
@@ -2257,147 +2159,6 @@ function renderMsgHistory() {
     ).join('') +
     '</tbody></table>';
 }
-
-// ============ 活动趋势图表 ============
-
-// 模拟历史数据
-const activityHistory = [];
-const MAX_HISTORY_POINTS = 20;
-
-function updateActivityChart() {
-  const runningCount = agents.filter(a => a.status === 'running').length;
-  const idleCount = agents.filter(a => a.status === 'idle').length;
-  const timestamp = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
-
-  activityHistory.push({
-    time: timestamp,
-    running: runningCount,
-    idle: idleCount,
-    total: agents.length
-  });
-
-  if (activityHistory.length > MAX_HISTORY_POINTS) {
-    activityHistory.shift();
-  }
-
-  renderActivityChart();
-}
-
-function renderActivityChart() {
-  if (activityHistory.length < 2) return;
-
-  const svg = document.getElementById('activity-chart');
-  const width = 800;
-  const height = 200;
-  const padding = { top: 20, right: 20, bottom: 30, left: 40 };
-  const chartWidth = width - padding.left - padding.right;
-  const chartHeight = height - padding.top - padding.bottom;
-
-  const maxValue = Math.max(...activityHistory.map(d => d.total), 1);
-  const minValue = 0;
-
-  const xScale = (index) => padding.left + (index / (activityHistory.length - 1)) * chartWidth;
-  const yScale = (value) => padding.top + chartHeight - ((value - minValue) / (maxValue - minValue)) * chartHeight;
-
-  // 生成路径
-  let linePath = '';
-  let areaPath = '';
-
-  activityHistory.forEach((d, i) => {
-    const x = xScale(i);
-    const y = yScale(d.running);
-    if (i === 0) {
-      linePath += `M ${x} ${y}`;
-      areaPath += `M ${x} ${padding.top + chartHeight} L ${x} ${y}`;
-    } else {
-      linePath += ` L ${x} ${y}`;
-      areaPath += ` L ${x} ${y}`;
-    }
-    if (i === activityHistory.length - 1) {
-      areaPath += ` L ${x} ${padding.top + chartHeight} Z`;
-    }
-  });
-
-  document.getElementById('chart-line').setAttribute('d', linePath);
-  document.getElementById('chart-area').setAttribute('d', areaPath);
-
-  // 绘制网格
-  const gridGroup = document.getElementById('chart-grid');
-  gridGroup.innerHTML = '';
-
-  // 水平网格线
-  for (let i = 0; i <= 4; i++) {
-    const y = padding.top + (chartHeight / 4) * i;
-    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    line.setAttribute('x1', padding.left);
-    line.setAttribute('y1', y);
-    line.setAttribute('x2', width - padding.right);
-    line.setAttribute('y2', y);
-    line.setAttribute('stroke', 'var(--border)');
-    line.setAttribute('stroke-dasharray', '4 4');
-    line.setAttribute('opacity', '0.5');
-    gridGroup.appendChild(line);
-  }
-
-  // 绘制数据点
-  const dotsGroup = document.getElementById('chart-dots');
-  dotsGroup.innerHTML = '';
-
-  activityHistory.forEach((d, i) => {
-    const x = xScale(i);
-    const y = yScale(d.running);
-
-    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    circle.setAttribute('cx', x);
-    circle.setAttribute('cy', y);
-    circle.setAttribute('r', '4');
-    circle.setAttribute('fill', 'var(--accent)');
-    circle.setAttribute('stroke', 'var(--surface)');
-    circle.setAttribute('stroke-width', '2');
-
-    const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
-    title.textContent = `${d.time} - 运行中: ${d.running}, 空闲: ${d.idle}`;
-    circle.appendChild(title);
-
-    dotsGroup.appendChild(circle);
-  });
-}
-
-// 初始化图表
-setInterval(() => {
-  if (document.getElementById('page-dashboard').classList.contains('active')) {
-    updateActivityChart();
-  }
-}, 30000);
-
-updateActivityChart();
-
-// ============ 性能指标 ============
-
-const pageLoadTime = performance.now();
-document.getElementById('perf-load-time').textContent = Math.round(pageLoadTime) + 'ms';
-
-const startTime = new Date();
-function updateUptime() {
-  const now = new Date();
-  const diff = now - startTime;
-  const seconds = Math.floor(diff / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
-
-  let uptime = '';
-  if (hours > 0) {
-    uptime = `${hours}h ${minutes % 60}m`;
-  } else if (minutes > 0) {
-    uptime = `${minutes}m ${seconds % 60}s`;
-  } else {
-    uptime = `${seconds}s`;
-  }
-  document.getElementById('perf-uptime').textContent = uptime;
-}
-
-setInterval(updateUptime, 1000);
-updateUptime();
 </script>
 </body>
 </html>
