@@ -144,10 +144,11 @@ def scan_agents():
         tasks = read_json(child / "memory" / "tasks.json", [])
         done_count = sum(1 for t in tasks if t.get("status") == "done")
         pending_count = sum(1 for t in tasks if t.get("status") == "pending")
+        enabled = is_agent_enabled(child)
         agents.append({
             "id": child.name,
             "name": state.get("agent", child.name),
-            "status": state.get("status", "unknown"),
+            "status": "disabled" if not enabled else state.get("status", "unknown"),
             "description": desc,
             "last_run": state.get("last_run"),
             "run_count": state.get("run_count", 0),

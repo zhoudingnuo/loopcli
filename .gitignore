@@ -10,12 +10,10 @@ logs/
 # Python 缓存
 __pycache__/
 *.pyc
+.pytest_cache/
 
 # 敏感文件
 */memory/errors.json
 .gittoken
 .DS_Store
 Thumbs.db
-
-# 敏感文件
-*/memory/errors.json

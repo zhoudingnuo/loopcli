@@ -1,0 +1,9 @@
+{
+  "agent": "market-analyst",
+  "status": "idle",
+  "current_task": null,
+  "last_run": "2026-05-21 17:36:33",
+  "run_count": 3,
+  "created": "2026-05-21",
+  "tasks_completed": 1
+}

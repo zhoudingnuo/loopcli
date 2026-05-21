@@ -514,3 +514,146 @@ class TestSSEHeartbeat:
                 assert len(data_chunks) >= 0  # Stream connected successfully
         except httpx.ReadTimeout:
             pass  # Expected — the stream is long-lived
+
+
+# ─── Helper: get_agent_tasks ───
+
+class TestGetAgentTasks:
+    def test_valid_agent(self):
+        from loopcli_lib import get_agent_tasks
+        tasks = get_agent_tasks("main")
+        assert isinstance(tasks, list)
+
+    def test_invalid_agent_returns_none(self):
+        from loopcli_lib import get_agent_tasks
+        assert get_agent_tasks("../../../etc") is None
+
+    def test_nonexistent_agent_returns_empty(self):
+        from loopcli_lib import get_agent_tasks
+        tasks = get_agent_tasks("nonexistent_agent_xyz")
+        assert tasks == []
+
+    def test_empty_string_returns_none(self):
+        from loopcli_lib import get_agent_tasks
+        assert get_agent_tasks("") is None
+
+
+# ─── Helper: get_all_agent_tasks ───
+
+class TestGetAllAgentTasks:
+    def test_returns_list(self):
+        from loopcli_lib import get_all_agent_tasks
+        tasks = get_all_agent_tasks()
+        assert isinstance(tasks, list)
+
+    def test_tasks_have_agent_id(self):
+        from loopcli_lib import get_all_agent_tasks
+        tasks = get_all_agent_tasks()
+        for t in tasks:
+            assert "_agent_id" in t
+
+    def test_includes_main_tasks(self):
+        from loopcli_lib import get_all_agent_tasks
+        tasks = get_all_agent_tasks()
+        agent_ids = {t["_agent_id"] for t in tasks}
+        assert "main" in agent_ids
+
+
+# ─── Helper: write_inbox_message ───
+
+class TestWriteInboxMessage:
+    def test_creates_file(self, tmp_path):
+        from loopcli_lib import write_inbox_message
+        msg_path = write_inbox_message(tmp_path, "webui", "hello test")
+        assert msg_path.exists()
+
+    def test_file_contains_content(self, tmp_path):
+        from loopcli_lib import write_inbox_message
+        msg_path = write_inbox_message(tmp_path, "webui", "test content here")
+        text = msg_path.read_text(encoding="utf-8")
+        assert "test content here" in text
+        assert "webui" in text
+
+    def test_file_has_md_extension(self, tmp_path):
+        from loopcli_lib import write_inbox_message
+        msg_path = write_inbox_message(tmp_path, "sender", "msg")
+        assert msg_path.suffix == ".md"
+
+    def test_creates_inbox_dir(self, tmp_path):
+        from loopcli_lib import write_inbox_message
+        agent_dir = tmp_path / "new-agent"
+        agent_dir.mkdir()
+        msg_path = write_inbox_message(agent_dir, "test", "msg")
+        assert (agent_dir / "inbox").is_dir()
+        assert msg_path.exists()
+
+
+# ─── Helper: set_agent_enabled ───
+
+class TestSetAgentEnabled:
+    def test_enable_writes_marker(self, tmp_path):
+        from loopcli_lib import set_agent_enabled, AGENT_MARKER
+        set_agent_enabled(tmp_path, True)
+        marker = (tmp_path / AGENT_MARKER).read_text(encoding="utf-8")
+        assert "disabled" not in marker
+
+    def test_disable_adds_disabled_flag(self, tmp_path):
+        from loopcli_lib import set_agent_enabled, AGENT_MARKER
+        set_agent_enabled(tmp_path, False)
+        marker = (tmp_path / AGENT_MARKER).read_text(encoding="utf-8")
+        assert "disabled: true" in marker
+
+    def test_toggle_enable_disable(self, tmp_path):
+        from loopcli_lib import set_agent_enabled, is_agent_enabled
+        set_agent_enabled(tmp_path, False)
+        assert is_agent_enabled(tmp_path) is False
+        set_agent_enabled(tmp_path, True)
+        assert is_agent_enabled(tmp_path) is True
+
+
+# ─── Helper: read_file_tail_incremental ───
+
+class TestReadFileTailIncremental:
+    def test_empty_file(self, tmp_path):
+        from loopcli_lib import read_file_tail_incremental
+        f = tmp_path / "test.log"
+        f.write_text("", encoding="utf-8")
+        lines, pos = read_file_tail_incremental(f)
+        assert lines == []
+        assert pos == 0
+
+    def test_reads_new_content(self, tmp_path):
+        from loopcli_lib import read_file_tail_incremental
+        f = tmp_path / "test.log"
+        f.write_text("line1\nline2\n", encoding="utf-8")
+        lines, pos = read_file_tail_incremental(f, 0)
+        assert len(lines) == 2
+        assert "line1" in lines[0]
+
+    def test_incremental_read(self, tmp_path):
+        from loopcli_lib import read_file_tail_incremental
+        f = tmp_path / "test.log"
+        f.write_text("first\n", encoding="utf-8")
+        _, pos = read_file_tail_incremental(f, 0)
+        with open(f, "a", encoding="utf-8") as fh:
+            fh.write("second\n")
+        lines, new_pos = read_file_tail_incremental(f, pos)
+        assert len(lines) == 1
+        assert "second" in lines[0]
+        assert new_pos > pos
+
+    def test_nonexistent_file(self, tmp_path):
+        from loopcli_lib import read_file_tail_incremental
+        lines, pos = read_file_tail_incremental(tmp_path / "nope.log")
+        assert lines == []
+        assert pos == 0
+
+    def test_file_truncated_resets(self, tmp_path):
+        from loopcli_lib import read_file_tail_incremental
+        f = tmp_path / "test.log"
+        f.write_text("long content here\n", encoding="utf-8")
+        _, pos = read_file_tail_incremental(f, 0)
+        # Truncate the file
+        f.write_text("short\n", encoding="utf-8")
+        lines, new_pos = read_file_tail_incremental(f, pos)
+        assert "short" in lines[0]

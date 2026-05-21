@@ -66,13 +66,15 @@ D:\loopcli\
 │   ├── inbox/                 # 收件箱（接收其他 Agent 消息）
 │   ├── log/
 │   │   └── run.md             # 运行日志
-│   └── tests/                 # 单元测试 & 集成测试
+│   ├── tests/                 # 单元测试 & 集成测试
+│   └── requirements-dev.txt   # 开发依赖
 ├── skill/                     # 全局技能文件
 │   ├── report.md              # 汇报状态
 │   ├── inbox.md / outbox.md   # 消息收发
 │   ├── create-agent.md        # 创建 Agent
 │   ├── assign-task.md         # 派发任务
-│   └── list-agents.md         # 列出 Agent
+│   ├── list-agents.md         # 列出 Agent
+│   └── token-saving.md        # Token 节省策略
 ├── subagent/                  # Agent 模板库（按部门分类）
 │   ├── engineering/           # 工程类模板
 │   ├── design/                # 设计类模板
@@ -258,11 +260,7 @@ python -m pytest tests/test_integration.py -v
 
 - WebUI：`Ctrl+C` 终止前台进程
 - 主循环：`Ctrl+C` 或在 WebUI 控制面板点击"停止"
-- 后台进程：
-
-```powershell
-Stop-Process -Name python -Force
-```
+- 后台进程：通过 WebUI 控制面板停止，或使用 `python run.py list` 查找进程后手动终止特定 PID
 
 ## 技术栈
 

@@ -17,9 +17,9 @@
 
 | 参数 | 默认值 | 位置 | 说明 |
 |------|--------|------|------|
-| `MAX_BODY_SIZE` | `10240` (10KB) | `server.py:44` | 请求体最大字节数 |
-| `SSE_MAX_CONNECTIONS` | `10` | `server.py:56` | SSE 最大并发连接数 |
-| `SSE_TIMEOUT_SECONDS` | `300` | `server.py:57` | SSE 连接超时时间（秒） |
+| `MAX_BODY_SIZE` | `10240` (10KB) | `server.py:43` | 请求体最大字节数 |
+| `SSE_MAX_CONNECTIONS` | `10` | `server.py:55` | SSE 最大并发连接数 |
+| `SSE_TIMEOUT_SECONDS` | `300` | `server.py:56` | SSE 连接超时时间（秒） |
 | 写入并发信号量 | `10` | `server.py:51` | 同时处理的写入请求数 |
 
 ### 主循环配置
@@ -28,9 +28,9 @@
 
 | 参数 | 默认值 | 位置 | 说明 |
 |------|--------|------|------|
-| `CLAUDE` | `%APPDATA%\npm\claude.cmd` | `run.py:30` | Claude CLI 路径 |
-| 日志轮转大小 | `1,000,000` (1MB) | `run.py:83` | 单个日志文件最大大小 |
-| 日志轮转归档数 | `3` | `run.py:83` | 最多保留的归档文件数 |
+| `CLAUDE` | `%APPDATA%\npm\claude.cmd` | `run.py:31` | Claude CLI 路径 |
+| 日志轮转大小 | `1,000,000` (1MB) | `run.py:84` | 单个日志文件最大大小 |
+| 日志轮转归档数 | `3` | `run.py:84` | 最多保留的归档文件数 |
 
 ## CLI 参数
 

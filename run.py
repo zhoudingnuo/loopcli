@@ -224,34 +224,38 @@ class C:
     RED = "\033[31m"
 
 
-# 全局分屏状态（由 cmd_run 设置）
-_output_bottom = [0]  # 输出区底行号
-_print_lock = threading.Lock()
+# 分屏全局状态
+_ob = [0]          # 输出区底行
+_buf = [""]         # 输入缓冲
+_lock = threading.Lock()
 
 
 def out(text=""):
-    """输出到滚动区域，然后光标回到输入区"""
-    with _print_lock:
-        # 移到输出区底部，打印
-        sys.stdout.write(f"\033[{_output_bottom[0]};1H")
-        print(text, flush=True)
-        # 重绘输入区，光标留在输入行
-        _draw_input()
+    """往滚动区写一行，光标不动"""
+    with _lock:
+        sys.stdout.write(f"\033[s")                       # 保存光标
+        sys.stdout.write(f"\033[{_ob[0]};1H")             # 移到输出区底
+        sys.stdout.write(text + "\n")                      # 写内容（在滚动区内滚动）
+        sys.stdout.write(f"\033[u")                        # 恢复光标到输入区
+        sys.stdout.flush()
 
 
-def _draw_input():
-    """重绘底部输入区，光标留在输入行"""
-    rows, cols = shutil.get_terminal_size().lines, shutil.get_terminal_size().columns
-    ob = _output_bottom[0]
-    buf = _input_buffer[0][:cols - 25] if _input_buffer else ""
-    sys.stdout.write(f"\033[{ob + 1};1H\033[K{C.CYAN}{'─' * cols}{C.RST}")
-    sys.stdout.write(f"\033[{ob + 2};1H\033[K{C.CYAN} > {C.RST}{buf}{C.DIM}█{C.RST} {C.DIM}(Enter发送, exit退出){C.RST}")
-    # 光标留在输入行，不回输出区
-    sys.stdout.write(f"\033[{ob + 2};{4 + len(buf)}H")
-    sys.stdout.flush()
+def draw_input():
+    """重绘输入区，光标留在输入行"""
+    with _lock:
+        cols = shutil.get_terminal_size().columns
+        ob = _ob[0]
+        buf = _buf[0][:cols - 25]
+        sys.stdout.write(f"\033[{ob+1};1H\033[K{C.CYAN}{'─'*cols}{C.RST}")
+        sys.stdout.write(f"\033[{ob+2};1H\033[K{C.CYAN} > {C.RST}{buf}{C.DIM}█{C.RST} {C.DIM}(Enter发送, exit退出){C.RST}")
+        sys.stdout.flush()
 
 
-_input_buffer = [""]
+def p_sub(text):
+    out(f"  {C.DIM}{text}{C.RST}")
+
+def p_agent_header(name, iteration):
+    out(f"\n{C.CYAN}{C.BOLD} {name} {C.RST} {C.DIM}iter #{iteration}{C.RST}")
 
 
 def handle_event(agent_name, line):
@@ -261,7 +265,7 @@ def handle_event(agent_name, line):
     try:
         event = json.loads(line)
     except json.JSONDecodeError:
-        print(f"  {C.DIM}{line}{C.RST}", flush=True)
+        out(f"  {C.DIM}{line}{C.RST}")
         return
 
     event_type = event.get("type", "")
@@ -273,7 +277,7 @@ def handle_event(agent_name, line):
                 text = block.get("text", "")
                 if text:
                     for ln in text.splitlines():
-                        print(f"  {ln}", flush=True)
+                        out(f"  {ln}")
             elif block.get("type") == "tool_use":
                 name = block.get("name", "")
                 inp = block.get("input", {})
@@ -282,7 +286,7 @@ def handle_event(agent_name, line):
                     if k in inp:
                         detail = inp[k]
                         break
-                print(f"  {C.YELLOW}●{C.RST} {C.BOLD}{name}{C.RST}({C.DIM}{detail}{C.RST})", flush=True)
+                out(f"  {C.YELLOW}●{C.RST} {C.BOLD}{name}{C.RST}({C.DIM}{detail}{C.RST})")
 
     elif event_type == "tool_result":
         content = event.get("content", "")
@@ -293,28 +297,20 @@ def handle_event(agent_name, line):
             texts = [content]
         for text in texts:
             short = text[:150].replace("\n", " ")
-            print(f"    {C.DIM}↳ {short}{C.RST}", flush=True)
+            out(f"    {C.DIM}↳ {short}{C.RST}")
 
     elif event_type == "result":
         text = event.get("result", "")
         if text:
             for ln in text[:300].splitlines():
-                print(f"  {C.GREEN}{ln}{C.RST}", flush=True)
+                out(f"  {C.GREEN}{ln}{C.RST}")
         cost = event.get("cost_usd", "")
         duration = event.get("duration_ms", "")
         if cost or duration:
-            print(f"  {C.DIM}⏱ {duration}ms  💰 ${cost}{C.RST}", flush=True)
+            out(f"  {C.DIM}⏱ {duration}ms  💰 ${cost}{C.RST}")
 
     elif event_type == "error":
-        print(f"  {C.RED}✘ {event.get('error', '')}{C.RST}", flush=True)
-
-
-def p_sub(text):
-    print(f"  {C.DIM}{text}{C.RST}", flush=True)
-
-def p_agent_header(name, iteration):
-    tag = f" {name} "
-    print(f"\n{C.CYAN}{C.BOLD}{tag}{C.RST} {C.DIM}iter #{iteration}{C.RST}", flush=True)
+        out(f"  {C.RED}✘ {event.get('error', '')}{C.RST}")
 
 
 def run_agent(agent, iteration, run_log_dir):
@@ -326,7 +322,7 @@ def run_agent(agent, iteration, run_log_dir):
     ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     if not os.path.isfile(prompt_file):
-        print(f"[{name}] 没有 PROMPT.md，跳过", flush=True)
+        out(f"  {C.DIM}{name}: 没有 PROMPT.md，跳过{C.RST}")
         return
 
     with open(prompt_file, "r", encoding="utf-8") as f:
@@ -368,7 +364,7 @@ def run_agent(agent, iteration, run_log_dir):
 
         stderr_output = proc.stderr.read().decode("utf-8", errors="replace")
         if stderr_output:
-            print(f"[{name}] [STDERR] {stderr_output}", flush=True)
+            out(f"  {C.RED}[{name}] STDERR: {stderr_output[:200]}{C.RST}")
             log_file.write(stderr_output)
             agent_log.write(stderr_output)
 
@@ -390,7 +386,9 @@ def run_agent(agent, iteration, run_log_dir):
     write_json(state_file, state)
 
     status = "完成" if proc.returncode == 0 else f"异常(exit={proc.returncode})"
-    print(f"[{name}] 本轮{status}", flush=True)
+    color = C.GREEN if "完成" in status else C.RED
+    sym = "✔" if "完成" in status else "✘"
+    out(f"  {color}{sym} {name} {status}{C.RST}")
 
 
 def git_push():
@@ -461,31 +459,16 @@ def cmd_run(args):
 
     # ─── 分屏终端设置 ───
     rows, cols = shutil.get_terminal_size().lines, shutil.get_terminal_size().columns
-    INPUT_ROWS = 2  # 底部输入区行数（分隔线 + 输入行）
-    output_bottom = rows - INPUT_ROWS  # 输出区底部行号
+    _ob[0] = rows - 2  # 输出区底行
 
-    # 设置滚动区域：第1行到 output_bottom 行
-    sys.stdout.write(f"\033[1;{output_bottom}r")
+    sys.stdout.write(f"\033[1;{_ob[0]}r")   # 滚动区域：1 到 rows-2
     sys.stdout.write(f"\033[1;1H")
     sys.stdout.flush()
 
-    print(f"LoopCLI 启动 | {len(agents)} Agents | 运行ID: {run_id}")
+    out(f"{C.BOLD}{C.CYAN}LoopCLI 启动 | {len(agents)} Agents | {run_id}{C.RST}")
 
-    # 输入状态
     msg_queue = queue.Queue()
     stop_event = threading.Event()
-    input_buffer = [""]  # 用 list 以便在闭包中修改
-
-    def draw_input():
-        """重绘底部输入区域"""
-        buf = input_buffer[0][:cols - 25]
-        # 分隔线（在滚动区域外）
-        sys.stdout.write(f"\033[{output_bottom + 1};1H\033[K{C.CYAN}{'─' * cols}{C.RST}")
-        # 输入行
-        sys.stdout.write(f"\033[{output_bottom + 2};1H\033[K{C.CYAN} > {C.RST}{buf}{C.DIM}█{C.RST} {C.DIM}(Enter发送, exit退出){C.RST}")
-        # 光标回到输出区底部，让 print 正常工作
-        sys.stdout.write(f"\033[{output_bottom};1H")
-        sys.stdout.flush()
 
     draw_input()
 
@@ -494,26 +477,23 @@ def cmd_run(args):
             try:
                 ch = msvcrt.getwch()
                 if ch == '\r':
-                    line = input_buffer[0].strip()
-                    input_buffer[0] = ""
+                    line = _buf[0].strip()
+                    _buf[0] = ""
                     draw_input()
                     if line == "exit":
                         msg_queue.put("__EXIT__")
                         return
                     if line:
                         msg_queue.put(line)
-                        # 在输出区显示发送确认
-                        sys.stdout.write(f"\033[{output_bottom};1H")
-                        print(f"  {C.GREEN}✔ 消息已发送 -> main/inbox/{C.RST}")
-                        draw_input()
+                        out(f"  {C.GREEN}✔ -> main/inbox/{C.RST}")
                 elif ch == '\x03':
                     msg_queue.put("__EXIT__")
                     return
                 elif ch == '\x08':
-                    input_buffer[0] = input_buffer[0][:-1]
+                    _buf[0] = _buf[0][:-1]
                     draw_input()
                 elif len(ch) == 1 and ord(ch) >= 32:
-                    input_buffer[0] += ch
+                    _buf[0] += ch
                     draw_input()
             except Exception:
                 pass
@@ -545,13 +525,10 @@ def cmd_run(args):
         ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         iter_label = f"{count}/{args.iterations}" if args.iterations else str(count)
 
-        # 输出到滚动区域
-        sys.stdout.write(f"\033[{output_bottom};1H")
-        print(f"\n{C.BOLD}{C.CYAN}══ Loop {iter_label} | {len(agents)} Agents | {ts} ══{C.RST}")
+        out(f"{C.BOLD}{C.CYAN}══ Loop {iter_label} | {len(agents)} Agents | {ts} ══{C.RST}")
 
         threads = []
         for agent in agents:
-            sys.stdout.write(f"\033[{output_bottom};1H")
             p_agent_header(agent["name"], count)
             t = threading.Thread(target=run_agent, args=(agent, count, run_log_dir))
             t.start()
@@ -572,10 +549,10 @@ def cmd_run(args):
                     break
                 time.sleep(1)
 
-    # 清理：恢复滚动区域
+    # 清理
     stop_event.set()
-    sys.stdout.write(f"\033[r")  # 重置滚动区域
-    sys.stdout.write(f"\033[{rows};1H")  # 光标到底部
+    sys.stdout.write(f"\033[r")
+    sys.stdout.write(f"\033[{rows};1H")
     sys.stdout.flush()
 
     meta["finished"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
