@@ -27,10 +27,11 @@
   },
   {
     "id": 4,
-    "status": "pending",
+    "status": "done",
     "title": "WebUI 安全最终审计：全量回归扫描",
     "description": "P0/P1 修复和 P1 加固已全部完成，代码经过多轮修改。需要对 WebUI 全栈代码做一次最终安全审计，确保没有引入新问题。重点：(1) 验证 CORS 白名单在生产环境配置正确（检查默认值是否安全）；(2) SSE 连接限制是否有竞态条件；(3) 并发限制实现是否有 bypass 路径；(4) 新增的 API 端点（如 /api/messages/send）是否有输入验证遗漏；(5) 检查所有文件操作是否有路径遍历残留风险；(6) 验证 API Key 比较是否使用 timing-safe 方法。审计文件：D:/loopcli/main/webui/server.py 和 D:/loopcli/run.py。输出报告到 D:/loopcli/main/memory/results/security-final-audit.md。完成后通过 inbox 通知 main。",
     "created": "2026-05-21",
-    "assignee": "engineering-security-engineer"
+    "assignee": "engineering-security-engineer",
+    "completed": "2026-05-21T08:12:00"
   }
 ]

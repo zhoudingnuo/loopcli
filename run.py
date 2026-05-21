@@ -90,6 +90,29 @@ def load_agent_tasks(agent_path):
     return []
 
 
+def rotate_log(log_path, max_size=1_000_000, max_backups=3):
+    """轮转日志文件：超过 max_size 时依次重命名为 .1 .2 .3，最多保留 max_backups 个归档"""
+    if not os.path.isfile(log_path):
+        return
+    try:
+        if os.path.getsize(log_path) < max_size:
+            return
+    except OSError:
+        return
+    # 删除最老的归档
+    oldest = f"{log_path}.{max_backups}"
+    if os.path.isfile(oldest):
+        os.remove(oldest)
+    # 依次重命名 .2->.3, .1->.2
+    for i in range(max_backups, 1, -1):
+        src = f"{log_path}.{i - 1}"
+        dst = f"{log_path}.{i}"
+        if os.path.isfile(src):
+            os.rename(src, dst)
+    # 当前日志 -> .1
+    os.rename(log_path, f"{log_path}.1")
+
+
 # ─── 子命令: create ───
 
 def cmd_create(args):
@@ -286,6 +309,7 @@ def run_agent(agent, iteration, run_log_dir):
         prompt = f.read()
 
     os.makedirs(os.path.join(path, "log"), exist_ok=True)
+    rotate_log(log_file_path)
     log_file = open(log_file_path, "a", encoding="utf-8")
     agent_log = open(run_agent_log, "a", encoding="utf-8")
 

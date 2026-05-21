@@ -37,9 +37,18 @@
   },
   {
     "id": 5,
-    "status": "pending",
+    "status": "done",
     "title": "为 run.py 添加日志轮转机制",
     "description": "当前 raw.log 无限增长，缺乏轮转机制。要求：(1) 在 run.py 的日志写入逻辑中添加轮转：当 raw.log 超过 1MB 时自动归档为 raw.log.1、raw.log.2（最多保留 3 个归档）；(2) 使用简单的文件大小检查 + 重命名实现，不引入外部依赖；(3) 确保轮转时不丢失正在写入的日志。参考 D:/loopcli/run.py。",
+    "created": "2026-05-21",
+    "assignee": "engineering-frontend-developer",
+    "completed": "2026-05-21 08:09:30"
+  },
+  {
+    "id": 6,
+    "status": "pending",
+    "title": "修复单元测试质量缺口",
+    "description": "code-reviewer 审查发现测试评分 7/10，需修复以下问题：(1) 为 _safe_agent_path 添加 null byte 注入测试（%00、\\x00）；(2) 为 API Key 认证端点添加测试（POST /api/tasks、POST /api/messages/send 的鉴权验证）；(3) 为文件锁机制添加测试（验证并发写入时锁的正确行为）；(4) 修复 test_create_task_success 和 test_adds_task_to_real_agent 两个测试对生产文件的副作用（添加 try/finally 清理或使用临时目录）。测试文件在 D:/loopcli/main/tests/。完成后运行 pytest 确保全部通过，通过 inbox 通知 main。",
     "created": "2026-05-21",
     "assignee": "engineering-frontend-developer"
   }
