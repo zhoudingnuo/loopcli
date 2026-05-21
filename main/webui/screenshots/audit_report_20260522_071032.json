@@ -1,0 +1,84 @@
+{
+  "timestamp": "2026-05-22T07:10:32.732423",
+  "performance": {
+    "loadTime": 429.69999999552965,
+    "domReady": 400.5,
+    "firstPaint": 428
+  },
+  "pages": [
+    {
+      "page": "dashboard",
+      "status": "success",
+      "screenshot": "screenshots\\page_dashboard_20260522_071023.png",
+      "timestamp": "2026-05-22T07:10:23.717188"
+    },
+    {
+      "page": "agents",
+      "status": "success",
+      "screenshot": "screenshots\\page_agents_20260522_071024.png",
+      "timestamp": "2026-05-22T07:10:24.583807"
+    },
+    {
+      "page": "tasks",
+      "status": "success",
+      "screenshot": "screenshots\\page_tasks_20260522_071025.png",
+      "timestamp": "2026-05-22T07:10:25.376038"
+    },
+    {
+      "page": "logs",
+      "status": "success",
+      "screenshot": "screenshots\\page_logs_20260522_071025.png",
+      "timestamp": "2026-05-22T07:10:26.199138"
+    },
+    {
+      "page": "control",
+      "status": "success",
+      "screenshot": "screenshots\\page_control_20260522_071026.png",
+      "timestamp": "2026-05-22T07:10:26.976635"
+    },
+    {
+      "page": "messages",
+      "status": "success",
+      "screenshot": "screenshots\\page_messages_20260522_071027.png",
+      "timestamp": "2026-05-22T07:10:27.764692"
+    },
+    {
+      "page": "health",
+      "status": "success",
+      "screenshot": "screenshots\\page_health_20260522_071028.png",
+      "timestamp": "2026-05-22T07:10:28.480878"
+    },
+    {
+      "page": "notifications",
+      "status": "success",
+      "screenshot": "screenshots\\page_notifications_20260522_071028.png",
+      "timestamp": "2026-05-22T07:10:29.344162"
+    },
+    {
+      "page": "cost",
+      "status": "success",
+      "screenshot": "screenshots\\page_cost_20260522_071029.png",
+      "timestamp": "2026-05-22T07:10:30.004661"
+    }
+  ],
+  "features": [
+    {
+      "feature": "theme_toggle",
+      "status": "pass"
+    },
+    {
+      "feature": "sidebar_toggle",
+      "status": "pass"
+    },
+    {
+      "feature": "shortcuts_modal",
+      "status": "pass"
+    }
+  ],
+  "summary": {
+    "total_pages": 9,
+    "successful_pages": 9,
+    "total_features": 3,
+    "passed_features": 3
+  }
+}
