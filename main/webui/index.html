@@ -228,6 +228,30 @@ body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; background
           <div class="stat-card"><div class="label">空闲</div><div class="value" style="color:var(--blue)" id="stat-idle">-</div></div>
           <div class="stat-card"><div class="label">待处理任务</div><div class="value" style="color:var(--yellow)" id="stat-pending">-</div></div>
         </div>
+
+        <!-- Main Agent Activity -->
+        <div class="ctrl-section" style="margin-bottom:20px">
+          <h3 class="ctrl-title">Main Agent 实时状态</h3>
+          <div class="ctrl-status-card">
+            <div class="ctrl-status-row">
+              <span class="ctrl-dot" id="main-agent-dot"></span>
+              <span id="main-agent-status">检测中...</span>
+              <span style="font-size:12px;color:var(--text2);margin-left:auto" id="main-agent-last-update"></span>
+            </div>
+            <div class="ctrl-info-grid">
+              <div class="ctrl-info"><span class="ctrl-label">日志文件</span><span class="ctrl-val" id="main-agent-log-file" style="font-size:12px">-</span></div>
+              <div class="ctrl-info"><span class="ctrl-label">最后更新</span><span class="ctrl-val" id="main-agent-last-time">-</span></div>
+              <div class="ctrl-info"><span class="ctrl-label">距离现在</span><span class="ctrl-val" id="main-agent-seconds-ago">-</span></div>
+            </div>
+          </div>
+          <div style="margin-top:14px">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:8px">最新输出（最近5条）</div>
+            <div id="main-agent-latest-output" style="background:var(--bg);border-radius:8px;padding:12px;font-size:12px;font-family:monospace;max-height:150px;overflow-y:auto;color:var(--text2)">
+              加载中...
+            </div>
+          </div>
+        </div>
+
         <h3 style="margin-bottom:14px;font-size:15px">Agent 概览</h3>
         <div class="agent-grid" id="dash-agents"></div>
       </div>
@@ -809,6 +833,88 @@ render = function() {
 
 loadLoopStatus();
 setInterval(loadLoopStatus, 3000);
+
+// --- Main Agent Activity ---
+async function loadMainAgentActivity() {
+  try {
+    const r = await fetch('/api/agent/activity');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+
+    // Update status dot and text
+    const dot = document.getElementById('main-agent-dot');
+    const statusText = document.getElementById('main-agent-status');
+    const lastUpdateEl = document.getElementById('main-agent-last-update');
+
+    if (data.status === 'running') {
+      dot.className = 'ctrl-dot running';
+      statusText.textContent = '运行中';
+      statusText.style.color = 'var(--green)';
+    } else if (data.status === 'idle') {
+      dot.className = 'ctrl-dot';
+      statusText.textContent = '空闲';
+      statusText.style.color = 'var(--blue)';
+    } else {
+      dot.className = 'ctrl-dot';
+      dot.style.background = 'var(--red)';
+      statusText.textContent = '异常';
+      statusText.style.color = 'var(--red)';
+    }
+
+    // Update info grid
+    document.getElementById('main-agent-log-file').textContent = data.log_file_exists ? '存在' : '不存在';
+
+    if (data.last_log_time) {
+      const lastTime = new Date(data.last_log_time);
+      document.getElementById('main-agent-last-time').textContent = fmtTime(data.last_log_time);
+
+      if (data.seconds_since_last_update !== null) {
+        const secs = data.seconds_since_last_update;
+        let timeStr = '';
+        if (secs < 60) timeStr = secs + '秒前';
+        else if (secs < 3600) timeStr = Math.floor(secs / 60) + '分钟前';
+        else timeStr = Math.floor(secs / 3600) + '小时前';
+        document.getElementById('main-agent-seconds-ago').textContent = timeStr;
+      }
+
+      lastUpdateEl.textContent = '更新于 ' + lastTime.toLocaleTimeString('zh-CN');
+    } else {
+      document.getElementById('main-agent-last-time').textContent = '-';
+      document.getElementById('main-agent-seconds-ago').textContent = '-';
+      lastUpdateEl.textContent = '';
+    }
+
+    // Update latest output
+    const outputEl = document.getElementById('main-agent-latest-output');
+    if (data.latest_output && data.latest_output.length > 0) {
+      outputEl.innerHTML = data.latest_output.map(line => {
+        // Parse markdown table format: | 时间 | 状态 | 任务 | 摘要 |
+        const parts = line.split('|').filter(p => p.trim());
+        if (parts.length >= 4) {
+          const time = parts[0].trim();
+          const status = parts[1].trim();
+          const task = parts[2].trim();
+          const summary = parts[3].trim();
+          return `<div style="padding:4px 0;border-bottom:1px solid var(--border)">
+            <span style="color:var(--text2)">[${time}]</span>
+            <span style="color:${status === 'done' ? 'var(--green)' : status === 'doing' ? 'var(--yellow)' : 'var(--text2)'}">${status}</span>
+            <span style="color:var(--accent2)">${task}</span>
+            <span style="color:var(--text)">${summary}</span>
+          </div>`;
+        }
+        return `<div style="padding:4px 0;border-bottom:1px solid var(--border)">${line}</div>`;
+      }).join('');
+    } else {
+      outputEl.innerHTML = '<div style="color:var(--text2)">暂无输出</div>';
+    }
+
+  } catch (e) {
+    console.error('Failed to load main agent activity:', e);
+  }
+}
+
+loadMainAgentActivity();
+setInterval(loadMainAgentActivity, 5000);
 
 // --- Message Send ---
 function fillMsgAgentSelect() {

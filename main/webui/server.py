@@ -61,6 +61,65 @@ def get_main_tasks():
     return read_json(MAIN_DIR / "memory" / "tasks.json", [])
 
 
+# --- Agent Activity Detection ---
+
+def get_main_agent_activity():
+    """Get main agent's real-time activity status based on log file modification time."""
+    log_path = MAIN_DIR / "log" / "run.md"
+    result = {
+        "agent_id": "main",
+        "status": "idle",  # idle, running, error
+        "last_log_time": None,
+        "last_log_entry": None,
+        "log_file_exists": False,
+        "seconds_since_last_update": None,
+        "latest_output": []
+    }
+
+    if not log_path.exists():
+        return result
+
+    result["log_file_exists"] = True
+
+    try:
+        # Get file modification time
+        mtime = os.path.getmtime(log_path)
+        last_update = datetime.fromtimestamp(mtime)
+        result["last_log_time"] = last_update.isoformat()
+        result["seconds_since_last_update"] = int((datetime.now() - last_update).total_seconds())
+
+        # Determine status based on last update time
+        # If updated within 2 minutes, consider it running
+        if result["seconds_since_last_update"] <= 120:
+            result["status"] = "running"
+        elif result["seconds_since_last_update"] > 3600:  # 1 hour
+            result["status"] = "idle"
+
+        # Get last few log entries
+        lines = get_recent_lines(log_path, 20)
+        # Filter to get the actual log entries (skip header)
+        log_entries = []
+        for line in lines:
+            if line.strip() and not line.strip().startswith("#") and not line.strip().startswith("|---") and not line.strip().startswith("| 时间"):
+                if line.strip().startswith("|"):
+                    log_entries.append(line.strip())
+
+        if log_entries:
+            # Get the most recent log entry (last one in the list)
+            last_entry = log_entries[-1] if log_entries else None
+            if last_entry:
+                result["last_log_entry"] = last_entry
+
+            # Return last 5 entries as latest output
+            result["latest_output"] = log_entries[-5:] if len(log_entries) >= 5 else log_entries
+
+    except Exception as e:
+        result["status"] = "error"
+        result["error"] = str(e)
+
+    return result
+
+
 # --- Loop Process Management ---
 
 def get_loop_state():
@@ -318,6 +377,9 @@ class WebUIHandler(SimpleHTTPRequestHandler):
 
         if path == "/api/logs/stream":
             return self._handle_sse_logs()
+
+        if path == "/api/agent/activity":
+            return self._send_json(get_main_agent_activity())
 
         if path == "/api/loopcli/status":
             return self._handle_loopcli_status()

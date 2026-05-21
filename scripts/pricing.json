@@ -1,0 +1,23 @@
+{
+  "GLM-5.1": {
+    "input_per_million": 1.40,
+    "output_per_million": 4.40,
+    "cached_input_per_million": 0.26,
+    "context_window": "1M",
+    "note": "旗舰模型"
+  },
+  "GLM-4.7": {
+    "input_per_million": 0.40,
+    "output_per_million": 1.60,
+    "cached_input_per_million": 0.08,
+    "context_window": "203K",
+    "note": "中端模型"
+  },
+  "GLM-4.5-Air": {
+    "input_per_million": 0.13,
+    "output_per_million": 1.10,
+    "cached_input_per_million": 0.026,
+    "context_window": "131K",
+    "note": "轻量模型"
+  }
+}

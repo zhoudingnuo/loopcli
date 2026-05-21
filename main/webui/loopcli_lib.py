@@ -111,52 +111,83 @@ def is_agent_enabled(agent_dir) -> bool:
 def discover_agents(include_disabled=False):
     """Discover agent directories under LOOPCLI_ROOT.
 
+    Looks in agents/ folder first, then root for main agent.
+
     Returns list of {"name": str, "path": str}.
     """
     agents = []
+    agents_dir = LOOPCLI_ROOT / "agents"
+
+    # Check agents/ folder first
+    if agents_dir.is_dir():
+        for child in agents_dir.iterdir():
+            if not child.is_dir():
+                continue
+            if not (child / AGENT_MARKER).exists():
+                continue
+            if include_disabled or is_agent_enabled(child):
+                agents.append({"name": child.name, "path": str(child)})
+
+    # Also check root for main agent (backwards compatibility)
     for child in LOOPCLI_ROOT.iterdir():
         if not child.is_dir():
             continue
+        if child.name != "main":
+            continue  # Only main stays in root
         if not (child / AGENT_MARKER).exists():
             continue
         if include_disabled or is_agent_enabled(child):
             agents.append({"name": child.name, "path": str(child)})
+
     return agents
 
 
 def scan_agents():
     """Full agent scan with metadata (state, soul, task counts)."""
     agents = []
-    for child in LOOPCLI_ROOT.iterdir():
-        if not child.is_dir():
-            continue
-        if not (child / AGENT_MARKER).exists():
-            continue
-        state = read_json(child / "memory" / "state.json", {})
-        soul_path = child / "SOUL.md"
-        desc = ""
-        if soul_path.exists():
-            for line in soul_path.read_text(encoding="utf-8").strip().splitlines():
-                stripped = line.strip()
-                if stripped and not stripped.startswith("#"):
-                    desc = stripped
-                    break
-        tasks = read_json(child / "memory" / "tasks.json", [])
-        done_count = sum(1 for t in tasks if t.get("status") == "done")
-        pending_count = sum(1 for t in tasks if t.get("status") == "pending")
-        enabled = is_agent_enabled(child)
-        agents.append({
-            "id": child.name,
-            "name": state.get("agent", child.name),
-            "status": "disabled" if not enabled else state.get("status", "unknown"),
-            "description": desc,
-            "last_run": state.get("last_run"),
-            "run_count": state.get("run_count", 0),
-            "current_task": state.get("current_task"),
-            "task_count": len(tasks),
-            "task_done": done_count,
-            "task_pending": pending_count,
-        })
+    agents_dir = LOOPCLI_ROOT / "agents"
+
+    # Check agents/ folder first
+    search_dirs = []
+    if agents_dir.is_dir():
+        search_dirs.append(agents_dir)
+    # Add root for main agent
+    search_dirs.append(LOOPCLI_ROOT)
+
+    for search_dir in search_dirs:
+        for child in search_dir.iterdir():
+            if not child.is_dir():
+                continue
+            # Skip non-main agents in root
+            if search_dir == LOOPCLI_ROOT and child.name != "main":
+                continue
+            if not (child / AGENT_MARKER).exists():
+                continue
+            state = read_json(child / "memory" / "state.json", {})
+            soul_path = child / "SOUL.md"
+            desc = ""
+            if soul_path.exists():
+                for line in soul_path.read_text(encoding="utf-8").strip().splitlines():
+                    stripped = line.strip()
+                    if stripped and not stripped.startswith("#"):
+                        desc = stripped
+                        break
+            tasks = read_json(child / "memory" / "tasks.json", [])
+            done_count = sum(1 for t in tasks if t.get("status") == "done")
+            pending_count = sum(1 for t in tasks if t.get("status") == "pending")
+            enabled = is_agent_enabled(child)
+            agents.append({
+                "id": child.name,
+                "name": state.get("agent", child.name),
+                "status": "disabled" if not enabled else state.get("status", "unknown"),
+                "description": desc,
+                "last_run": state.get("last_run"),
+                "run_count": state.get("run_count", 0),
+                "current_task": state.get("current_task"),
+                "task_count": len(tasks),
+                "task_done": done_count,
+                "task_pending": pending_count,
+            })
     return agents
 
 

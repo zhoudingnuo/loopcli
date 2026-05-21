@@ -1,20 +1,7 @@
 {
   "agent": "main",
   "status": "idle",
-  "last_run": "2026-05-22 04:40:40",
-  "run_count": 158,
-  "last_action": "research_token_optimization",
-  "usage_baseline_20260522": {
-    "daily_tokens": 225002277,
-    "glm51_pct": 71,
-    "glm47_pct": 29,
-    "estimated_cost_usd": 64
-  },
-  "cost_reduction_target": {
-    "current": "$64/day",
-    "goal": "$20/day",
-    "strategy": "model_routing + token_optimizer_skills",
-    "resources_found": "nadimtuhin/claude-token-optimizer (90% savings), MindStudio skills (70% reduction)"
-  },
-  "next_priority": "evaluate_token_optimizer_repo"
+  "last_run": "2026-05-22 04:52:32",
+  "run_count": 165,
+  "last_action": "fixed_git_issue_and_webui_diagnosis"
 }

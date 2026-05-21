@@ -133,7 +133,7 @@ def cmd_create(args):
     with open(tpl_file, "r", encoding="utf-8") as f:
         soul_content = f.read()
 
-    agent_dir = os.path.join(LOOPCLI_DIR, template_id)
+    agent_dir = os.path.join(LOOPCLI_DIR, "agents", template_id)
     if os.path.exists(agent_dir):
         print(f"[跳过] Agent 已存在: {agent_dir}")
         if task_desc:
@@ -173,7 +173,10 @@ def cmd_create(args):
 # ─── 子命令: task ───
 
 def cmd_task_inner(agent_name, title, desc):
-    agent_dir = os.path.join(LOOPCLI_DIR, agent_name)
+    # Check agents/ folder first, then root for main
+    agent_dir = os.path.join(LOOPCLI_DIR, "agents", agent_name)
+    if not os.path.isfile(os.path.join(agent_dir, AGENT_MARKER)):
+        agent_dir = os.path.join(LOOPCLI_DIR, agent_name)
     if not os.path.isfile(os.path.join(agent_dir, AGENT_MARKER)):
         print(f"[错误] 不是有效的 Agent: {agent_name}")
         sys.exit(1)
@@ -510,7 +513,7 @@ def git_push():
         git = resolve_git()
         r = subprocess.run([git, "add", "-A"], cwd=LOOPCLI_DIR, capture_output=True, text=True, timeout=30)
         if r.returncode != 0:
-            err = r.stderr.strip() if r.stderr else "unknown error"
+            err = (r.stderr or r.stdout or "unknown error").strip()
             out(f"  {C.RED}[git] add 失败: {err}{C.RST}")
             return
         r = subprocess.run(
@@ -518,7 +521,7 @@ def git_push():
             cwd=LOOPCLI_DIR, capture_output=True, text=True, timeout=30
         )
         if r.returncode != 0 and "nothing to commit" not in (r.stdout or ""):
-            err = r.stderr.strip() if r.stderr else "unknown error"
+            err = (r.stderr or r.stdout or "unknown error").strip()
             out(f"  {C.RED}[git] commit 失败: {err}{C.RST}")
             return
         askpass_script = os.path.join(LOOPCLI_DIR, ".git_askpass.bat")
@@ -536,7 +539,7 @@ def git_push():
         )
         os.remove(askpass_script)
         if r.returncode != 0:
-            err = r.stderr.strip() if r.stderr else "unknown error"
+            err = (r.stderr or r.stdout or "unknown error").strip()
             out(f"  {C.RED}[git] push 失败: {err}{C.RST}")
         else:
             out(f"  {C.GREEN}[git] 已同步到 GitHub{C.RST}")
@@ -729,7 +732,10 @@ p_tpl = sub.add_parser("templates", help="列出可用模板")
 p_tpl.add_argument("--filter", "-f", default="", help="按关键词筛选")
 
 def cmd_enable(args):
-    agent_dir = os.path.join(LOOPCLI_DIR, args.agent)
+    # Check agents/ folder first, then root for main
+    agent_dir = os.path.join(LOOPCLI_DIR, "agents", args.agent)
+    if not os.path.isfile(os.path.join(agent_dir, AGENT_MARKER)):
+        agent_dir = os.path.join(LOOPCLI_DIR, args.agent)
     if not os.path.isfile(os.path.join(agent_dir, AGENT_MARKER)):
         print(f"[错误] 不是有效的 Agent: {args.agent}")
         sys.exit(1)
@@ -741,7 +747,10 @@ def cmd_disable(args):
     if args.agent == "main":
         print("[错误] 不能禁用 main Agent")
         sys.exit(1)
-    agent_dir = os.path.join(LOOPCLI_DIR, args.agent)
+    # Check agents/ folder first, then root for main
+    agent_dir = os.path.join(LOOPCLI_DIR, "agents", args.agent)
+    if not os.path.isfile(os.path.join(agent_dir, AGENT_MARKER)):
+        agent_dir = os.path.join(LOOPCLI_DIR, args.agent)
     if not os.path.isfile(os.path.join(agent_dir, AGENT_MARKER)):
         print(f"[错误] 不是有效的 Agent: {args.agent}")
         sys.exit(1)
@@ -819,7 +828,10 @@ def cmd_weixin(args):
 
 
 def cmd_msg(args):
-    agent_dir = os.path.join(LOOPCLI_DIR, args.agent)
+    # Check agents/ folder first, then root for main
+    agent_dir = os.path.join(LOOPCLI_DIR, "agents", args.agent)
+    if not os.path.isfile(os.path.join(agent_dir, AGENT_MARKER)):
+        agent_dir = os.path.join(LOOPCLI_DIR, args.agent)
     if not os.path.isfile(os.path.join(agent_dir, AGENT_MARKER)):
         print(f"[错误] 不是有效的 Agent: {args.agent}")
         sys.exit(1)
