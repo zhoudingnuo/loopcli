@@ -1983,9 +1983,9 @@ async function loadMainAgentActivity() {
     const statusText = document.getElementById('main-agent-status');
     const lastUpdateEl = document.getElementById('main-agent-last-update');
 
-    if (data.status === 'running') {
+    if (data.status === 'running' || data.status === 'active') {
       dot.className = 'ctrl-dot running';
-      statusText.textContent = '运行中';
+      statusText.textContent = data.status === 'active' ? '活跃' : '运行中';
       statusText.style.color = 'var(--green)';
     } else if (data.status === 'idle') {
       dot.className = 'ctrl-dot';

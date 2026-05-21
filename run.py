@@ -116,15 +116,22 @@ def rotate_log(log_path, max_size=1_000_000, max_backups=3):
             return
     except OSError:
         return
-    oldest = f"{log_path}.{max_backups}"
-    if os.path.isfile(oldest):
-        os.remove(oldest)
-    for i in range(max_backups, 1, -1):
-        src = f"{log_path}.{i - 1}"
-        dst = f"{log_path}.{i}"
-        if os.path.isfile(src):
-            os.rename(src, dst)
-    os.rename(log_path, f"{log_path}.1")
+    try:
+        oldest = f"{log_path}.{max_backups}"
+        if os.path.isfile(oldest):
+            os.remove(oldest)
+        for i in range(max_backups, 1, -1):
+            src = f"{log_path}.{i - 1}"
+            dst = f"{log_path}.{i}"
+            if os.path.isfile(src):
+                os.rename(src, dst)
+        os.rename(log_path, f"{log_path}.1")
+    except PermissionError:
+        # 文件被占用，跳过轮转
+        pass
+    except OSError as e:
+        # 其他错误也静默处理，避免影响主流程
+        pass
 
 
 # ─── 子命令: create ───
