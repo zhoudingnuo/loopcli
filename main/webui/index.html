@@ -1081,6 +1081,178 @@ body {
   height: 100%;
 }
 
+/* 通知中心 */
+.notification-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: var(--red);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 10px;
+  min-width: 16px;
+  text-align: center;
+  animation: notifBadgePulse 2s infinite;
+}
+@keyframes notifBadgePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.notification-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.filter-btn {
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text2);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all var(--transition-normal);
+}
+.filter-btn:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+.filter-btn.active {
+  background: var(--accent-gradient);
+  border-color: transparent;
+  color: #fff;
+}
+
+.notification-item {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  position: relative;
+}
+.notification-item:hover {
+  border-color: var(--accent);
+  transform: translateX(4px);
+  box-shadow: var(--shadow-sm);
+}
+.notification-item.unread {
+  background: var(--surface2);
+  border-color: var(--accent);
+}
+.notification-item.unread::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--accent-gradient);
+  border-radius: 12px 0 0 12px;
+}
+
+.notification-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.notification-icon.system { background: var(--blue-bg); }
+.notification-icon.agent { background: var(--purple-bg); }
+.notification-icon.task { background: var(--green-bg); }
+.notification-icon.error { background: var(--red-bg); }
+
+.notification-content {
+  flex: 1;
+  min-width: 0;
+}
+.notification-title {
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.notification-time {
+  font-size: 11px;
+  color: var(--text2);
+  font-weight: 400;
+}
+.notification-message {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+.notification-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 11px;
+  color: var(--text2);
+  flex-wrap: wrap;
+}
+.notification-tag {
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: var(--surface2);
+  font-weight: 600;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 24px;
+}
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  transition: all var(--transition-normal);
+}
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  height: 18px;
+  width: 18px;
+  left: 2px;
+  bottom: 2px;
+  background: var(--text2);
+  border-radius: 50%;
+  transition: all var(--transition-normal);
+}
+.toggle-switch input:checked + .toggle-slider {
+  background: var(--accent-gradient);
+  border-color: transparent;
+}
+.toggle-switch input:checked + .toggle-slider::before {
+  transform: translateX(24px);
+  background: #fff;
+}
+
 /* 响应式 */
 @media (max-width: 768px) {
   .sidebar {
@@ -1180,8 +1352,13 @@ body {
         <div class="icon">🏥</div>
         <span>健康监控</span>
       </div>
+      <div class="nav-item" data-page="notifications">
+        <div class="icon">🔔</div>
+        <span>通知中心</span>
+        <span class="notification-badge" id="notification-badge" style="display:none"></span>
+      </div>
     </nav>
-    <div class="sidebar-footer">LoopCLI v3.1</div>
+    <div class="sidebar-footer">LoopCLI v3.3</div>
   </aside>
 
   <div class="main">
@@ -1552,6 +1729,83 @@ body {
           </div>
         </div>
       </div>
+
+      <!-- Notifications Center -->
+      <div class="page" id="page-notifications">
+        <div class="ctrl-section">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+            <h3 class="ctrl-title">通知中心</h3>
+            <div style="display:flex;gap:10px">
+              <button class="btn" id="mark-all-read">全部已读</button>
+              <button class="btn" id="clear-all-notifications">清空通知</button>
+            </div>
+          </div>
+
+          <div class="notification-filters" style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap">
+            <button class="filter-btn active" data-filter="all">全部</button>
+            <button class="filter-btn" data-filter="system">系统</button>
+            <button class="filter-btn" data-filter="agent">Agent</button>
+            <button class="filter-btn" data-filter="task">任务</button>
+            <button class="filter-btn" data-filter="error">错误</button>
+            <button class="filter-btn" data-filter="unread">未读</button>
+          </div>
+        </div>
+
+        <div class="ctrl-section">
+          <div id="notification-list" style="display:flex;flex-direction:column;gap:12px">
+            <div class="empty-state" style="text-align:center;padding:40px;color:var(--text2)">
+              <div style="font-size:48px;margin-bottom:16px">🔔</div>
+              <div>暂无通知</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ctrl-section">
+          <h3 class="ctrl-title">通知设置</h3>
+          <div class="notification-settings" style="display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))">
+            <div class="setting-item" style="display:flex;justify-content:space-between;align-items:center;padding:16px;background:var(--surface2);border-radius:12px;border:1px solid var(--border)">
+              <div>
+                <div style="font-weight:700;color:var(--text);margin-bottom:4px">系统通知</div>
+                <div style="font-size:12px;color:var(--text2)">显示系统启动、停止等状态变更</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="notif-system" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="setting-item" style="display:flex;justify-content:space-between;align-items:center;padding:16px;background:var(--surface2);border-radius:12px;border:1px solid var(--border)">
+              <div>
+                <div style="font-weight:700;color:var(--text);margin-bottom:4px">Agent 通知</div>
+                <div style="font-size:12px;color:var(--text2)">Agent 启动、停止、错误等事件</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="notif-agent" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="setting-item" style="display:flex;justify-content:space-between;align-items:center;padding:16px;background:var(--surface2);border-radius:12px;border:1px solid var(--border)">
+              <div>
+                <div style="font-weight:700;color:var(--text);margin-bottom:4px">任务通知</div>
+                <div style="font-size:12px;color:var(--text2)">任务创建、完成、失败等事件</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="notif-task" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="setting-item" style="display:flex;justify-content:space-between;align-items:center;padding:16px;background:var(--surface2);border-radius:12px;border:1px solid var(--border)">
+              <div>
+                <div style="font-weight:700;color:var(--text);margin-bottom:4px">错误提醒</div>
+                <div style="font-size:12px;color:var(--text2)">系统错误、异常等紧急事件</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="notif-error" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -1679,10 +1933,10 @@ document.addEventListener('keydown', (e) => {
     e.preventDefault();
     fullscreenToggle.click();
   }
-  // 数字键 1-6: 切换页面
-  if (['1', '2', '3', '4', '5', '6'].includes(e.key) &&
+  // 数字键 1-7: 切换页面
+  if (['1', '2', '3', '4', '5', '6', '7', '8'].includes(e.key) &&
       !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) {
-    const pages = ['dashboard', 'agents', 'tasks', 'logs', 'control', 'messages'];
+    const pages = ['dashboard', 'agents', 'tasks', 'logs', 'control', 'messages', 'health', 'notifications'];
     const index = parseInt(e.key) - 1;
     const navItem = document.querySelector(`.nav-item[data-page="${pages[index]}"]`);
     if (navItem) navItem.click();
@@ -1706,6 +1960,217 @@ function showToast(message, type = 'error') {
     toast.classList.add('toast-exit');
     setTimeout(() => toast.remove(), 250);
   }, 4000);
+}
+
+// ============ 通知中心系统 ============
+let notifications = [];
+let notificationSettings = {
+  system: true,
+  agent: true,
+  task: true,
+  error: true
+};
+
+// 从localStorage加载通知和设置
+function loadNotifications() {
+  try {
+    const saved = localStorage.getItem('notifications');
+    if (saved) notifications = JSON.parse(saved);
+    const savedSettings = localStorage.getItem('notificationSettings');
+    if (savedSettings) notificationSettings = JSON.parse(savedSettings);
+  } catch (e) {
+    console.error('加载通知失败:', e);
+  }
+  updateNotificationBadge();
+}
+
+// 保存通知到localStorage
+function saveNotifications() {
+  try {
+    localStorage.setItem('notifications', JSON.stringify(notifications));
+  } catch (e) {
+    console.error('保存通知失败:', e);
+  }
+}
+
+// 添加新通知
+function addNotification(type, title, message, meta = {}) {
+  if (!notificationSettings[type]) return;
+
+  const notification = {
+    id: Date.now() + Math.random().toString(36).substr(2, 9),
+    type,
+    title,
+    message,
+    meta,
+    timestamp: new Date().toISOString(),
+    read: false
+  };
+
+  notifications.unshift(notification);
+  // 只保留最近100条通知
+  if (notifications.length > 100) {
+    notifications = notifications.slice(0, 100);
+  }
+
+  saveNotifications();
+  updateNotificationBadge();
+  renderNotifications();
+
+  // 显示toast提示
+  showToast(`🔔 ${title}`, 'info');
+}
+
+// 更新通知徽章
+function updateNotificationBadge() {
+  const unreadCount = notifications.filter(n => !n.read).length;
+  const badge = document.getElementById('notification-badge');
+  if (unreadCount > 0) {
+    badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+    badge.style.display = 'block';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+// 渲染通知列表
+function renderNotifications(filter = 'all') {
+  const container = document.getElementById('notification-list');
+  if (!container) return;
+
+  let filtered = notifications;
+  if (filter === 'unread') {
+    filtered = notifications.filter(n => !n.read);
+  } else if (filter !== 'all') {
+    filtered = notifications.filter(n => n.type === filter);
+  }
+
+  if (filtered.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state" style="text-align:center;padding:40px;color:var(--text2)">
+        <div style="font-size:48px;margin-bottom:16px">🔔</div>
+        <div>暂无通知</div>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = filtered.map(n => {
+    const iconMap = {
+      system: '⚙️',
+      agent: '🤖',
+      task: '✅',
+      error: '❌'
+    };
+    const timeAgo = getTimeAgo(n.timestamp);
+    return `
+      <div class="notification-item ${n.read ? '' : 'unread'}" data-id="${n.id}">
+        <div class="notification-icon ${n.type}">
+          ${iconMap[n.type] || '📢'}
+        </div>
+        <div class="notification-content">
+          <div class="notification-title">
+            ${esc(n.title)}
+            <span class="notification-time">${timeAgo}</span>
+          </div>
+          <div class="notification-message">${esc(n.message)}</div>
+          ${Object.keys(n.meta || {}).length > 0 ? `
+            <div class="notification-meta">
+              ${Object.entries(n.meta).map(([key, value]) =>
+                `<span class="notification-tag">${esc(key)}: ${esc(String(value))}</span>`
+              ).join('')}
+            </div>
+          ` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // 添加点击事件
+  container.querySelectorAll('.notification-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const id = item.dataset.id;
+      markNotificationRead(id);
+    });
+  });
+}
+
+// 标记通知为已读
+function markNotificationRead(id) {
+  const notification = notifications.find(n => n.id === id);
+  if (notification && !notification.read) {
+    notification.read = true;
+    saveNotifications();
+    updateNotificationBadge();
+    renderNotifications(getCurrentNotificationFilter());
+  }
+}
+
+// 标记所有通知为已读
+function markAllNotificationsRead() {
+  notifications.forEach(n => n.read = true);
+  saveNotifications();
+  updateNotificationBadge();
+  renderNotifications(getCurrentNotificationFilter());
+  showToast('所有通知已标记为已读', 'info');
+}
+
+// 清空所有通知
+function clearAllNotifications() {
+  if (confirm('确定要清空所有通知吗？')) {
+    notifications = [];
+    saveNotifications();
+    updateNotificationBadge();
+    renderNotifications(getCurrentNotificationFilter());
+    showToast('通知已清空', 'info');
+  }
+}
+
+// 获取当前通知过滤类型
+function getCurrentNotificationFilter() {
+  const activeBtn = document.querySelector('.filter-btn.active');
+  return activeBtn ? activeBtn.dataset.filter : 'all';
+}
+
+// 计算时间差
+function getTimeAgo(timestamp) {
+  const now = new Date();
+  const time = new Date(timestamp);
+  const diff = Math.floor((now - time) / 1000);
+
+  if (diff < 60) return '刚刚';
+  if (diff < 3600) return Math.floor(diff / 60) + '分钟前';
+  if (diff < 86400) return Math.floor(diff / 3600) + '小时前';
+  if (diff < 604800) return Math.floor(diff / 86400) + '天前';
+  return time.toLocaleDateString('zh-CN');
+}
+
+// 初始化通知过滤器
+function initNotificationFilters() {
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderNotifications(btn.dataset.filter);
+    });
+  });
+
+  document.getElementById('mark-all-read')?.addEventListener('click', markAllNotificationsRead);
+  document.getElementById('clear-all-notifications')?.addEventListener('click', clearAllNotifications);
+}
+
+// 初始化通知设置
+function initNotificationSettings() {
+  ['system', 'agent', 'task', 'error'].forEach(type => {
+    const checkbox = document.getElementById(`notif-${type}`);
+    if (checkbox) {
+      checkbox.checked = notificationSettings[type];
+      checkbox.addEventListener('change', () => {
+        notificationSettings[type] = checkbox.checked;
+        localStorage.setItem('notificationSettings', JSON.stringify(notificationSettings));
+      });
+    }
+  });
 }
 
 // Poll Indicator
@@ -3013,6 +3478,20 @@ if (document.getElementById('page-health')) {
       loadSystemHealth();
     }
   }, 5000);
+}
+
+// ============ 初始化通知中心 ============
+loadNotifications();
+initNotificationFilters();
+initNotificationSettings();
+renderNotifications();
+
+// 模拟一些初始通知（演示用）
+if (notifications.length === 0) {
+  setTimeout(() => {
+    addNotification('system', 'WebUI 启动', 'LoopCLI WebUI v3.3 已成功启动', { version: '3.3' });
+    addNotification('agent', 'Agent 状态', '所有 Agent 运行正常', { count: agents.length });
+  }, 1000);
 }
 </script>
 </body>
