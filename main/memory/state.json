@@ -1,7 +1,7 @@
 {
   "agent": "main",
   "status": "idle",
-  "last_run": "2026-05-22 05:32:38",
-  "run_count": 183,
-  "last_action": "fixed_runpy_cost_display_and_webui_status_detection"
+  "last_run": "2026-05-22 05:36:09",
+  "run_count": 185,
+  "last_action": "disabled_content_generator_agent"
 }

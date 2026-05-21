@@ -22,14 +22,16 @@
   },
   {
     "id": 3,
-    "status": "pending",
+    "status": "done",
     "assignee": "content-generator",
     "created": "2026-05-22",
+    "completed": "2026-05-22 05:35",
     "topic": "OpenAI model disproved central conjecture in discrete geometry",
     "source": "hackernews",
     "score": 1131,
     "url": "https://openai.com/blog/discrete-geometry-breakthrough",
     "angle": "AI突破性应用：数学证明的新范式",
-    "target_keywords": ["AI", "数学", "OpenAI", "几何", "机器学习证明"]
+    "target_keywords": ["AI", "数学", "OpenAI", "几何", "机器学习证明"],
+    "output": "output/20260522_0535_AI数学新范式_OpenAI模型推翻80年几何猜想.md"
   }
 ]

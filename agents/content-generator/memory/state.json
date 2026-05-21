@@ -1,15 +1,11 @@
 {
-  "status": "active",
-  "last_run": "2026-05-22 05:15",
-  "run_count": 22,
-  "current_task": {
-    "id": 3,
-    "topic": "AI Agent 技术趋势分析（2026年上半年）",
-    "status": "pending"
-  },
+  "status": "idle",
+  "last_run": "2026-05-22 05:36:09",
+  "run_count": 24,
+  "current_task": null,
   "last_task": {
-    "id": 2,
-    "topic": "Flipper One",
+    "id": 3,
+    "topic": "OpenAI model disproved central conjecture in discrete geometry",
     "status": "done"
   }
 }

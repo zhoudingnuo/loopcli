@@ -19,7 +19,8 @@
 
 ## 成本控制（每轮必做）
 
-- **禁用空闲 Agent** — 没任务的 Agent 立即禁用，这是铁律
+- **禁用空闲 Agent** — 没任务的 Agent 立即禁用，这是铁律。方法：在 agent 的 `AGENT` 文件中添加一行 `disabled: true`
+- **启用 Agent** — 需要启用时，删除 agent 的 `AGENT` 文件中的 `disabled` 行。路径：`D:/loopcli/agents/<agent名>/AGENT`
 - **压缩 memory** — thoughts.md 超过 50 行就压缩，只保留最近 5 轮 + 关键决策
 - **清理 inbox** — 处理完的消息归档到 `inbox/archive/`，不要堆积
 - **日志轮转** — 检查 raw.log 大小，超过 1MB 触发轮转
