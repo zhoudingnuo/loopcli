@@ -4,6 +4,7 @@ LoopCLI shared library — common functions used by server.py and run.py.
 
 import json
 import os
+import tempfile
 import threading
 from pathlib import Path
 
@@ -37,11 +38,42 @@ def read_json(path, default=None):
 
 
 def write_json(path, data):
-    """Atomically write data as JSON with thread-safe locking."""
+    """Atomically write data as JSON using tempfile + os.replace.
+
+    Writes to a temporary file first, then atomically replaces the target.
+    This ensures no partial/corrupt files if the process crashes mid-write.
+    """
+    import time as _time
     path = Path(path)
     with _json_lock:
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+        content = json.dumps(data, ensure_ascii=False, indent=2)
+        fd, tmp_path = tempfile.mkstemp(
+            suffix=".tmp",
+            prefix=".loopcli_",
+            dir=str(path.parent),
+        )
+        try:
+            with os.fdopen(fd, "w", encoding="utf-8") as f:
+                f.write(content)
+                f.flush()
+                os.fsync(f.fileno())
+            # On Windows, os.replace can fail if another thread is reading the file.
+            # Retry a few times with a short delay.
+            for attempt in range(5):
+                try:
+                    os.replace(tmp_path, str(path))
+                    break
+                except PermissionError:
+                    if attempt == 4:
+                        raise
+                    _time.sleep(0.05)
+        except BaseException:
+            try:
+                os.unlink(tmp_path)
+            except OSError:
+                pass
+            raise
 
 
 # ─── Agent path safety ───

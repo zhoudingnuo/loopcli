@@ -54,6 +54,7 @@ _sse_connections = 0
 _sse_lock = threading.Lock()
 SSE_MAX_CONNECTIONS = 10
 SSE_TIMEOUT_SECONDS = 300
+SSE_HEARTBEAT_INTERVAL = 30
 
 
 def get_main_tasks():
@@ -243,11 +244,17 @@ class WebUIHandler(SimpleHTTPRequestHandler):
 
         last_pos = 0
         start_time = time.time()
+        last_heartbeat = time.time()
         try:
             while True:
-                if time.time() - start_time > SSE_TIMEOUT_SECONDS:
+                now = time.time()
+                if now - start_time > SSE_TIMEOUT_SECONDS:
                     self._send_sse_event({"event": "timeout", "ts": datetime.now().isoformat()})
                     break
+                if now - last_heartbeat >= SSE_HEARTBEAT_INTERVAL:
+                    self.wfile.write(b": heartbeat\n\n")
+                    self.wfile.flush()
+                    last_heartbeat = now
                 if log_path.exists():
                     lines, last_pos = read_file_tail_incremental(log_path, last_pos)
                     if lines:
