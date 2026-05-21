@@ -528,8 +528,12 @@ def run_agent(agent, iteration, run_log_dir):
             if d > 0:
                 diff[model] = d
         if diff:
-            total_cost, _ = calc_cost(diff, pricing)
-            out(f"  {C.DIM}  💰 ${total_cost:.4f}{C.RST}")
+            total_cost, details = calc_cost(diff, pricing)
+            # 显示明细
+            for model, tokens, cost in details:
+                out(f"    {C.DIM}{model}: +{tokens:,} tokens → ${cost:.4f}{C.RST}")
+            # 总花费用更显眼的颜色
+            out(f"  {C.GREEN}{C.BOLD}💰 本轮花费: ${total_cost:.4f}{C.RST}")
         else:
             out(f"  {C.DIM}💰 本轮无新增消耗{C.RST}")
         save_last_usage(current)
