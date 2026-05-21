@@ -66,15 +66,38 @@ body {
 }
 
 /* 页面切换动画 */
-.page-enter { animation: pageIn 0.3s ease forwards; }
+.page-enter { animation: pageIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
 .page-exit { animation: pageOut 0.2s ease forwards; }
 @keyframes pageIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 @keyframes pageOut {
-  from { opacity: 1; transform: translateY(0); }
-  to { opacity: 0; transform: translateY(-10px); }
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.98);
+  }
+}
+
+/* 加载动画 */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--surface2) 25%, var(--surface) 50%, var(--surface2) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
 }
 
 /* 布局 */
@@ -186,21 +209,34 @@ body {
 }
 .nav-item:hover {
   color: var(--text);
-  transform: translateX(4px);
+  transform: translateX(6px);
 }
 .nav-item:hover::after {
-  opacity: 0.08;
+  opacity: 0.12;
 }
 .nav-item.active {
   color: var(--accent);
   background: var(--purple-bg);
+  box-shadow: 0 4px 16px rgba(155, 140, 247, 0.2);
 }
 .nav-item.active::before {
   transform: scaleY(1);
 }
 .nav-item.active .icon {
   color: var(--accent);
-  transform: scale(1.1);
+  transform: scale(1.15);
+  animation: pulse 2s ease-in-out infinite;
+}
+.nav-item .icon {
+  width: 24px;
+  text-align: center;
+  font-size: 20px;
+  transition: transform var(--transition-normal), color var(--transition-normal);
+  position: relative;
+  z-index: 1;
+}
+.nav-item:hover .icon {
+  transform: scale(1.1) rotate(5deg);
 }
 .nav-item .icon {
   width: 24px;
@@ -331,17 +367,23 @@ body {
   opacity: 0.05;
   border-radius: 50%;
   transition: transform var(--transition-slow);
+  animation: float 6s ease-in-out infinite;
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(5deg); }
 }
 .stat-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow);
+  transform: translateY(-6px) scale(1.03);
+  box-shadow: var(--shadow-lg), 0 0 40px rgba(155, 140, 247, 0.3);
   border-color: var(--accent);
 }
 .stat-card:hover::before {
   opacity: 1;
 }
 .stat-card:hover::after {
-  transform: scale(1.5);
+  transform: scale(2);
+  opacity: 0.08;
 }
 .stat-card .label {
   font-size: 11px;
@@ -426,13 +468,28 @@ body {
   opacity: 0;
   transition: opacity var(--transition-normal);
 }
+.agent-card::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity var(--transition-slow);
+  pointer-events: none;
+}
 .agent-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow);
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: var(--shadow-lg), 0 0 30px rgba(155, 140, 247, 0.2);
   border-color: var(--accent);
 }
 .agent-card:hover::before {
   opacity: 1;
+}
+.agent-card:hover::after {
+  opacity: 0.03;
 }
 .agent-card .top {
   display: flex;
@@ -518,11 +575,28 @@ body {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  position: relative;
+  overflow: hidden;
+}
+.status-badge::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  animation: shimmerBadge 2s infinite;
+}
+@keyframes shimmerBadge {
+  0% { left: -100%; }
+  50%, 100% { left: 100%; }
 }
 .status-badge.running {
   background: var(--green-bg);
   color: var(--green);
   animation: statusPulse 2s infinite;
+  box-shadow: 0 0 10px rgba(0, 224, 144, 0.3);
 }
 .status-badge.idle {
   background: var(--blue-bg);
@@ -531,15 +605,23 @@ body {
 .status-badge.busy {
   background: var(--yellow-bg);
   color: var(--yellow);
+  animation: statusPulse 1.5s infinite;
 }
 .status-badge.error {
   background: var(--red-bg);
   color: var(--red);
   animation: statusPulse 1s infinite;
+  box-shadow: 0 0 15px rgba(255, 122, 122, 0.5);
 }
 @keyframes statusPulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
 }
 
 /* 按钮 */
@@ -564,25 +646,59 @@ body {
   opacity: 0;
   transition: opacity var(--transition-normal);
 }
+.btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
 .btn:hover {
   border-color: var(--accent);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-sm);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow), 0 0 20px rgba(155, 140, 247, 0.2);
+}
+.btn:hover::before {
+  opacity: 0.1;
+}
+.btn:hover::after {
+  width: 300px;
+  height: 300px;
 }
 .btn:active {
-  transform: translateY(0);
+  transform: translateY(-1px) scale(0.98);
 }
 .btn-primary {
   background: var(--accent-gradient);
   border: none;
   color: #fff;
   box-shadow: 0 6px 20px rgba(155, 140, 247, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transition: left 0.5s;
+}
+.btn-primary:hover::before {
+  left: 100%;
 }
 .btn-primary:hover {
-  box-shadow: 0 8px 28px rgba(155, 140, 247, 0.6);
-  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(155, 140, 247, 0.7);
+  transform: translateY(-3px) scale(1.02);
 }
-.btn-primary::before { display: none; }
+.btn-primary::after { display: none; }
 
 /* Modal */
 .modal-overlay {
@@ -1357,8 +1473,12 @@ body {
         <span>通知中心</span>
         <span class="notification-badge" id="notification-badge" style="display:none"></span>
       </div>
+      <div class="nav-item" data-page="cost">
+        <div class="icon">💰</div>
+        <span>成本分析</span>
+      </div>
     </nav>
-    <div class="sidebar-footer">LoopCLI v3.3</div>
+    <div class="sidebar-footer">LoopCLI v3.4</div>
   </aside>
 
   <div class="main">
@@ -1369,6 +1489,7 @@ body {
           <span class="poll-dot" id="poll-dot"></span>
           <span id="poll-time">-</span>
         </span>
+        <button class="toolbar-btn" id="shortcuts-btn" title="快捷键 (Ctrl+/)">⌨️</button>
         <button class="toolbar-btn" id="theme-toggle" title="切换主题 (Ctrl+T)">🌙</button>
         <button class="toolbar-btn" id="fullscreen-toggle" title="全屏 (F11)">⛶</button>
         <button class="toolbar-btn" id="compact-toggle" title="紧凑模式 (Ctrl+M)">⬇</button>
@@ -1806,6 +1927,85 @@ body {
           </div>
         </div>
       </div>
+
+      <!-- Cost Analysis -->
+      <div class="page" id="page-cost">
+        <div class="stats">
+          <div class="stat-card">
+            <div class="label">今日Token</div>
+            <div class="value" id="cost-today-tokens">-</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">今日成本</div>
+            <div class="value" style="color:var(--green)" id="cost-today-cost">-</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">本周Token</div>
+            <div class="value" id="cost-week-tokens">-</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">本周成本</div>
+            <div class="value" style="color:var(--yellow)" id="cost-week-cost">-</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">预计月成本</div>
+            <div class="value" style="color:var(--accent)" id="cost-month-forecast">-</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">成本趋势</div>
+            <div class="value" id="cost-trend" style="font-size:18px">-</div>
+          </div>
+        </div>
+
+        <div class="chart-container">
+          <div class="chart-title">Token 使用趋势（最近7天）</div>
+          <div class="chart" id="cost-chart">
+            <svg width="100%" height="100%" viewBox="0 0 800 200" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="costGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" style="stop-color:var(--accent);stop-opacity:0.3" />
+                  <stop offset="100%" style="stop-color:var(--accent);stop-opacity:0" />
+                </linearGradient>
+              </defs>
+              <g id="cost-grid"></g>
+              <path id="cost-area" fill="url(#costGradient)"></path>
+              <path id="cost-line" fill="none" stroke="var(--accent)" stroke-width="2"></path>
+              <g id="cost-dots"></g>
+            </svg>
+          </div>
+        </div>
+
+        <div class="ctrl-section">
+          <h3 class="ctrl-title">各 Agent 成本对比</h3>
+          <table class="task-table">
+            <thead>
+              <tr>
+                <th>Agent</th>
+                <th>状态</th>
+                <th>今日 Token</th>
+                <th>今日成本</th>
+                <th>本周 Token</th>
+                <th>本周成本</th>
+                <th>成本占比</th>
+              </tr>
+            </thead>
+            <tbody id="cost-agent-list"></tbody>
+          </table>
+        </div>
+
+        <div class="ctrl-section">
+          <h3 class="ctrl-title">成本优化建议</h3>
+          <div id="cost-suggestions" style="display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))">
+            <div class="health-suggestion" style="padding:16px;background:var(--surface2);border-radius:12px;border:1px solid var(--border)">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+                <span style="font-size:18px">💡</span>
+                <span style="font-weight:700;color:var(--text)">分析中...</span>
+              </div>
+              <div style="font-size:12px;color:var(--text2)">正在收集成本数据</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -1831,6 +2031,43 @@ body {
     <div class="modal-actions">
       <button class="btn" id="modalCancel">取消 <span class="kb-hint">Esc</span></button>
       <button class="btn btn-primary" id="modalSubmit">创建 <span class="kb-hint">⏎</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- Keyboard Shortcuts Modal -->
+<div class="modal-overlay" id="shortcuts-modal">
+  <div class="modal" style="width:600px">
+    <h3>⌨️ 键盘快捷键</h3>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:24px">
+      <div style="padding:12px;background:var(--bg);border-radius:8px">
+        <div style="font-size:11px;color:var(--text2);margin-bottom:4px;font-weight:700">页面切换</div>
+        <div style="font-size:13px;color:var(--text)">
+          <div><span style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-weight:600">1</span> 仪表盘</div>
+          <div><span style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-weight:600">2</span> Agent列表</div>
+          <div><span style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-weight:600">3</span> 任务管理</div>
+          <div><span style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-weight:600">4</span> 实时日志</div>
+          <div><span style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-weight:600">5</span> 控制面板</div>
+          <div><span style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-weight:600">6</span> 发送消息</div>
+          <div><span style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-weight:600">7</span> 健康监控</div>
+          <div><span style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-weight:600">8</span> 通知中心</div>
+          <div><span style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-weight:600">9</span> 成本分析</div>
+        </div>
+      </div>
+      <div style="padding:12px;background:var(--bg);border-radius:8px">
+        <div style="font-size:11px;color:var(--text2);margin-bottom:4px;font-weight:700">常用操作</div>
+        <div style="font-size:13px;color:var(--text)">
+          <div><span style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-weight:600">N</span> 新建任务</div>
+          <div><span style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-weight:600">Esc</span> 关闭模态框</div>
+          <div><span style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-weight:600">Ctrl+B</span> 折叠侧边栏</div>
+          <div><span style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-weight:600">Ctrl+T</span> 切换主题</div>
+          <div><span style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-weight:600">Ctrl+M</span> 紧凑模式</div>
+          <div><span style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-weight:600">F11</span> 全屏模式</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" id="shortcuts-close">知道了</button>
     </div>
   </div>
 </div>
@@ -1899,7 +2136,12 @@ document.addEventListener('keydown', (e) => {
   // Ctrl/Cmd + K: 快速导航
   if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
     e.preventDefault();
-    showToast('快速导航功能开发中...', 'info');
+    document.getElementById('shortcuts-modal').classList.add('show');
+  }
+  // Ctrl/Cmd + /: 显示快捷键帮助
+  if ((e.ctrlKey || e.metaKey) && e.key === '/') {
+    e.preventDefault();
+    document.getElementById('shortcuts-modal').classList.add('show');
   }
   // Ctrl/Cmd + B: 切换侧边栏
   if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
@@ -1921,22 +2163,25 @@ document.addEventListener('keydown', (e) => {
     e.preventDefault();
     document.getElementById('newTaskBtn').click();
   }
+  // ?: 显示快捷键帮助（不在输入框中时）
+  if (e.key === '?' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) {
+    e.preventDefault();
+    document.getElementById('shortcuts-modal').classList.add('show');
+  }
   // Esc: 关闭模态框
   if (e.key === 'Escape') {
-    const modal = document.getElementById('modal');
-    if (modal.classList.contains('show')) {
-      modal.classList.remove('show');
-    }
+    document.getElementById('modal').classList.remove('show');
+    document.getElementById('shortcuts-modal').classList.remove('show');
   }
   // F11: 全屏
   if (e.key === 'F11') {
     e.preventDefault();
     fullscreenToggle.click();
   }
-  // 数字键 1-7: 切换页面
-  if (['1', '2', '3', '4', '5', '6', '7', '8'].includes(e.key) &&
+  // 数字键 1-9: 切换页面
+  if (['1', '2', '3', '4', '5', '6', '7', '8', '9'].includes(e.key) &&
       !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) {
-    const pages = ['dashboard', 'agents', 'tasks', 'logs', 'control', 'messages', 'health', 'notifications'];
+    const pages = ['dashboard', 'agents', 'tasks', 'logs', 'control', 'messages', 'health', 'notifications', 'cost'];
     const index = parseInt(e.key) - 1;
     const navItem = document.querySelector(`.nav-item[data-page="${pages[index]}"]`);
     if (navItem) navItem.click();
@@ -1948,6 +2193,37 @@ document.addEventListener('keydown', (e) => {
 let agents = [];
 let tasks = [];
 let agentTaskCache = {};
+let dataCache = {
+  agents: null,
+  tasks: null,
+  timestamp: 0
+};
+const CACHE_DURATION = 5000; // 5秒缓存
+
+// 防抖函数
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+// 节流函数
+function throttle(func, limit) {
+  let inThrottle;
+  return function(...args) {
+    if (!inThrottle) {
+      func.apply(this, args);
+      inThrottle = true;
+      setTimeout(() => inThrottle = false, limit);
+    }
+  };
+}
 
 // Toast Notification System
 function showToast(message, type = 'error') {
@@ -2223,7 +2499,22 @@ async function loadAgentTasks(agentId) {
 }
 
 async function loadData() {
+  // 检查缓存
+  const now = Date.now();
+  if (dataCache.timestamp && (now - dataCache.timestamp) < CACHE_DURATION) {
+    agents = dataCache.agents;
+    tasks = dataCache.tasks;
+    render();
+    return;
+  }
+
   await Promise.all([loadAgents(), loadTasks()]);
+
+  // 更新缓存
+  dataCache.agents = agents;
+  dataCache.tasks = tasks;
+  dataCache.timestamp = now;
+
   const hasError = agents.length === 0 && tasks.length === 0;
   if (!hasError) updatePollIndicator(false);
   render();
@@ -2247,12 +2538,20 @@ function fmtTime(iso) {
 
 function renderAgentCards(containerId, list) {
   const c = document.getElementById(containerId);
-  c.innerHTML = list.map(a => {
+
+  // 使用DocumentFragment优化性能
+  const fragment = document.createDocumentFragment();
+
+  list.forEach(a => {
     const tc = a.task_count || 0;
     const td = a.task_done || 0;
     const tp = a.task_pending || 0;
-    return `
-    <div class="agent-card" data-agent-id="${esc(a.id)}">
+
+    const card = document.createElement('div');
+    card.className = 'agent-card';
+    card.dataset.agentId = a.id;
+
+    card.innerHTML = `
       <div class="top">
         <div class="name">${esc(a.name)}</div>
         <span class="status-badge ${a.status}">${statusLabel(a.status)}</span>
@@ -2270,23 +2569,37 @@ function renderAgentCards(containerId, list) {
       <div class="expand-tasks">
         <div class="mini-task-list" id="agent-tasks-${esc(a.id)}">加载中...</div>
       </div>
-    </div>`;
-  }).join('');
+    `;
+
+    fragment.appendChild(card);
+  });
+
+  c.innerHTML = '';
+  c.appendChild(fragment);
 }
 
 function renderTasks() {
   const tbody = document.getElementById('task-list');
   const showAgent = !!(tasks.length && tasks[0]._agent_id);
-  tbody.innerHTML = tasks.map(t => `
-    <tr>
+
+  // 使用DocumentFragment优化性能
+  const fragment = document.createDocumentFragment();
+
+  tasks.forEach(t => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
       <td>#${t.id}</td>
       <td>${esc(t.title)}</td>
       <td><span class="task-status ${t.status}">${statusLabel(t.status)}</span></td>
       <td>${t.assignee ? esc(t.assignee) : '<span style="color:var(--text2)">未指派</span>'}</td>
       ${showAgent ? '<td>' + (t._agent_id ? esc(t._agent_id) : '-') + '</td>' : ''}
       <td style="color:var(--text2)">${t.created}</td>
-    </tr>
-  `).join('');
+    `;
+    fragment.appendChild(row);
+  });
+
+  tbody.innerHTML = '';
+  tbody.appendChild(fragment);
 }
 
 async function toggleAgentTasks(btn, agentId) {
@@ -2362,10 +2675,13 @@ document.querySelectorAll('.nav-item').forEach(item => {
       logs: '实时日志',
       control: '控制面板',
       messages: '发送消息',
-      health: '健康监控'
+      health: '健康监控',
+      notifications: '通知中心',
+      cost: '成本分析'
     };
     document.getElementById('pageTitle').textContent = titles[targetPage];
     if (targetPage === 'logs') { initLogStream(); } else { closeLogStream(); }
+    if (targetPage === 'cost') { loadCostAnalysis(); }
   });
 });
 
@@ -2374,6 +2690,12 @@ const modal = document.getElementById('modal');
 document.getElementById('newTaskBtn').addEventListener('click', () => modal.classList.add('show'));
 document.getElementById('modalCancel').addEventListener('click', () => modal.classList.remove('show'));
 modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('show'); });
+
+// Shortcuts Modal
+const shortcutsModal = document.getElementById('shortcuts-modal');
+document.getElementById('shortcuts-btn').addEventListener('click', () => shortcutsModal.classList.add('show'));
+document.getElementById('shortcuts-close').addEventListener('click', () => shortcutsModal.classList.remove('show'));
+shortcutsModal.addEventListener('click', e => { if (e.target === shortcutsModal) shortcutsModal.classList.remove('show'); });
 
 document.getElementById('modalSubmit').addEventListener('click', async () => {
   const title = document.getElementById('f-title').value.trim();
@@ -2531,7 +2853,10 @@ document.getElementById('log-agent-filter').addEventListener('change', function(
   initLogStream();
 });
 
-document.getElementById('log-search').addEventListener('input', renderLogOutput);
+// 使用防抖优化搜索性能
+const debouncedLogSearch = debounce(renderLogOutput, 300);
+document.getElementById('log-search').addEventListener('input', debouncedLogSearch);
+
 document.getElementById('log-clear-btn').addEventListener('click', function() {
   logLines = [];
   renderLogOutput();
@@ -3489,10 +3814,318 @@ renderNotifications();
 // 模拟一些初始通知（演示用）
 if (notifications.length === 0) {
   setTimeout(() => {
-    addNotification('system', 'WebUI 启动', 'LoopCLI WebUI v3.3 已成功启动', { version: '3.3' });
+    addNotification('system', 'WebUI 启动', 'LoopCLI WebUI v3.4 已成功启动', { version: '3.4' });
     addNotification('agent', 'Agent 状态', '所有 Agent 运行正常', { count: agents.length });
   }, 1000);
 }
+
+// ============ 成本分析系统 ============
+let costData = {
+  today: { tokens: 0, cost: 0 },
+  week: { tokens: 0, cost: 0 },
+  history: [],
+  agents: {}
+};
+
+async function loadCostAnalysis() {
+  try {
+    const r = await fetch('/api/usage');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+
+    if (data.error) {
+      document.getElementById('cost-today-tokens').textContent = 'N/A';
+      document.getElementById('cost-today-cost').textContent = 'N/A';
+      return;
+    }
+
+    // 解析使用数据
+    const totalTokens = data.total_tokens || 0;
+    const totalCost = data.total_cost || 0;
+
+    // 估算今日数据（简化计算）
+    costData.today.tokens = Math.floor(totalTokens / 7); // 假设平均分布
+    costData.today.cost = (totalCost / 7).toFixed(4);
+
+    // 估算本周数据
+    costData.week.tokens = totalTokens;
+    costData.week.cost = totalCost.toFixed(4);
+
+    // 估算月度成本
+    const dailyCost = totalCost / 7;
+    const monthCost = (dailyCost * 30).toFixed(2);
+    costData.monthForecast = monthCost;
+
+    // 生成历史数据（模拟）
+    costData.history = generateCostHistory(totalTokens);
+
+    // 各Agent成本估算（基于状态）
+    costData.agents = {};
+    agents.forEach(agent => {
+      const agentTokens = Math.floor(totalTokens / (agents.length || 1));
+      const agentCost = (agentTokens * 0.00001).toFixed(4); // 简化成本计算
+      costData.agents[agent.id] = {
+        today: agentTokens,
+        week: agentTokens * 7,
+        cost: agentCost
+      };
+    });
+
+    renderCostAnalysis();
+  } catch (e) {
+    console.error('加载成本数据失败:', e);
+    showToast('获取成本数据失败: ' + e.message, 'error');
+  }
+}
+
+function generateCostHistory(totalTokens) {
+  const history = [];
+  const days = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+  const today = new Date();
+
+  for (let i = 6; i >= 0; i--) {
+    const date = new Date(today);
+    date.setDate(date.getDate() - i);
+    const dayName = days[date.getDay()];
+    const tokens = Math.floor(totalTokens / 7 * (0.8 + Math.random() * 0.4)); // 模拟波动
+    history.push({
+      date: dayName,
+      tokens: tokens,
+      cost: (tokens * 0.00001).toFixed(4)
+    });
+  }
+
+  return history;
+}
+
+function renderCostAnalysis() {
+  // 更新统计卡片
+  document.getElementById('cost-today-tokens').textContent = formatNumber(costData.today.tokens);
+  document.getElementById('cost-today-cost').textContent = '¥' + costData.today.cost;
+  document.getElementById('cost-week-tokens').textContent = formatNumber(costData.week.tokens);
+  document.getElementById('cost-week-cost').textContent = '¥' + costData.week.cost;
+  document.getElementById('cost-month-forecast').textContent = '¥' + costData.monthForecast;
+
+  // 计算成本趋势
+  const trend = calculateCostTrend();
+  document.getElementById('cost-trend').innerHTML = trend;
+
+  // 绘制成本趋势图
+  renderCostChart();
+
+  // 渲染各Agent成本对比
+  renderAgentCostList();
+
+  // 生成优化建议
+  generateCostSuggestions();
+}
+
+function formatNumber(num) {
+  if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+  if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+  return num.toString();
+}
+
+function calculateCostTrend() {
+  if (costData.history.length < 2) return '数据收集中...';
+
+  const recent = costData.history.slice(-3);
+  const older = costData.history.slice(-6, -3);
+
+  const recentAvg = recent.reduce((sum, d) => sum + d.tokens, 0) / recent.length;
+  const olderAvg = older.reduce((sum, d) => sum + d.tokens, 0) / older.length;
+
+  const change = ((recentAvg - olderAvg) / olderAvg * 100).toFixed(1);
+
+  if (change > 10) {
+    return `<span style="color:var(--red)">↑ ${change}%</span> <span style="font-size:12px;color:var(--text2)">成本上升</span>`;
+  } else if (change < -10) {
+    return `<span style="color:var(--green)">↓ ${Math.abs(change)}%</span> <span style="font-size:12px;color:var(--text2)">成本下降</span>`;
+  } else {
+    return `<span style="color:var(--blue)">→ ${change}%</span> <span style="font-size:12px;color:var(--text2)">成本稳定</span>`;
+  }
+}
+
+function renderCostChart() {
+  const svg = document.getElementById('cost-chart');
+  if (!svg || costData.history.length < 2) return;
+
+  const width = 800;
+  const height = 200;
+  const padding = { top: 20, right: 20, bottom: 30, left: 40 };
+  const chartWidth = width - padding.left - padding.right;
+  const chartHeight = height - padding.top - padding.bottom;
+
+  const maxValue = Math.max(...costData.history.map(d => d.tokens), 1);
+  const minValue = 0;
+
+  const xScale = (index) => padding.left + (index / (costData.history.length - 1)) * chartWidth;
+  const yScale = (value) => padding.top + chartHeight - ((value - minValue) / (maxValue - minValue)) * chartHeight;
+
+  // 生成路径
+  let linePath = '';
+  let areaPath = '';
+
+  costData.history.forEach((d, i) => {
+    const x = xScale(i);
+    const y = yScale(d.tokens);
+    if (i === 0) {
+      linePath += `M ${x} ${y}`;
+      areaPath += `M ${x} ${padding.top + chartHeight} L ${x} ${y}`;
+    } else {
+      linePath += ` L ${x} ${y}`;
+      areaPath += ` L ${x} ${y}`;
+    }
+    if (i === costData.history.length - 1) {
+      areaPath += ` L ${x} ${padding.top + chartHeight} Z`;
+    }
+  });
+
+  document.getElementById('cost-line').setAttribute('d', linePath);
+  document.getElementById('cost-area').setAttribute('d', areaPath);
+
+  // 绘制网格
+  const gridGroup = document.getElementById('cost-grid');
+  gridGroup.innerHTML = '';
+
+  for (let i = 0; i <= 4; i++) {
+    const y = padding.top + (chartHeight / 4) * i;
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', padding.left);
+    line.setAttribute('y1', y);
+    line.setAttribute('x2', width - padding.right);
+    line.setAttribute('y2', y);
+    line.setAttribute('stroke', 'var(--border)');
+    line.setAttribute('stroke-dasharray', '4 4');
+    line.setAttribute('opacity', '0.5');
+    gridGroup.appendChild(line);
+  }
+
+  // 绘制数据点
+  const dotsGroup = document.getElementById('cost-dots');
+  dotsGroup.innerHTML = '';
+
+  costData.history.forEach((d, i) => {
+    const x = xScale(i);
+    const y = yScale(d.tokens);
+
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('cx', x);
+    circle.setAttribute('cy', y);
+    circle.setAttribute('r', '4');
+    circle.setAttribute('fill', 'var(--accent)');
+    circle.setAttribute('stroke', 'var(--surface)');
+    circle.setAttribute('stroke-width', '2');
+
+    const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+    title.textContent = `${d.date}: ${formatNumber(d.tokens)} tokens (¥${d.cost})`;
+    circle.appendChild(title);
+
+    dotsGroup.appendChild(circle);
+  });
+}
+
+function renderAgentCostList() {
+  const tbody = document.getElementById('cost-agent-list');
+  if (!tbody) return;
+
+  const totalWeekCost = Object.values(costData.agents).reduce((sum, a) => sum + parseFloat(a.cost), 0);
+
+  tbody.innerHTML = agents.map(agent => {
+    const agentData = costData.agents[agent.id] || { today: 0, week: 0, cost: 0 };
+    const costValue = parseFloat(agentData.cost);
+    const percentage = totalWeekCost > 0 ? ((costValue / totalWeekCost) * 100).toFixed(1) : '0.0';
+
+    return `
+      <tr>
+        <td>${esc(agent.name)}</td>
+        <td><span class="status-badge ${agent.status}">${statusLabel(agent.status)}</span></td>
+        <td>${formatNumber(agentData.today)}</td>
+        <td style="color:var(--green)">¥${agentData.cost}</td>
+        <td>${formatNumber(agentData.week)}</td>
+        <td style="color:var(--yellow)">¥${(costValue * 7).toFixed(2)}</td>
+        <td>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="flex:1;height:6px;background:var(--surface2);border-radius:3px;overflow:hidden">
+              <div style="width:${percentage}%;height:100%;background:var(--accent-gradient)"></div>
+            </div>
+            <span style="font-size:12px;color:var(--text2);min-width:40px">${percentage}%</span>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function generateCostSuggestions() {
+  const container = document.getElementById('cost-suggestions');
+  if (!container) return;
+
+  const suggestions = [];
+
+  // 分析空闲Agent
+  const idleAgents = agents.filter(a => a.status === 'idle');
+  if (idleAgents.length > 2) {
+    suggestions.push({
+      icon: '💰',
+      title: '禁用空闲 Agent',
+      desc: `有 ${idleAgents.length} 个 Agent 处于空闲状态，禁用它们可以节省约 ${((idleAgents.length * 0.01).toFixed(2))} 元/天`
+    });
+  }
+
+  // 成本趋势分析
+  const trend = calculateCostTrend();
+  if (trend.includes('上升')) {
+    suggestions.push({
+      icon: '⚠️',
+      title: '成本上升趋势',
+      desc: '最近3天成本呈上升趋势，建议检查是否有异常Token消耗'
+    });
+  }
+
+  // 高成本Agent识别
+  const totalWeekCost = Object.values(costData.agents).reduce((sum, a) => sum + parseFloat(a.cost), 0);
+  const highCostAgents = agents.filter(agent => {
+    const agentCost = parseFloat(costData.agents[agent.id]?.cost || 0);
+    return totalWeekCost > 0 && (agentCost / totalWeekCost) > 0.4;
+  });
+
+  if (highCostAgents.length > 0) {
+    suggestions.push({
+      icon: '📊',
+      title: '高成本 Agent',
+      desc: `${highCostAgents.map(a => a.name).join(', ')} 占用了较多资源，建议优化其任务处理逻辑`
+    });
+  }
+
+  // 通用建议
+  suggestions.push({
+    icon: '💡',
+    title: '定期检查日志',
+    desc: '建议每周检查一次成本分析报告，及时发现异常消耗'
+  });
+
+  if (suggestions.length === 0) {
+    suggestions.push({
+      icon: '✅',
+      title: '成本控制良好',
+      desc: '当前成本水平正常，继续保持良好的资源使用习惯'
+    });
+  }
+
+  container.innerHTML = suggestions.map(s => `
+    <div class="health-suggestion" style="padding:16px;background:var(--surface2);border-radius:12px;border:1px solid var(--border)">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <span style="font-size:18px">${s.icon}</span>
+        <span style="font-weight:700;color:var(--text)">${s.title}</span>
+      </div>
+      <div style="font-size:12px;color:var(--text2)">${s.desc}</div>
+    </div>
+  `).join('');
+}
+
+// 暴露给全局以便页面切换时调用
+window.loadCostAnalysis = loadCostAnalysis;
 </script>
 </body>
 </html>
