@@ -61,5 +61,13 @@
     "created": "2026-05-21",
     "assignee": "engineering-frontend-developer",
     "completed": "2026-05-21 08:24:15"
+  },
+  {
+    "id": 8,
+    "status": "pending",
+    "title": "修复安全审计 Medium x3 + Low x2 残留问题",
+    "description": "安全最终审计发现以下残留问题需修复：(1) CORS 默认策略过于宽松——server.py 的 CORS_ORIGINS 如未配置环境变量应默认为 localhost:3000 而非 wildcard，修改默认值；(2) write_json 并发竞态——多个请求同时写同一 tasks.json 可能丢失数据，添加 threading.Lock 或文件锁保护 write_json 调用；(3) 消息文件名冲突——并发的 inbox 写入可能产生同名文件覆盖，在文件名中加入随机后缀或 UUID 防冲突；(4) Low: 默认绑定 0.0.0.0 改为 127.0.0.1（生产环境用环境变量覆盖）；(5) Low: 检查代码中是否有 git add -A 等宽泛操作，确保只 add 特定文件。参考 webui/server.py。完成后运行 pytest 确保无回归，通过 inbox 通知 main。",
+    "created": "2026-05-21",
+    "assignee": "engineering-frontend-developer"
   }
 ]
