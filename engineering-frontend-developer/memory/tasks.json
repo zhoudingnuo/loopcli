@@ -25,5 +25,21 @@
     "created": "2026-05-21",
     "assignee": "engineering-frontend-developer",
     "completed": "2026-05-21 08:00:21"
+  },
+  {
+    "id": 4,
+    "status": "pending",
+    "title": "WebUI 多 Agent 统一仪表盘",
+    "description": "当前 WebUI 仪表盘只显示单个 Agent（main）的信息。需要改造为多 Agent 统一视图：(1) 仪表盘首页展示所有已注册 Agent 的卡片（名称、状态、任务完成数、最后运行时间）；(2) 点击 Agent 卡片可展开查看该 Agent 的任务列表；(3) 任务管理页面增加 Agent 筛选下拉框；(4) 后端 server.py 可能需要新增 GET /api/agents/:name/tasks 端点。参考 webui/server.py 和 webui/index.html。",
+    "created": "2026-05-21",
+    "assignee": "engineering-frontend-developer"
+  },
+  {
+    "id": 5,
+    "status": "pending",
+    "title": "为 run.py 添加日志轮转机制",
+    "description": "当前 raw.log 无限增长，缺乏轮转机制。要求：(1) 在 run.py 的日志写入逻辑中添加轮转：当 raw.log 超过 1MB 时自动归档为 raw.log.1、raw.log.2（最多保留 3 个归档）；(2) 使用简单的文件大小检查 + 重命名实现，不引入外部依赖；(3) 确保轮转时不丢失正在写入的日志。参考 D:/loopcli/run.py。",
+    "created": "2026-05-21",
+    "assignee": "engineering-frontend-developer"
   }
 ]
