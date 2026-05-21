@@ -1,3 +1,5 @@
+⚠️ 禁止使用任何 MCP 工具（mcp__lean-ctx__* 等）。只用原生工具：Read、Grep、Glob、Bash、Edit、Write、Agent。
+
 读取 SOUL.md 作为身份。
 读取 memory/state.json。
 读取 inbox/ 下来自 user 的消息（最高优先级）。

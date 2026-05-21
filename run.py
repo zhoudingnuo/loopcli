@@ -32,7 +32,9 @@ CLAUDE = os.path.join(os.environ.get("APPDATA", ""), "npm", "claude.cmd")
 
 LOGS_DIR = os.path.join(LOOPCLI_DIR, "logs")
 GIT_TOKEN_FILE = os.path.join(LOOPCLI_DIR, ".gittoken")
-DEFAULT_PROMPT = """读取 SOUL.md 作为你的身份。
+DEFAULT_PROMPT = """⚠️ 禁止使用任何 MCP 工具（mcp__lean-ctx__* 等）。只用原生工具：Read、Grep、Glob、Bash、Edit、Write、Agent。
+
+读取 SOUL.md 作为你的身份。
 读取 memory/tasks.json 获取分配给你的任务。
 技能文件在 D:/loopcli/skill/（全局），按需读取，不要开局全读。
 
@@ -356,15 +358,24 @@ def run_agent(agent, iteration, run_log_dir):
         proc.stdin.write(prompt.encode("utf-8"))
         proc.stdin.close()
 
-        # 看门狗：30 分钟无输出则杀进程
+        # 并发读 stderr，防止管道缓冲区满导致死锁
+        stderr_chunks = []
+        def drain_stderr():
+            for line in proc.stderr:
+                stderr_chunks.append(line.decode("utf-8", errors="replace"))
+
+        stderr_thread = threading.Thread(target=drain_stderr, daemon=True)
+        stderr_thread.start()
+
+        # 看门狗：5 分钟无输出则杀进程
         last_output = [time.time()]
         stuck = [False]
 
         def watchdog():
             while proc.poll() is None:
-                if time.time() - last_output[0] > 1800:  # 30 分钟
+                if time.time() - last_output[0] > 300:
                     stuck[0] = True
-                    out(f"  {C.RED}⏰ {name} 超时（30分钟无输出），正在终止...{C.RST}")
+                    out(f"  {C.RED}⏰ {name} 超时（5分钟无输出），正在终止...{C.RST}")
                     proc.kill()
                     return
                 time.sleep(10)
@@ -381,7 +392,11 @@ def run_agent(agent, iteration, run_log_dir):
             agent_log.flush()
             handle_event(name, decoded)
 
-        stderr_output = proc.stderr.read().decode("utf-8", errors="replace")
+        proc.wait()
+        stderr_thread.join(timeout=5)
+        wd.join(timeout=5)
+
+        stderr_output = "".join(stderr_chunks)
         if stderr_output:
             out(f"  {C.RED}[{name}] STDERR: {stderr_output[:200]}{C.RST}")
             log_file.write(stderr_output)
@@ -392,13 +407,13 @@ def run_agent(agent, iteration, run_log_dir):
 
         if stuck[0]:
             # 超时被杀：记录错误并通知 main
-            footer = f"\n[{ts}] --- 超时终止 (killed, 30min no output) ---\n"
+            footer = f"\n[{ts}] --- 超时终止 (killed, 5min no output) ---\n"
             log_file.write(footer)
             agent_log.write(footer)
             # 写错误记录
             err_file = os.path.join(path, "memory", "errors.json")
             errs = read_json(err_file, [])
-            errs.append({"time": ts, "agent": name, "error": "timeout", "detail": "30分钟无输出，进程被看门狗终止"})
+            errs.append({"time": ts, "agent": name, "error": "timeout", "detail": "5分钟无输出，进程被看门狗终止"})
             write_json(err_file, errs)
             # 通知 main
             inbox_dir = os.path.join(LOOPCLI_DIR, "main", "inbox")
