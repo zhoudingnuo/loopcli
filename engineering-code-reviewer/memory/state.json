@@ -1,6 +1,6 @@
 {
   "agent": "engineering-code-reviewer",
-  "status": "idle",
+  "status": "disabled",
   "current_task": null,
   "last_run": "2026-05-21 14:44:10",
   "run_count": 191,

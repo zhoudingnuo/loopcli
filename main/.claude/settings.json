@@ -1,0 +1,8 @@
+{
+  "hooks": {
+    "toolStart": "D:/loopcli/tools/token-optimizer.sh"
+  },
+  "env": {
+    "TOKEN_OPTIMIZER_ENABLED": "true"
+  }
+}

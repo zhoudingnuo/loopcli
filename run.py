@@ -241,13 +241,15 @@ def out(text=""):
 
 
 def draw_input():
-    """重绘输入区，光标留在输入行"""
+    """重绘输入区，光标停在 > 后面"""
     with _lock:
         cols = shutil.get_terminal_size().columns
         ob = _ob[0]
         buf = _buf[0][:cols - 25]
         sys.stdout.write(f"\033[{ob+1};1H\033[K{C.CYAN}{'─'*cols}{C.RST}")
         sys.stdout.write(f"\033[{ob+2};1H\033[K{C.CYAN} > {C.RST}{buf}{C.DIM}█{C.RST} {C.DIM}(Enter发送, exit退出){C.RST}")
+        # 光标移到 > 后面，紧跟用户输入内容
+        sys.stdout.write(f"\033[{ob+2};{4 + len(buf)}H")
         sys.stdout.flush()
 
 
@@ -354,7 +356,24 @@ def run_agent(agent, iteration, run_log_dir):
         proc.stdin.write(prompt.encode("utf-8"))
         proc.stdin.close()
 
+        # 看门狗：30 分钟无输出则杀进程
+        last_output = [time.time()]
+        stuck = [False]
+
+        def watchdog():
+            while proc.poll() is None:
+                if time.time() - last_output[0] > 1800:  # 30 分钟
+                    stuck[0] = True
+                    out(f"  {C.RED}⏰ {name} 超时（30分钟无输出），正在终止...{C.RST}")
+                    proc.kill()
+                    return
+                time.sleep(10)
+
+        wd = threading.Thread(target=watchdog, daemon=True)
+        wd.start()
+
         for line in proc.stdout:
+            last_output[0] = time.time()
             decoded = line.decode("utf-8", errors="replace")
             log_file.write(decoded)
             agent_log.write(decoded)
@@ -369,8 +388,29 @@ def run_agent(agent, iteration, run_log_dir):
             agent_log.write(stderr_output)
 
         proc.wait()
+        wd.join(timeout=5)
 
-        footer = f"\n[{ts}] --- 结束 (exit={proc.returncode}) ---\n"
+        if stuck[0]:
+            # 超时被杀：记录错误并通知 main
+            footer = f"\n[{ts}] --- 超时终止 (killed, 30min no output) ---\n"
+            log_file.write(footer)
+            agent_log.write(footer)
+            # 写错误记录
+            err_file = os.path.join(path, "memory", "errors.json")
+            errs = read_json(err_file, [])
+            errs.append({"time": ts, "agent": name, "error": "timeout", "detail": "30分钟无输出，进程被看门狗终止"})
+            write_json(err_file, errs)
+            # 通知 main
+            inbox_dir = os.path.join(LOOPCLI_DIR, "main", "inbox")
+            os.makedirs(inbox_dir, exist_ok=True)
+            msg_ts = datetime.now().strftime("%Y%m%d_%H%M")
+            msg_file = os.path.join(inbox_dir, f"watchdog_{msg_ts}.md")
+            with open(msg_file, "w", encoding="utf-8") as f:
+                f.write(f"# 看门狗超时报告\n- 类型：错误\n- 时间：{ts}\n\n## 内容\nAgent `{name}` 超过 30 分钟无输出，已自动终止。请检查该 Agent 的 SOUL.md 和 PROMPT.md 是否存在问题并修复。\n")
+        else:
+            footer = f"\n[{ts}] --- 结束 (exit={proc.returncode}) ---\n"
+            log_file.write(footer)
+            agent_log.write(footer)
         log_file.write(footer)
         agent_log.write(footer)
     finally:
@@ -402,11 +442,17 @@ def git_push():
         return
     try:
         git = resolve_git()
-        subprocess.run([git, "add", "memory/", "log/", "inbox/"], cwd=LOOPCLI_DIR, capture_output=True, timeout=30)
-        subprocess.run(
+        r = subprocess.run([git, "add", "-A"], cwd=LOOPCLI_DIR, capture_output=True, text=True, timeout=30)
+        if r.returncode != 0:
+            out(f"  {C.RED}[git] add 失败: {r.stderr.strip()}{C.RST}")
+            return
+        r = subprocess.run(
             [git, "commit", "-m", f"auto: loopcli sync {datetime.now().strftime('%Y-%m-%d %H:%M')}"],
-            cwd=LOOPCLI_DIR, capture_output=True, timeout=30
+            cwd=LOOPCLI_DIR, capture_output=True, text=True, timeout=30
         )
+        if r.returncode != 0 and "nothing to commit" not in r.stdout:
+            out(f"  {C.RED}[git] commit 失败: {r.stderr.strip()}{C.RST}")
+            return
         askpass_script = os.path.join(LOOPCLI_DIR, ".git_askpass.bat")
         with open(askpass_script, "w") as f:
             f.write("@echo %GH_TOKEN%\n")
@@ -416,14 +462,17 @@ def git_push():
             "GIT_ASKPASS": askpass_script,
             "GIT_TERMINAL_PROMPT": "0",
         }
-        subprocess.run(
+        r = subprocess.run(
             [git, "push", "https://x-access-token@github.com/zhoudingnuo/loopcli.git", "main"],
-            cwd=LOOPCLI_DIR, capture_output=True, timeout=60, env=push_env,
+            cwd=LOOPCLI_DIR, capture_output=True, text=True, timeout=60, env=push_env,
         )
         os.remove(askpass_script)
-        print("[git] 已同步到 GitHub", flush=True)
+        if r.returncode != 0:
+            out(f"  {C.RED}[git] push 失败: {r.stderr.strip()}{C.RST}")
+        else:
+            out(f"  {C.GREEN}[git] 已同步到 GitHub{C.RST}")
     except Exception as e:
-        print(f"[git] 同步失败: {e}", flush=True)
+        out(f"  {C.RED}[git] 同步失败: {e}{C.RST}")
 
 
 def resolve_git():

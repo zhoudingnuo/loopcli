@@ -1,0 +1,102 @@
+{
+  "hackernews": [
+    {
+      "title": "An OpenAI model has disproved a central conjecture in discrete geometry",
+      "url": "https://openai.com/index/model-disproves-discrete-geometry-conjecture/",
+      "score": 1190,
+      "comments": 864,
+      "source": "hackernews",
+      "timestamp": "2026-05-21T18:34:41.759990"
+    },
+    {
+      "title": "GitHub confirms breach of 3,800 repos via malicious VSCode extension",
+      "url": "https://www.bleepingcomputer.com/news/security/github-confirms-breach-of-3-800-repos-via-malicious-vscode-extension/",
+      "score": 856,
+      "comments": 357,
+      "source": "hackernews",
+      "timestamp": "2026-05-21T18:34:42.371009"
+    },
+    {
+      "title": "Flipper One Tech Specs",
+      "url": "https://docs.flipper.net/one/general/tech-specs",
+      "score": 383,
+      "comments": 134,
+      "source": "hackernews",
+      "timestamp": "2026-05-21T18:34:47.098851"
+    },
+    {
+      "title": "Show HN: I reverse engineered Apple's video wallpapers",
+      "url": "https://github.com/kageroumado/phosphene",
+      "score": 294,
+      "comments": 67,
+      "source": "hackernews",
+      "timestamp": "2026-05-21T18:34:42.960985"
+    },
+    {
+      "title": "DOS Zone",
+      "url": "https://dos.zone/",
+      "score": 262,
+      "comments": 59,
+      "source": "hackernews",
+      "timestamp": "2026-05-21T18:34:46.527084"
+    },
+    {
+      "title": "Vivaldi 8.0",
+      "url": "https://vivaldi.com/blog/vivaldi-on-desktop-8-0/",
+      "score": 141,
+      "comments": 66,
+      "source": "hackernews",
+      "timestamp": "2026-05-21T18:34:44.437932"
+    },
+    {
+      "title": "The Letter S, by Donald Knuth (1980) [pdf]",
+      "url": "https://gwern.net/doc/design/typography/1980-knuth.pdf",
+      "score": 184,
+      "comments": 21,
+      "source": "hackernews",
+      "timestamp": "2026-05-21T18:34:45.938860"
+    },
+    {
+      "title": "Haskell Foundation 2026 Update",
+      "url": "https://discourse.haskell.org/t/haskell-foundation-2026-update/14136",
+      "score": 122,
+      "comments": 35,
+      "source": "hackernews",
+      "timestamp": "2026-05-21T18:34:43.853292"
+    },
+    {
+      "title": "New features in GCC 16: Improved error messages and SARIF output",
+      "url": "https://developers.redhat.com/articles/2026/04/28/gcc-16-improved-error-messages-sarif-output",
+      "score": 88,
+      "comments": 13,
+      "source": "hackernews",
+      "timestamp": "2026-05-21T18:34:45.331190"
+    },
+    {
+      "title": "Show HN: Rmux – A programmable terminal multiplexer with a Playwright-style SDK",
+      "url": "https://github.com/helvesec/rmux",
+      "score": 26,
+      "comments": 22,
+      "source": "hackernews",
+      "timestamp": "2026-05-21T18:34:41.149085"
+    }
+  ],
+  "github": [
+    {
+      "title": "Trending general repos",
+      "url": "https://github.com/trending",
+      "source": "github",
+      "timestamp": "2026-05-21T18:34:47.098851",
+      "note": "Manual check required or web scraper"
+    }
+  ],
+  "last_updated": "2026-05-21T18:34:47.098851",
+  "top_pick": {
+    "title": "An OpenAI model has disproved a central conjecture in discrete geometry",
+    "url": "https://openai.com/index/model-disproves-discrete-geometry-conjecture/",
+    "score": 1190,
+    "comments": 864,
+    "source": "hackernews",
+    "timestamp": "2026-05-21T18:34:41.759990"
+  }
+}

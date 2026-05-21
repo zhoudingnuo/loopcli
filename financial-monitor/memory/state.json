@@ -1,0 +1,11 @@
+{
+  "agent": "financial-monitor",
+  "status": "idle",
+  "last_run": null,
+  "run_count": 0,
+  "apis": {
+    "coingecko": "active",
+    "alphavantage": "setup_required",
+    "binance": "active"
+  }
+}

@@ -1,0 +1,21 @@
+# Prevent auto-loading of heavy directories
+.claude/completions/**
+.claude/sessions/**
+docs/archive/**
+inbox/archive/**
+
+# Prevent loading of large logs
+logs/**/*.log
+**/*.log
+
+# Prevent loading of git files
+.git/**
+
+# Prevent loading of node_modules
+node_modules/**
+
+# Prevent loading of build artifacts
+dist/**
+build/**
+*.pyc
+__pycache__/**

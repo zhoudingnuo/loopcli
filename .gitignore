@@ -17,3 +17,4 @@ __pycache__/
 .gittoken
 .DS_Store
 Thumbs.db
+tools/claude-token-optimizer
