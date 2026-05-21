@@ -94,10 +94,57 @@ body {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
 }
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 5px var(--accent), 0 0 10px var(--accent); }
+  50% { box-shadow: 0 0 20px var(--accent), 0 0 30px var(--accent); }
+}
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes data-refresh {
+  0% { background-color: var(--accent-bg); }
+  100% { background-color: transparent; }
+}
 .skeleton {
   background: linear-gradient(90deg, var(--surface2) 25%, var(--surface) 50%, var(--surface2) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
+}
+.stat-card {
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+}
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+.stat-card.updating {
+  animation: data-refresh 0.5s ease;
+}
+.btn {
+  transition: all var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+}
+.btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255,255,255,0.2);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s, height 0.3s;
+}
+.btn:active::after {
+  width: 200px;
+  height: 200px;
 }
 
 /* 布局 */
@@ -1027,18 +1074,57 @@ body {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  padding: 6px 12px;
+  background: var(--surface2);
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  transition: all var(--transition-normal);
+}
+.poll-indicator:hover {
+  border-color: var(--accent);
+  color: var(--text);
 }
 .poll-dot {
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: var(--green);
   box-shadow: 0 0 10px rgba(0, 224, 144, 0.7);
   animation: pulse 2.5s infinite;
+  position: relative;
+}
+.poll-dot::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: var(--green);
+  opacity: 0.3;
+  animation: ping 2.5s infinite;
+}
+@keyframes ping {
+  0% { transform: scale(1); opacity: 0.3; }
+  75% { transform: scale(2); opacity: 0; }
+  100% { transform: scale(2); opacity: 0; }
+}
+.poll-dot.updating {
+  animation: spin 1s linear infinite;
+  background: var(--accent);
+  box-shadow: 0 0 15px rgba(155, 140, 247, 0.8);
+}
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 .poll-dot.error {
   background: var(--red);
   box-shadow: 0 0 10px rgba(255, 122, 122, 0.7);
+  animation: shake 0.5s ease-in-out infinite;
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
 }
 
 /* Log stream controls */
@@ -1251,6 +1337,32 @@ body {
   background: var(--accent-gradient);
   border-color: transparent;
   color: #fff;
+}
+
+/* Batch Actions */
+.batch-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--accent-bg);
+  border: 1px solid var(--accent);
+  border-radius: 20px;
+  animation: slide-up 0.3s ease;
+}
+.selected-count {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  white-space: nowrap;
+}
+.task-checkbox {
+  width: auto;
+  cursor: pointer;
+  accent-color: var(--accent);
+}
+.task-checkbox:checked {
+  accent-color: var(--accent);
 }
 
 .notification-item {
@@ -1657,17 +1769,24 @@ body {
 
       <!-- Tasks -->
       <div class="page" id="page-tasks">
-        <div class="log-toolbar" style="margin-bottom:18px">
+        <div class="log-toolbar" style="margin-bottom:18px;align-items:center">
           <select id="task-agent-filter">
             <option value="">main</option>
             <option value="__all__">所有 Agent</option>
           </select>
+          <div class="batch-actions" id="batch-actions" style="display:none;gap:8px;margin-left:auto">
+            <span class="selected-count" id="selected-count">已选 0 项</span>
+            <button class="btn" id="batch-complete">标记完成</button>
+            <button class="btn" id="batch-delete">删除</button>
+            <button class="btn" id="batch-cancel">取消</button>
+          </div>
           <button class="btn" id="export-tasks-csv">导出 CSV</button>
           <button class="btn" id="export-tasks-json">导出 JSON</button>
         </div>
         <table class="task-table">
           <thead>
             <tr>
+              <th width="40"><input type="checkbox" id="select-all-tasks" /></th>
               <th>ID</th>
               <th>标题</th>
               <th>状态</th>
@@ -3072,7 +3191,9 @@ function renderTasks() {
 
   tasks.forEach(t => {
     const row = document.createElement('tr');
+    row.dataset.taskId = t.id;
     row.innerHTML = `
+      <td><input type="checkbox" class="task-checkbox" data-task-id="${t.id}" /></td>
       <td>#${t.id}</td>
       <td>${esc(t.title)}</td>
       <td><span class="task-status ${t.status}">${statusLabel(t.status)}</span></td>
@@ -3085,6 +3206,11 @@ function renderTasks() {
 
   tbody.innerHTML = '';
   tbody.appendChild(fragment);
+
+  // 添加复选框事件监听
+  document.querySelectorAll('.task-checkbox').forEach(cb => {
+    cb.addEventListener('change', updateBatchActions);
+  });
 }
 
 async function toggleAgentTasks(btn, agentId) {
@@ -3126,6 +3252,81 @@ document.getElementById('task-agent-filter').addEventListener('change', async fu
   const agentFilter = this.value;
   await loadTasks(agentFilter || undefined);
   renderTasks();
+});
+
+// 批量操作功能
+let selectedTaskIds = new Set();
+
+function updateBatchActions() {
+  const checkboxes = document.querySelectorAll('.task-checkbox:checked');
+  selectedTaskIds = new Set(Array.from(checkboxes).map(cb => cb.dataset.taskId));
+  const count = selectedTaskIds.size;
+  const batchActions = document.getElementById('batch-actions');
+  const selectedCount = document.getElementById('selected-count');
+
+  if (count > 0) {
+    batchActions.style.display = 'flex';
+    selectedCount.textContent = `已选 ${count} 项`;
+  } else {
+    batchActions.style.display = 'none';
+  }
+}
+
+// 全选/取消全选
+document.getElementById('select-all-tasks').addEventListener('change', function() {
+  const checkboxes = document.querySelectorAll('.task-checkbox');
+  checkboxes.forEach(cb => cb.checked = this.checked);
+  updateBatchActions();
+});
+
+// 批量完成
+document.getElementById('batch-complete').addEventListener('click', async function() {
+  if (selectedTaskIds.size === 0) return;
+  if (!confirm(`确定要标记 ${selectedTaskIds.size} 个任务为完成吗？`)) return;
+
+  try {
+    const promises = Array.from(selectedTaskIds).map(id =>
+      fetch(`/api/tasks/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'completed' })
+      })
+    );
+    await Promise.all(promises);
+    showToast(`已标记 ${selectedTaskIds.size} 个任务为完成`, 'success');
+    selectedTaskIds.clear();
+    document.getElementById('select-all-tasks').checked = false;
+    await loadData();
+  } catch (e) {
+    showToast('批量操作失败: ' + e.message, 'error');
+  }
+});
+
+// 批量删除
+document.getElementById('batch-delete').addEventListener('click', async function() {
+  if (selectedTaskIds.size === 0) return;
+  if (!confirm(`确定要删除 ${selectedTaskIds.size} 个任务吗？此操作不可恢复！`)) return;
+
+  try {
+    const promises = Array.from(selectedTaskIds).map(id =>
+      fetch(`/api/tasks/${id}`, { method: 'DELETE' })
+    );
+    await Promise.all(promises);
+    showToast(`已删除 ${selectedTaskIds.size} 个任务`, 'success');
+    selectedTaskIds.clear();
+    document.getElementById('select-all-tasks').checked = false;
+    await loadData();
+  } catch (e) {
+    showToast('批量删除失败: ' + e.message, 'error');
+  }
+});
+
+// 取消选择
+document.getElementById('batch-cancel').addEventListener('click', function() {
+  selectedTaskIds.clear();
+  document.querySelectorAll('.task-checkbox').forEach(cb => cb.checked = false);
+  document.getElementById('select-all-tasks').checked = false;
+  updateBatchActions();
 });
 
 // Navigation - 添加页面切换动画
