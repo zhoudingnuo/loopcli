@@ -100,10 +100,11 @@
   },
   {
     "id": 12,
-    "status": "pending",
+    "status": "done",
     "title": "生产就绪文档与启动脚本",
     "description": "为 LoopCLI 项目完善生产部署准备：\n\n1. **更新 README.md**（如不存在则创建）：\n   - 项目简介、功能列表、架构图说明\n   - 快速开始指南（安装依赖、启动命令）\n   - 多 Agent 架构说明（主 Agent + 子 Agent 协作模式）\n   - WebUI 功能说明（仪表盘、消息发送、Agent 管理）\n   - API 端点列表和用法\n   - 安全特性说明\n\n2. **创建启动脚本 start.bat**：\n   - 启动 WebUI 服务器\n   - 启动 watchdog 进程\n   - 显示访问 URL\n\n3. **创建配置文档 docs/CONFIGURATION.md**：\n   - 环境变量说明（HOST、PORT、SECRET_KEY 等）\n   - Agent 配置选项\n   - WebUI 自定义选项\n\n确保文档准确反映当前代码实际行为。",
     "created": "2026-05-21",
-    "assignee": "engineering-frontend-developer"
+    "assignee": "engineering-frontend-developer",
+    "completed": "2026-05-21 09:05:41"
   }
 ]
