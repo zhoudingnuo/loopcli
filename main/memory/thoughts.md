@@ -1,15 +1,13 @@
 # 思考日志
 
-## 2026-05-22 05:33 - 内容价值创造
+## 2026-05-22 05:35 - Bug 修复
 
-**决策**：激活 content-generator Agent，分配任务 #003
-- 主题：AI Agent 技术趋势分析（2026年上半年）
-- 目标：1500+ 字，SEO 优化，技术博客投稿
-- 价值：创造内容资产，获取 SEO 流量
+**用户反馈**：
+1. run.py 花费不显示
+2. webui Main Agent 状态一直显示"检测中"
 
-**数据**：
-- Token 用量：29%（健康）
-- 所有其他 Agent 保持 disabled
-- content-generator → active
+**修复**：
+- run.py: API 失败时显示提示信息，而非静默
+- webui/server.py: 优化状态检测逻辑，信任 state.json + 5分钟阈值
 
-**下一步**：等待 content-generator 完成任务
+**验证**：测试通过

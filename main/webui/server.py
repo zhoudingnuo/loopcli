@@ -94,22 +94,21 @@ def get_main_agent_activity():
         # Check state.json for more accurate status
         state = read_json(state_path, {})
         state_status = state.get("status", "idle")
+        last_action = state.get("last_action", "")
 
-        # Determine status: use state.json if available, otherwise fallback to mtime check
+        # Determine status: trust state.json primarily
         if state_status == "running":
             result["status"] = "running"
         elif state_status == "error":
             result["status"] = "error"
-        elif state_status == "idle":
-            # Agent 报告空闲，但根据日志更新时间验证
-            if result["seconds_since_last_update"] <= 120:
-                result["status"] = "running"  # 日志刚更新，可能还在运行
-            else:
-                result["status"] = "idle"
-        else:
-            # 未知状态，根据日志时间判断
-            if result["seconds_since_last_update"] <= 120:
-                result["status"] = "running"
+        else:  # idle or unknown
+            # 如果有最近的活动（日志更新<5分钟或 last_action 很新），判定为活跃
+            is_recently_active = (
+                result["seconds_since_last_update"] <= 300 or  # 5分钟内有日志更新
+                (last_action and "activated" in last_action.lower())  # 或最近激活了任务
+            )
+            if is_recently_active:
+                result["status"] = "running" if result["seconds_since_last_update"] <= 120 else "active"
             else:
                 result["status"] = "idle"
 

@@ -356,11 +356,9 @@ def handle_event(agent_name, line):
         if text:
             for ln in text[:300].splitlines():
                 out(f"  {tag} {C.GREEN}{ln}{C.RST}")
-        cost = event.get("cost_usd", "")
         duration = event.get("duration_ms", "")
         if duration:
-            cost_part = f"  💰 ${cost}" if cost else ""
-            out(f"  {tag} {C.DIM}⏱ {duration}ms{cost_part}{C.RST}")
+            out(f"  {tag} {C.DIM}⏱ {duration}ms{C.RST}")
 
     elif event_type == "error":
         out(f"  {tag} {C.RED}✘ {event.get('error', '')}{C.RST}")
@@ -512,7 +510,10 @@ def run_agent(agent, iteration, run_log_dir):
     # 查询本轮花费
     current = query_model_usage()
     pricing = load_pricing()
-    if current and pricing:
+    if current is None:
+        # API 查询失败，提示用户手动检查
+        out(f"  {C.YELLOW}⚠ 花费查询失败，运行: python D:/loopcli/scripts/usage.py{C.RST}")
+    elif current and pricing:
         prev = load_last_usage()
         diff = {}
         for model in set(list(prev.keys()) + list(current.keys())):
@@ -522,6 +523,8 @@ def run_agent(agent, iteration, run_log_dir):
         if diff:
             total_cost, _ = calc_cost(diff, pricing)
             out(f"  {C.DIM}  💰 ${total_cost:.4f}{C.RST}")
+        else:
+            out(f"  {C.DIM}💰 本轮无新增消耗{C.RST}")
         save_last_usage(current)
 
 
