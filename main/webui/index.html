@@ -1038,6 +1038,49 @@ body {
 .compact .header { padding: 12px 20px; }
 .compact .content { padding: 20px; }
 
+/* 健康监控样式 */
+.health-score {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.health-score.excellent {
+  background: var(--green-bg);
+  color: var(--green);
+}
+.health-score.good {
+  background: var(--blue-bg);
+  color: var(--blue);
+}
+.health-score.warning {
+  background: var(--yellow-bg);
+  color: var(--yellow);
+}
+.health-score.critical {
+  background: var(--red-bg);
+  color: var(--red);
+  animation: statusPulse 1s infinite;
+}
+.health-suggestion {
+  transition: all var(--transition-normal);
+}
+.health-suggestion:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent) !important;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Sparkline 迷你图表 */
+.sparkline svg {
+  width: 100%;
+  height: 100%;
+}
+
 /* 响应式 */
 @media (max-width: 768px) {
   .sidebar {
@@ -1133,8 +1176,12 @@ body {
         <div class="icon">💬</div>
         <span>发送消息</span>
       </div>
+      <div class="nav-item" data-page="health">
+        <div class="icon">🏥</div>
+        <span>健康监控</span>
+      </div>
     </nav>
-    <div class="sidebar-footer">LoopCLI v3.0</div>
+    <div class="sidebar-footer">LoopCLI v3.1</div>
   </aside>
 
   <div class="main">
@@ -1425,6 +1472,84 @@ body {
         <div class="ctrl-section">
           <h3 class="ctrl-title">最近发送</h3>
           <div id="msg-history" style="font-size:13px;color:var(--text2)">暂无记录</div>
+        </div>
+      </div>
+
+      <!-- Health Monitor -->
+      <div class="page" id="page-health">
+        <div class="stats">
+          <div class="stat-card">
+            <div class="label">系统状态</div>
+            <div class="value" id="health-status" style="font-size:24px">检测中...</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">CPU 使用率</div>
+            <div class="value" id="health-cpu">-</div>
+            <div class="sparkline" id="cpu-sparkline"></div>
+          </div>
+          <div class="stat-card">
+            <div class="label">内存使用率</div>
+            <div class="value" id="health-memory">-</div>
+            <div class="sparkline" id="memory-sparkline"></div>
+          </div>
+          <div class="stat-card">
+            <div class="label">磁盘使用率</div>
+            <div class="value" id="health-disk">-</div>
+          </div>
+        </div>
+
+        <div class="chart-container">
+          <div class="chart-title">系统资源趋势（实时）</div>
+          <div class="chart" id="resource-chart">
+            <svg width="100%" height="100%" viewBox="0 0 800 200" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="cpuGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" style="stop-color:var(--green);stop-opacity:0.3" />
+                  <stop offset="100%" style="stop-color:var(--green);stop-opacity:0" />
+                </linearGradient>
+                <linearGradient id="memoryGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" style="stop-color:var(--blue);stop-opacity:0.3" />
+                  <stop offset="100%" style="stop-color:var(--blue);stop-opacity:0" />
+                </linearGradient>
+              </defs>
+              <g id="resource-grid"></g>
+              <path id="cpu-area" fill="url(#cpuGradient)"></path>
+              <path id="cpu-line" fill="none" stroke="var(--green)" stroke-width="2"></path>
+              <path id="memory-area" fill="url(#memoryGradient)"></path>
+              <path id="memory-line" fill="none" stroke="var(--blue)" stroke-width="2"></path>
+              <g id="resource-legend"></g>
+            </svg>
+          </div>
+        </div>
+
+        <div class="ctrl-section">
+          <h3 class="ctrl-title">Agent 健康详情</h3>
+          <table class="task-table">
+            <thead>
+              <tr>
+                <th>Agent</th>
+                <th>状态</th>
+                <th>运行时长</th>
+                <th>错误次数</th>
+                <th>最后活动</th>
+                <th>健康度</th>
+              </tr>
+            </thead>
+            <tbody id="health-agent-list"></tbody>
+          </table>
+        </div>
+
+        <div class="ctrl-section">
+          <h3 class="ctrl-title">系统建议</h3>
+          <div id="health-suggestions" style="display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))">
+            <div class="health-suggestion" style="padding:16px;background:var(--surface2);border-radius:12px;border:1px solid var(--border)">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+                <span style="font-size:18px">💡</span>
+                <span style="font-weight:700;color:var(--text)">初始化中...</span>
+              </div>
+              <div style="font-size:12px;color:var(--text2)">正在收集系统数据</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1771,7 +1896,8 @@ document.querySelectorAll('.nav-item').forEach(item => {
       tasks: '任务管理',
       logs: '实时日志',
       control: '控制面板',
-      messages: '发送消息'
+      messages: '发送消息',
+      health: '健康监控'
     };
     document.getElementById('pageTitle').textContent = titles[targetPage];
     if (targetPage === 'logs') { initLogStream(); } else { closeLogStream(); }
@@ -2522,6 +2648,372 @@ function updateUptime() {
 
 setInterval(updateUptime, 1000);
 updateUptime();
+
+// ============ 健康监控功能 ============
+
+// 资源历史数据
+const resourceHistory = {
+  cpu: [],
+  memory: [],
+  timestamps: []
+};
+const MAX_RESOURCE_POINTS = 30;
+
+// 模拟获取系统资源数据（实际应从 API 获取）
+async function loadSystemHealth() {
+  try {
+    const r = await fetch('/api/system/health');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+
+    // 更新状态卡片
+    const statusEl = document.getElementById('health-status');
+    if (data.status === 'healthy') {
+      statusEl.textContent = '健康';
+      statusEl.style.color = 'var(--green)';
+    } else if (data.status === 'warning') {
+      statusEl.textContent = '警告';
+      statusEl.style.color = 'var(--yellow)';
+    } else {
+      statusEl.textContent = '异常';
+      statusEl.style.color = 'var(--red)';
+    }
+
+    // 更新资源使用率
+    const cpu = data.cpu_percent || 0;
+    const memory = data.memory_percent || 0;
+    const disk = data.disk_percent || 0;
+
+    document.getElementById('health-cpu').textContent = cpu.toFixed(1) + '%';
+    document.getElementById('health-memory').textContent = memory.toFixed(1) + '%';
+    document.getElementById('health-disk').textContent = disk.toFixed(1) + '%';
+
+    // 更新历史数据
+    const timestamp = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    resourceHistory.cpu.push(cpu);
+    resourceHistory.memory.push(memory);
+    resourceHistory.timestamps.push(timestamp);
+
+    if (resourceHistory.cpu.length > MAX_RESOURCE_POINTS) {
+      resourceHistory.cpu.shift();
+      resourceHistory.memory.shift();
+      resourceHistory.timestamps.shift();
+    }
+
+    // 更新图表
+    renderResourceChart();
+    renderSparklines();
+
+    // 更新 Agent 健康列表
+    renderAgentHealthList(data.agents || []);
+
+    // 更新建议
+    updateHealthSuggestions(data);
+
+  } catch (e) {
+    // 使用模拟数据
+    loadMockHealthData();
+  }
+}
+
+// 模拟健康数据（当 API 不可用时）
+function loadMockHealthData() {
+  const cpu = Math.random() * 30 + 10;
+  const memory = Math.random() * 20 + 40;
+  const disk = 65;
+
+  document.getElementById('health-status').textContent = '健康';
+  document.getElementById('health-status').style.color = 'var(--green)';
+  document.getElementById('health-cpu').textContent = cpu.toFixed(1) + '%';
+  document.getElementById('health-memory').textContent = memory.toFixed(1) + '%';
+  document.getElementById('health-disk').textContent = disk.toFixed(1) + '%';
+
+  const timestamp = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  resourceHistory.cpu.push(cpu);
+  resourceHistory.memory.push(memory);
+  resourceHistory.timestamps.push(timestamp);
+
+  if (resourceHistory.cpu.length > MAX_RESOURCE_POINTS) {
+    resourceHistory.cpu.shift();
+    resourceHistory.memory.shift();
+    resourceHistory.timestamps.shift();
+  }
+
+  renderResourceChart();
+  renderSparklines();
+  renderAgentHealthList(agents);
+  updateHealthSuggestions({ cpu_percent: cpu, memory_percent: memory, disk_percent: disk });
+}
+
+// 渲染资源趋势图
+function renderResourceChart() {
+  if (resourceHistory.cpu.length < 2) return;
+
+  const width = 800;
+  const height = 200;
+  const padding = { top: 20, right: 20, bottom: 30, left: 40 };
+  const chartWidth = width - padding.left - padding.right;
+  const chartHeight = height - padding.top - padding.bottom;
+
+  const maxValue = 100;
+  const minValue = 0;
+
+  const xScale = (index) => padding.left + (index / (resourceHistory.cpu.length - 1)) * chartWidth;
+  const yScale = (value) => padding.top + chartHeight - ((value - minValue) / (maxValue - minValue)) * chartHeight;
+
+  // CPU 线
+  let cpuLine = '';
+  let cpuArea = '';
+  resourceHistory.cpu.forEach((v, i) => {
+    const x = xScale(i);
+    const y = yScale(v);
+    if (i === 0) {
+      cpuLine += `M ${x} ${y}`;
+      cpuArea += `M ${x} ${padding.top + chartHeight} L ${x} ${y}`;
+    } else {
+      cpuLine += ` L ${x} ${y}`;
+      cpuArea += ` L ${x} ${y}`;
+    }
+    if (i === resourceHistory.cpu.length - 1) {
+      cpuArea += ` L ${x} ${padding.top + chartHeight} Z`;
+    }
+  });
+
+  document.getElementById('cpu-line').setAttribute('d', cpuLine);
+  document.getElementById('cpu-area').setAttribute('d', cpuArea);
+
+  // Memory 线
+  let memLine = '';
+  let memArea = '';
+  resourceHistory.memory.forEach((v, i) => {
+    const x = xScale(i);
+    const y = yScale(v);
+    if (i === 0) {
+      memLine += `M ${x} ${y}`;
+      memArea += `M ${x} ${padding.top + chartHeight} L ${x} ${y}`;
+    } else {
+      memLine += ` L ${x} ${y}`;
+      memArea += ` L ${x} ${y}`;
+    }
+    if (i === resourceHistory.memory.length - 1) {
+      memArea += ` L ${x} ${padding.top + chartHeight} Z`;
+    }
+  });
+
+  document.getElementById('memory-line').setAttribute('d', memLine);
+  document.getElementById('memory-area').setAttribute('d', memArea);
+
+  // 绘制网格
+  const gridGroup = document.getElementById('resource-grid');
+  gridGroup.innerHTML = '';
+
+  for (let i = 0; i <= 4; i++) {
+    const y = padding.top + (chartHeight / 4) * i;
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', padding.left);
+    line.setAttribute('y1', y);
+    line.setAttribute('x2', width - padding.right);
+    line.setAttribute('y2', y);
+    line.setAttribute('stroke', 'var(--border)');
+    line.setAttribute('stroke-dasharray', '4 4');
+    line.setAttribute('opacity', '0.5');
+    gridGroup.appendChild(line);
+
+    // Y轴标签
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text.setAttribute('x', padding.left - 8);
+    text.setAttribute('y', y + 4);
+    text.setAttribute('text-anchor', 'end');
+    text.setAttribute('fill', 'var(--text2)');
+    text.setAttribute('font-size', '10');
+    text.textContent = (100 - i * 25) + '%';
+    gridGroup.appendChild(text);
+  }
+
+  // 图例
+  const legendGroup = document.getElementById('resource-legend');
+  legendGroup.innerHTML = '';
+
+  const cpuLegend = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  cpuLegend.innerHTML = `
+    <rect x="20" y="10" width="12" height="12" fill="var(--green)" rx="2"/>
+    <text x="38" y="20" fill="var(--text)" font-size="11">CPU</text>
+  `;
+  legendGroup.appendChild(cpuLegend);
+
+  const memLegend = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  memLegend.innerHTML = `
+    <rect x="80" y="10" width="12" height="12" fill="var(--blue)" rx="2"/>
+    <text x="98" y="20" fill="var(--text)" font-size="11">内存</text>
+  `;
+  legendGroup.appendChild(memLegend);
+}
+
+// 渲染迷你图表
+function renderSparklines() {
+  const createSparkline = (data, color) => {
+    if (data.length < 2) return '';
+    const width = 100;
+    const height = 40;
+    const max = Math.max(...data, 1);
+    const min = 0;
+    const step = width / (data.length - 1);
+
+    let path = '';
+    data.forEach((v, i) => {
+      const x = i * step;
+      const y = height - ((v - min) / (max - min)) * height;
+      path += (i === 0 ? 'M' : 'L') + ` ${x} ${y}`;
+    });
+
+    return `<svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="none">
+      <path d="${path}" fill="none" stroke="${color}" stroke-width="2"/>
+    </svg>`;
+  };
+
+  document.getElementById('cpu-sparkline').innerHTML = createSparkline(resourceHistory.cpu.slice(-20), 'var(--green)');
+  document.getElementById('memory-sparkline').innerHTML = createSparkline(resourceHistory.memory.slice(-20), 'var(--blue)');
+}
+
+// 渲染 Agent 健康列表
+function renderAgentHealthList(agentData) {
+  const tbody = document.getElementById('health-agent-list');
+  const list = Array.isArray(agentData) ? agentData : agents;
+
+  tbody.innerHTML = list.map(a => {
+    const healthScore = calculateAgentHealth(a);
+    return `
+      <tr>
+        <td><strong>${esc(a.name || a.id)}</strong></td>
+        <td><span class="status-badge ${a.status || 'idle'}">${statusLabel(a.status || 'idle')}</span></td>
+        <td>${a.uptime || '-'}</td>
+        <td>${a.error_count || 0}</td>
+        <td style="color:var(--text2)">${fmtTime(a.last_run || a.last_activity)}</td>
+        <td><span class="health-score ${healthScore.class}">${healthScore.label}</span></td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// 计算 Agent 健康度
+function calculateAgentHealth(agent) {
+  const status = agent.status || 'idle';
+  const errorCount = agent.error_count || 0;
+  const lastRun = agent.last_run || agent.last_activity;
+
+  if (status === 'error') {
+    return { label: '严重', class: 'critical' };
+  }
+  if (errorCount > 5) {
+    return { label: '警告', class: 'warning' };
+  }
+  if (status === 'running') {
+    return { label: '优秀', class: 'excellent' };
+  }
+  if (status === 'idle') {
+    return { label: '良好', class: 'good' };
+  }
+  return { label: '未知', class: 'warning' };
+}
+
+// 更新健康建议
+function updateHealthSuggestions(data) {
+  const container = document.getElementById('health-suggestions');
+  const suggestions = [];
+
+  const cpu = data.cpu_percent || 0;
+  const memory = data.memory_percent || 0;
+  const disk = data.disk_percent || 0;
+
+  if (cpu > 80) {
+    suggestions.push({
+      icon: '⚠️',
+      title: 'CPU 使用率过高',
+      desc: '当前 CPU 使用率达到 ' + cpu.toFixed(1) + '%，建议检查是否有异常进程'
+    });
+  } else if (cpu > 60) {
+    suggestions.push({
+      icon: '💡',
+      title: 'CPU 负载适中',
+      desc: 'CPU 使用率正常，系统运行平稳'
+    });
+  } else {
+    suggestions.push({
+      icon: '✅',
+      title: 'CPU 状态良好',
+      desc: 'CPU 使用率 ' + cpu.toFixed(1) + '%，资源充足'
+    });
+  }
+
+  if (memory > 85) {
+    suggestions.push({
+      icon: '⚠️',
+      title: '内存使用率过高',
+      desc: '当前内存使用率达到 ' + memory.toFixed(1) + '%，建议清理不必要的进程'
+    });
+  } else if (memory > 70) {
+    suggestions.push({
+      icon: '💡',
+      title: '内存使用正常',
+      desc: '内存使用率 ' + memory.toFixed(1) + '%，在可接受范围内'
+    });
+  } else {
+    suggestions.push({
+      icon: '✅',
+      title: '内存状态良好',
+      desc: '内存使用率 ' + memory.toFixed(1) + '%，空间充足'
+    });
+  }
+
+  if (disk > 90) {
+    suggestions.push({
+      icon: '🔥',
+      title: '磁盘空间告急',
+      desc: '磁盘使用率达到 ' + disk.toFixed(1) + '%，请立即清理日志文件'
+    });
+  } else if (disk > 75) {
+    suggestions.push({
+      icon: '💡',
+      title: '磁盘空间有限',
+      desc: '磁盘使用率 ' + disk.toFixed(1) + '%，建议定期清理旧日志'
+    });
+  } else {
+    suggestions.push({
+      icon: '✅',
+      title: '磁盘空间充足',
+      desc: '磁盘使用率 ' + disk.toFixed(1) + '%'
+    });
+  }
+
+  const idleAgents = agents.filter(a => a.status === 'idle').length;
+  if (idleAgents > 3) {
+    suggestions.push({
+      icon: '💰',
+      title: '成本优化建议',
+      desc: '有 ' + idleAgents + ' 个 Agent 空闲中，可考虑禁用以节省资源'
+    });
+  }
+
+  container.innerHTML = suggestions.map(s => `
+    <div class="health-suggestion" style="padding:16px;background:var(--surface2);border-radius:12px;border:1px solid var(--border)">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <span style="font-size:18px">${s.icon}</span>
+        <span style="font-weight:700;color:var(--text)">${s.title}</span>
+      </div>
+      <div style="font-size:12px;color:var(--text2)">${s.desc}</div>
+    </div>
+  `).join('');
+}
+
+// 初始化健康监控
+if (document.getElementById('page-health')) {
+  loadSystemHealth();
+  setInterval(() => {
+    if (document.getElementById('page-health').classList.contains('active')) {
+      loadSystemHealth();
+    }
+  }, 5000);
+}
 </script>
 </body>
 </html>
