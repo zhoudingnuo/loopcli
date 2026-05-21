@@ -2,6 +2,7 @@ import argparse
 import json
 import msvcrt
 import os
+import queue
 import shutil
 import subprocess
 import sys
@@ -32,8 +33,8 @@ CLAUDE = os.path.join(os.environ.get("APPDATA", ""), "npm", "claude.cmd")
 LOGS_DIR = os.path.join(LOOPCLI_DIR, "logs")
 GIT_TOKEN_FILE = os.path.join(LOOPCLI_DIR, ".gittoken")
 DEFAULT_PROMPT = """读取 SOUL.md 作为你的身份。
-读取 D:/loopcli/skill/ 下所有技能文件（全局技能）。
 读取 memory/tasks.json 获取分配给你的任务。
+技能文件在 D:/loopcli/skill/（全局），按需读取，不要开局全读。
 
 执行步骤：
 1. 从 tasks.json 中找 status 为 "pending" 的第一个任务
@@ -212,6 +213,47 @@ def cmd_templates(args):
 
 # ─── 子命令: run（主循环）───
 
+# ANSI 颜色
+class C:
+    RST = "\033[0m"
+    BOLD = "\033[1m"
+    DIM = "\033[2m"
+    CYAN = "\033[36m"
+    GREEN = "\033[32m"
+    YELLOW = "\033[33m"
+    RED = "\033[31m"
+
+
+# 全局分屏状态（由 cmd_run 设置）
+_output_bottom = [0]  # 输出区底行号
+_print_lock = threading.Lock()
+
+
+def out(text=""):
+    """输出到滚动区域，然后光标回到输入区"""
+    with _print_lock:
+        # 移到输出区底部，打印
+        sys.stdout.write(f"\033[{_output_bottom[0]};1H")
+        print(text, flush=True)
+        # 重绘输入区，光标留在输入行
+        _draw_input()
+
+
+def _draw_input():
+    """重绘底部输入区，光标留在输入行"""
+    rows, cols = shutil.get_terminal_size().lines, shutil.get_terminal_size().columns
+    ob = _output_bottom[0]
+    buf = _input_buffer[0][:cols - 25] if _input_buffer else ""
+    sys.stdout.write(f"\033[{ob + 1};1H\033[K{C.CYAN}{'─' * cols}{C.RST}")
+    sys.stdout.write(f"\033[{ob + 2};1H\033[K{C.CYAN} > {C.RST}{buf}{C.DIM}█{C.RST} {C.DIM}(Enter发送, exit退出){C.RST}")
+    # 光标留在输入行，不回输出区
+    sys.stdout.write(f"\033[{ob + 2};{4 + len(buf)}H")
+    sys.stdout.flush()
+
+
+_input_buffer = [""]
+
+
 def handle_event(agent_name, line):
     line = line.strip()
     if not line:
@@ -219,7 +261,7 @@ def handle_event(agent_name, line):
     try:
         event = json.loads(line)
     except json.JSONDecodeError:
-        print(f"[{agent_name}] {line}", flush=True)
+        print(f"  {C.DIM}{line}{C.RST}", flush=True)
         return
 
     event_type = event.get("type", "")
@@ -230,7 +272,8 @@ def handle_event(agent_name, line):
             if block.get("type") == "text":
                 text = block.get("text", "")
                 if text:
-                    print(f"[{agent_name}] {text}", flush=True)
+                    for ln in text.splitlines():
+                        print(f"  {ln}", flush=True)
             elif block.get("type") == "tool_use":
                 name = block.get("name", "")
                 inp = block.get("input", {})
@@ -239,7 +282,7 @@ def handle_event(agent_name, line):
                     if k in inp:
                         detail = inp[k]
                         break
-                print(f"[{agent_name}] ● {name}({detail})", flush=True)
+                print(f"  {C.YELLOW}●{C.RST} {C.BOLD}{name}{C.RST}({C.DIM}{detail}{C.RST})", flush=True)
 
     elif event_type == "tool_result":
         content = event.get("content", "")
@@ -249,19 +292,29 @@ def handle_event(agent_name, line):
         elif isinstance(content, str):
             texts = [content]
         for text in texts:
-            print(f"[{agent_name}]   ↳ {text[:200]}", flush=True)
+            short = text[:150].replace("\n", " ")
+            print(f"    {C.DIM}↳ {short}{C.RST}", flush=True)
 
     elif event_type == "result":
         text = event.get("result", "")
         if text:
-            print(f"[{agent_name}] [结果] {text[:500]}", flush=True)
+            for ln in text[:300].splitlines():
+                print(f"  {C.GREEN}{ln}{C.RST}", flush=True)
         cost = event.get("cost_usd", "")
         duration = event.get("duration_ms", "")
         if cost or duration:
-            print(f"[{agent_name}] [统计] 耗时: {duration}ms, 费用: ${cost}", flush=True)
+            print(f"  {C.DIM}⏱ {duration}ms  💰 ${cost}{C.RST}", flush=True)
 
     elif event_type == "error":
-        print(f"[{agent_name}] [错误] {event.get('error', '')}", flush=True)
+        print(f"  {C.RED}✘ {event.get('error', '')}{C.RST}", flush=True)
+
+
+def p_sub(text):
+    print(f"  {C.DIM}{text}{C.RST}", flush=True)
+
+def p_agent_header(name, iteration):
+    tag = f" {name} "
+    print(f"\n{C.CYAN}{C.BOLD}{tag}{C.RST} {C.DIM}iter #{iteration}{C.RST}", flush=True)
 
 
 def run_agent(agent, iteration, run_log_dir):
@@ -328,24 +381,13 @@ def run_agent(agent, iteration, run_log_dir):
         log_file.close()
         agent_log.close()
 
-    # 更新 state.json (with file lock)
+    # 更新 state.json
     state_file = os.path.join(path, "memory", "state.json")
-    with open(state_file, "a+") as f:
-        msvcrt.locking(f.fileno(), msvcrt.LK_LOCK, 1)
-        try:
-            f.seek(0)
-            try:
-                state = json.load(f)
-            except (json.JSONDecodeError, ValueError):
-                state = {}
-            state["status"] = "idle"
-            state["last_run"] = ts
-            state["run_count"] = state.get("run_count", 0) + 1
-            f.seek(0)
-            f.truncate()
-            json.dump(state, f, indent=2, ensure_ascii=False)
-        finally:
-            msvcrt.locking(f.fileno(), msvcrt.LK_UNLCK, 1)
+    state = load_agent_state(path) or {}
+    state["status"] = "idle"
+    state["last_run"] = ts
+    state["run_count"] = state.get("run_count", 0) + 1
+    write_json(state_file, state)
 
     status = "完成" if proc.returncode == 0 else f"异常(exit={proc.returncode})"
     print(f"[{name}] 本轮{status}", flush=True)
@@ -417,22 +459,100 @@ def cmd_run(args):
     }
     write_json(os.path.join(run_log_dir, "meta.json"), meta)
 
-    print(f"运行 ID: {run_id}")
-    print(f"日志目录: {run_log_dir}")
-    print(f"发现 {len(agents)} 个 Agent: {', '.join(a['name'] for a in agents)}")
+    # ─── 分屏终端设置 ───
+    rows, cols = shutil.get_terminal_size().lines, shutil.get_terminal_size().columns
+    INPUT_ROWS = 2  # 底部输入区行数（分隔线 + 输入行）
+    output_bottom = rows - INPUT_ROWS  # 输出区底部行号
 
+    # 设置滚动区域：第1行到 output_bottom 行
+    sys.stdout.write(f"\033[1;{output_bottom}r")
+    sys.stdout.write(f"\033[1;1H")
+    sys.stdout.flush()
+
+    print(f"LoopCLI 启动 | {len(agents)} Agents | 运行ID: {run_id}")
+
+    # 输入状态
+    msg_queue = queue.Queue()
+    stop_event = threading.Event()
+    input_buffer = [""]  # 用 list 以便在闭包中修改
+
+    def draw_input():
+        """重绘底部输入区域"""
+        buf = input_buffer[0][:cols - 25]
+        # 分隔线（在滚动区域外）
+        sys.stdout.write(f"\033[{output_bottom + 1};1H\033[K{C.CYAN}{'─' * cols}{C.RST}")
+        # 输入行
+        sys.stdout.write(f"\033[{output_bottom + 2};1H\033[K{C.CYAN} > {C.RST}{buf}{C.DIM}█{C.RST} {C.DIM}(Enter发送, exit退出){C.RST}")
+        # 光标回到输出区底部，让 print 正常工作
+        sys.stdout.write(f"\033[{output_bottom};1H")
+        sys.stdout.flush()
+
+    draw_input()
+
+    def input_listener():
+        while not stop_event.is_set():
+            try:
+                ch = msvcrt.getwch()
+                if ch == '\r':
+                    line = input_buffer[0].strip()
+                    input_buffer[0] = ""
+                    draw_input()
+                    if line == "exit":
+                        msg_queue.put("__EXIT__")
+                        return
+                    if line:
+                        msg_queue.put(line)
+                        # 在输出区显示发送确认
+                        sys.stdout.write(f"\033[{output_bottom};1H")
+                        print(f"  {C.GREEN}✔ 消息已发送 -> main/inbox/{C.RST}")
+                        draw_input()
+                elif ch == '\x03':
+                    msg_queue.put("__EXIT__")
+                    return
+                elif ch == '\x08':
+                    input_buffer[0] = input_buffer[0][:-1]
+                    draw_input()
+                elif len(ch) == 1 and ord(ch) >= 32:
+                    input_buffer[0] += ch
+                    draw_input()
+            except Exception:
+                pass
+
+    listener = threading.Thread(target=input_listener, daemon=True)
+    listener.start()
+
+    def process_queue():
+        while True:
+            try:
+                msg = msg_queue.get_nowait()
+            except queue.Empty:
+                break
+            if msg == "__EXIT__":
+                return False
+            inbox_dir = os.path.join(LOOPCLI_DIR, "main", "inbox")
+            os.makedirs(inbox_dir, exist_ok=True)
+            ts = datetime.now().strftime("%Y%m%d_%H%M")
+            msg_file = os.path.join(inbox_dir, f"user_{ts}.md")
+            with open(msg_file, "w", encoding="utf-8") as f:
+                f.write(f"# 来自 zhoudingnuo 的消息\n- 类型：指令\n- 时间：{datetime.now().strftime('%Y-%m-%d %H:%M')}\n\n## 内容\n{msg}\n")
+        return True
+
+    # ─── 主循环 ───
     count = 0
     while args.iterations == 0 or count < args.iterations:
         count += 1
         agents = discover_agents()
         ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        print(f"\n{'='*60}")
-        print(f"[{ts}] 第 {count}{'/' + str(args.iterations) if args.iterations else ''} 轮 | {len(agents)} 个 Agent")
-        print(f"{'='*60}")
+        iter_label = f"{count}/{args.iterations}" if args.iterations else str(count)
+
+        # 输出到滚动区域
+        sys.stdout.write(f"\033[{output_bottom};1H")
+        print(f"\n{C.BOLD}{C.CYAN}══ Loop {iter_label} | {len(agents)} Agents | {ts} ══{C.RST}")
 
         threads = []
         for agent in agents:
-            print(f"\n--- 启动 [{agent['name']}] ---", flush=True)
+            sys.stdout.write(f"\033[{output_bottom};1H")
+            p_agent_header(agent["name"], count)
             t = threading.Thread(target=run_agent, args=(agent, count, run_log_dir))
             t.start()
             threads.append(t)
@@ -441,30 +561,27 @@ def cmd_run(args):
 
         git_push()
 
+        if not process_queue():
+            break
+
         if args.iterations == 0 or count < args.iterations:
-            print(f"\n{'─'*60}", flush=True)
-            print(f"输入消息发给 main（直接回车跳过，输入 exit 停止）:", flush=True)
-            try:
-                user_input = input(f"  > ").strip()
-                if user_input.lower() == "exit":
-                    print("用户终止运行")
+            draw_input()
+            for _ in range(args.wait):
+                if not process_queue():
+                    stop_event.set()
                     break
-                if user_input:
-                    msg_file = write_inbox_message(
-                        os.path.join(LOOPCLI_DIR, "main"),
-                        "user",
-                        user_input,
-                    )
-                    print(f"  [已发送] -> main/inbox/", flush=True)
-            except EOFError:
-                pass
-            print(f"  等待 {args.wait} 秒后进入下一轮...", flush=True)
-            time.sleep(args.wait)
+                time.sleep(1)
+
+    # 清理：恢复滚动区域
+    stop_event.set()
+    sys.stdout.write(f"\033[r")  # 重置滚动区域
+    sys.stdout.write(f"\033[{rows};1H")  # 光标到底部
+    sys.stdout.flush()
+
     meta["finished"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     meta["total_iterations"] = count
     write_json(os.path.join(run_log_dir, "meta.json"), meta)
-
-    print(f"\n运行结束，日志保存在: {run_log_dir}")
+    print(f"运行结束，日志保存在: {run_log_dir}")
 
 
 # ─── CLI 入口 ───
