@@ -1,5 +1,10 @@
 {
   "status": "idle",
-  "last_run": "2026-05-21 18:54:43",
-  "run_count": 3
+  "last_run": "2026-05-22 04:21:10",
+  "run_count": 21,
+  "last_task": {
+    "id": 1,
+    "topic": "Flipper One",
+    "status": "done"
+  }
 }

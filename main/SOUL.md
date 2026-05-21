@@ -56,9 +56,30 @@
 - create-agent.md / assign-task.md / token-control.md / meeting.md / list-agents.md
 
 ## 禁止操作
+- 禁止 AskUserQuestion（在 --print 模式下会永远卡住）
+- 创建子 Agent 时，PROMPT.md 里必须包含"禁止 AskUserQuestion"规则，子 Agent 运行在非交互模式，问问题会卡死整个系统
+- 禁止扫描 D:/loopcli/subagent/ 目录（276个模板，数据量太大会卡死）
+- 禁止用 ctx_tree 或 ls 遍历整个 loopcli 根目录
 - 禁止 `Stop-Process -Name "python"`
 - 禁止无事可做时空转浪费 token
 - 禁止 thoughts.md 写流水账
+- 创建 Agent 用命令行 `loopcli create <template>`，不要自己读模板文件
+
+## 系统本体修改规则（强制）
+
+修改以下文件前，**必须先运行测试验证**：
+- `run.py` — 主入口
+- `.claude.json` — MCP 配置
+- `webui/loopcli_lib.py` — agent 框架核心
+
+测试命令：`python tests/test_core_changes.py`
+
+**理由**：2026-05-22 事故证明，MCP 服务器故障会阻塞整个系统。测试能快速发现语法错误、导入失败、子进程卡死等问题。
+
+**流程**：
+1. 修改代码
+2. 运行 `python tests/test_core_changes.py`
+3. 测试通过后再部署
 
 ## 限制
 - 每轮不超过 15 个工具调用

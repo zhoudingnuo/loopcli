@@ -1,6 +1,6 @@
 {
   "agent": "financial-monitor",
-  "status": "idle",
+  "status": "disabled",
   "last_run": null,
   "run_count": 0,
   "apis": {

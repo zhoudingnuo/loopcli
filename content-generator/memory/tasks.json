@@ -1,0 +1,24 @@
+[
+  {
+    "id": 1,
+    "status": "done",
+    "assignee": "content-generator",
+    "created": "2026-05-22",
+    "completed": "2026-05-22 03:49",
+    "topic": "Flipper One - 开源 Linux Cyberdeck",
+    "source": "hackernews",
+    "score": 842
+  },
+  {
+    "id": 2,
+    "status": "pending",
+    "assignee": "content-generator",
+    "created": "2026-05-22",
+    "topic": "OpenAI model disproved central conjecture in discrete geometry",
+    "source": "hackernews",
+    "score": 1131,
+    "url": "https://openai.com/blog/discrete-geometry-breakthrough",
+    "angle": "AI突破性应用：数学证明的新范式",
+    "target_keywords": ["AI", "数学", "OpenAI", "几何", "机器学习证明"]
+  }
+]

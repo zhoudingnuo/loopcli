@@ -1,84 +1,84 @@
 {
   "hackernews": [
     {
-      "title": "An OpenAI model has disproved a central conjecture in discrete geometry",
-      "url": "https://openai.com/index/model-disproves-discrete-geometry-conjecture/",
-      "score": 1190,
-      "comments": 864,
+      "title": "Flipper One – we need your help",
+      "url": "https://blog.flipper.net/flipper-one-we-need-your-help/",
+      "score": 842,
+      "comments": 368,
       "source": "hackernews",
-      "timestamp": "2026-05-21T18:34:41.759990"
+      "timestamp": "2026-05-22T03:09:41.280264"
     },
     {
-      "title": "GitHub confirms breach of 3,800 repos via malicious VSCode extension",
-      "url": "https://www.bleepingcomputer.com/news/security/github-confirms-breach-of-3-800-repos-via-malicious-vscode-extension/",
-      "score": 856,
-      "comments": 357,
+      "title": "Python 3.15: features that didn't make the headlines",
+      "url": "https://blog.changs.co.uk/python-315-features-that-didnt-make-the-headlines.html",
+      "score": 249,
+      "comments": 120,
       "source": "hackernews",
-      "timestamp": "2026-05-21T18:34:42.371009"
+      "timestamp": "2026-05-22T03:09:44.217828"
     },
     {
-      "title": "Flipper One Tech Specs",
-      "url": "https://docs.flipper.net/one/general/tech-specs",
-      "score": 383,
-      "comments": 134,
+      "title": "Project Hail Mary – Stellar Navigation Chart",
+      "url": "https://valhovey.github.io/gaia-mary/",
+      "score": 179,
+      "comments": 49,
       "source": "hackernews",
-      "timestamp": "2026-05-21T18:34:47.098851"
+      "timestamp": "2026-05-22T03:09:40.670284"
     },
     {
-      "title": "Show HN: I reverse engineered Apple's video wallpapers",
-      "url": "https://github.com/kageroumado/phosphene",
-      "score": 294,
-      "comments": 67,
+      "title": "Amazon, Facebook, FBI have access to a private intelligence-sharing network",
+      "url": "https://prismreports.org/2026/05/20/seattle-shield-private-companies-surveillance/",
+      "score": 204,
+      "comments": 58,
       "source": "hackernews",
-      "timestamp": "2026-05-21T18:34:42.960985"
+      "timestamp": "2026-05-22T03:09:39.506984"
     },
     {
-      "title": "DOS Zone",
-      "url": "https://dos.zone/",
-      "score": 262,
-      "comments": 59,
+      "title": "Indexing a year of video locally on a 2021 MacBook with Gemma4-31B (50GB swap)",
+      "url": "https://blog.simbastack.com/indexed-a-year-of-video-locally/",
+      "score": 173,
+      "comments": 60,
       "source": "hackernews",
-      "timestamp": "2026-05-21T18:34:46.527084"
+      "timestamp": "2026-05-22T03:09:43.043557"
     },
     {
-      "title": "Vivaldi 8.0",
-      "url": "https://vivaldi.com/blog/vivaldi-on-desktop-8-0/",
-      "score": 141,
-      "comments": 66,
-      "source": "hackernews",
-      "timestamp": "2026-05-21T18:34:44.437932"
-    },
-    {
-      "title": "The Letter S, by Donald Knuth (1980) [pdf]",
-      "url": "https://gwern.net/doc/design/typography/1980-knuth.pdf",
-      "score": 184,
-      "comments": 21,
-      "source": "hackernews",
-      "timestamp": "2026-05-21T18:34:45.938860"
-    },
-    {
-      "title": "Haskell Foundation 2026 Update",
-      "url": "https://discourse.haskell.org/t/haskell-foundation-2026-update/14136",
-      "score": 122,
-      "comments": 35,
-      "source": "hackernews",
-      "timestamp": "2026-05-21T18:34:43.853292"
-    },
-    {
-      "title": "New features in GCC 16: Improved error messages and SARIF output",
-      "url": "https://developers.redhat.com/articles/2026/04/28/gcc-16-improved-error-messages-sarif-output",
-      "score": 88,
+      "title": "More than 340 local news outlets are limiting the Internet Archive's access",
+      "url": "https://www.niemanlab.org/2026/05/more-than-340-local-news-outlets-are-limiting-the-internet-archives-access-to-their-journalism/",
+      "score": 69,
       "comments": 13,
       "source": "hackernews",
-      "timestamp": "2026-05-21T18:34:45.331190"
+      "timestamp": "2026-05-22T03:09:41.860543"
     },
     {
-      "title": "Show HN: Rmux – A programmable terminal multiplexer with a Playwright-style SDK",
-      "url": "https://github.com/helvesec/rmux",
-      "score": 26,
-      "comments": 22,
+      "title": "BBEdit 16",
+      "url": "https://www.barebones.com/products/bbedit/bbedit16.html",
+      "score": 71,
+      "comments": 7,
       "source": "hackernews",
-      "timestamp": "2026-05-21T18:34:41.149085"
+      "timestamp": "2026-05-22T03:09:40.094984"
+    },
+    {
+      "title": "Spotify will start reserving concert tickets for fans",
+      "url": "https://www.hollywoodreporter.com/music/music-industry-news/spotify-will-start-reserving-concert-tickets-for-superfans-1236603106/",
+      "score": 21,
+      "comments": 32,
+      "source": "hackernews",
+      "timestamp": "2026-05-22T03:09:42.434580"
+    },
+    {
+      "title": "Where are all the UK red telephone kiosks?",
+      "url": "https://www.thek6project.co.uk/",
+      "score": 20,
+      "comments": 3,
+      "source": "hackernews",
+      "timestamp": "2026-05-22T03:09:43.656825"
+    },
+    {
+      "title": "ParadeDB (YC S23) Is Hiring Distributed Systems/Platform Engineers",
+      "url": "https://news.ycombinator.com/item?id=48225852",
+      "score": 1,
+      "comments": 0,
+      "source": "hackernews",
+      "timestamp": "2026-05-22T03:09:44.780143"
     }
   ],
   "github": [
@@ -86,17 +86,17 @@
       "title": "Trending general repos",
       "url": "https://github.com/trending",
       "source": "github",
-      "timestamp": "2026-05-21T18:34:47.098851",
+      "timestamp": "2026-05-22T03:09:44.780143",
       "note": "Manual check required or web scraper"
     }
   ],
-  "last_updated": "2026-05-21T18:34:47.098851",
+  "last_updated": "2026-05-22T03:09:44.780143",
   "top_pick": {
-    "title": "An OpenAI model has disproved a central conjecture in discrete geometry",
-    "url": "https://openai.com/index/model-disproves-discrete-geometry-conjecture/",
-    "score": 1190,
-    "comments": 864,
+    "title": "Flipper One – we need your help",
+    "url": "https://blog.flipper.net/flipper-one-we-need-your-help/",
+    "score": 842,
+    "comments": 368,
     "source": "hackernews",
-    "timestamp": "2026-05-21T18:34:41.759990"
+    "timestamp": "2026-05-22T03:09:41.280264"
   }
 }

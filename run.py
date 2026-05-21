@@ -12,6 +12,14 @@ from datetime import datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent / "main" / "webui"))
+
+# 微信桥接模块
+try:
+    from wechat_bridge import create_wechat_bridge, weixin_qr_login, weixin_verify_token
+    WECHAT_AVAILABLE = True
+except ImportError:
+    WECHAT_AVAILABLE = False
+
 from loopcli_lib import (
     LOOPCLI_ROOT,
     AGENT_MARKER,
@@ -27,16 +35,23 @@ from loopcli_lib import (
 )
 
 LOOPCLI_DIR = str(LOOPCLI_ROOT)
+
+# Fix Windows GBK encoding issue - force UTF-8 for stdout/stderr
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+if hasattr(sys.stderr, 'reconfigure'):
+    sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+
 SUBAGENT_DIR = os.path.join(LOOPCLI_DIR, "subagent")
 CLAUDE = os.path.join(os.environ.get("APPDATA", ""), "npm", "claude.cmd")
 
 LOGS_DIR = os.path.join(LOOPCLI_DIR, "logs")
 GIT_TOKEN_FILE = os.path.join(LOOPCLI_DIR, ".gittoken")
-DEFAULT_PROMPT = """⚠️ 禁止使用任何 MCP 工具（mcp__lean-ctx__* 等）。只用原生工具：Read、Grep、Glob、Bash、Edit、Write、Agent。
-
-读取 SOUL.md 作为你的身份。
+DEFAULT_PROMPT = """读取 SOUL.md 作为你的身份。
 读取 memory/tasks.json 获取分配给你的任务。
 技能文件在 D:/loopcli/skill/（全局），按需读取，不要开局全读。
+
+禁止：绝对不要调用 AskUserQuestion（你运行在非交互模式下，没人能回答，会永远卡住）。
 
 执行步骤：
 1. 从 tasks.json 中找 status 为 "pending" 的第一个任务
@@ -262,6 +277,26 @@ def p_agent_header(name, iteration):
     out(f"\n{C.CYAN}{C.BOLD} {name} {C.RST} {C.DIM}iter #{iteration}{C.RST}")
 
 
+# Agent 颜色池
+_AGENT_COLORS = [
+    "\033[36m",  # CYAN
+    "\033[33m",  # YELLOW
+    "\033[32m",  # GREEN
+    "\033[35m",  # MAGENTA
+    "\033[34m",  # BLUE
+    "\033[31m",  # RED
+]
+_agent_color_map = {}
+
+def _agent_tag(name):
+    """返回 [agent名] 彩色标签"""
+    if name not in _agent_color_map:
+        _agent_color_map[name] = _AGENT_COLORS[len(_agent_color_map) % len(_AGENT_COLORS)]
+    c = _agent_color_map[name]
+    short = name[:16]
+    return f"{c}[{short}]{C.RST}"
+
+
 def handle_event(agent_name, line):
     line = line.strip()
     if not line:
@@ -269,10 +304,11 @@ def handle_event(agent_name, line):
     try:
         event = json.loads(line)
     except json.JSONDecodeError:
-        out(f"  {C.DIM}{line}{C.RST}")
+        out(f"  {_agent_tag(agent_name)} {C.DIM}{line}{C.RST}")
         return
 
     event_type = event.get("type", "")
+    tag = _agent_tag(agent_name)
 
     if event_type == "assistant":
         msg = event.get("message", {})
@@ -281,7 +317,7 @@ def handle_event(agent_name, line):
                 text = block.get("text", "")
                 if text:
                     for ln in text.splitlines():
-                        out(f"  {ln}")
+                        out(f"  {tag} {ln}")
             elif block.get("type") == "tool_use":
                 name = block.get("name", "")
                 inp = block.get("input", {})
@@ -290,7 +326,7 @@ def handle_event(agent_name, line):
                     if k in inp:
                         detail = inp[k]
                         break
-                out(f"  {C.YELLOW}●{C.RST} {C.BOLD}{name}{C.RST}({C.DIM}{detail}{C.RST})")
+                out(f"  {tag} {C.YELLOW}●{C.RST} {C.BOLD}{name}{C.RST}({C.DIM}{detail}{C.RST})")
 
     elif event_type == "tool_result":
         content = event.get("content", "")
@@ -301,20 +337,20 @@ def handle_event(agent_name, line):
             texts = [content]
         for text in texts:
             short = text[:150].replace("\n", " ")
-            out(f"    {C.DIM}↳ {short}{C.RST}")
+            out(f"  {tag}   {C.DIM}↳ {short}{C.RST}")
 
     elif event_type == "result":
         text = event.get("result", "")
         if text:
             for ln in text[:300].splitlines():
-                out(f"  {C.GREEN}{ln}{C.RST}")
+                out(f"  {tag} {C.GREEN}{ln}{C.RST}")
         cost = event.get("cost_usd", "")
         duration = event.get("duration_ms", "")
         if cost or duration:
-            out(f"  {C.DIM}⏱ {duration}ms  💰 ${cost}{C.RST}")
+            out(f"  {tag} {C.DIM}⏱ {duration}ms  💰 ${cost}{C.RST}")
 
     elif event_type == "error":
-        out(f"  {C.RED}✘ {event.get('error', '')}{C.RST}")
+        out(f"  {tag} {C.RED}✘ {event.get('error', '')}{C.RST}")
 
 
 def run_agent(agent, iteration, run_log_dir):
@@ -358,7 +394,41 @@ def run_agent(agent, iteration, run_log_dir):
         proc.stdin.write(prompt.encode("utf-8"))
         proc.stdin.close()
 
-        # 并发读 stderr，防止管道缓冲区满导致死锁
+        # 看门狗：5 分钟无输出则杀进程
+        last_output = [time.time()]
+        stuck = [False]
+
+        def watchdog():
+            while proc.poll() is None:
+                if time.time() - last_output[0] > 300:  # 5 分钟
+                    stuck[0] = True
+                    out(f"  {_agent_tag(name)} {C.RED}⏰ 超时（5分钟无输出），正在终止...{C.RST}")
+                    proc.kill()
+                    try:
+                        proc.stdout.close()
+                    except Exception:
+                        pass
+                    return
+                time.sleep(10)
+
+        # 后台线程读 stdout，避免 Windows 管道阻塞主线程
+        def drain_stdout():
+            for line in iter(proc.stdout.readline, b''):
+                last_output[0] = time.time()
+                decoded = line.decode("utf-8", errors="replace")
+                log_file.write(decoded)
+                agent_log.write(decoded)
+                log_file.flush()
+                agent_log.flush()
+                handle_event(name, decoded)
+
+        reader = threading.Thread(target=drain_stdout, daemon=True)
+        reader.start()
+
+        wd = threading.Thread(target=watchdog, daemon=True)
+        wd.start()
+
+        # 并发读 stderr
         stderr_chunks = []
         def drain_stderr():
             for line in proc.stderr:
@@ -367,43 +437,24 @@ def run_agent(agent, iteration, run_log_dir):
         stderr_thread = threading.Thread(target=drain_stderr, daemon=True)
         stderr_thread.start()
 
-        # 看门狗：5 分钟无输出则杀进程
-        last_output = [time.time()]
-        stuck = [False]
-
-        def watchdog():
-            while proc.poll() is None:
-                if time.time() - last_output[0] > 300:
-                    stuck[0] = True
-                    out(f"  {C.RED}⏰ {name} 超时（5分钟无输出），正在终止...{C.RST}")
-                    proc.kill()
-                    return
-                time.sleep(10)
-
-        wd = threading.Thread(target=watchdog, daemon=True)
-        wd.start()
-
-        for line in proc.stdout:
-            last_output[0] = time.time()
-            decoded = line.decode("utf-8", errors="replace")
-            log_file.write(decoded)
-            agent_log.write(decoded)
-            log_file.flush()
-            agent_log.flush()
-            handle_event(name, decoded)
-
+        # 等进程退出
         proc.wait()
+
+        # 进程退出后关 stdout，解除 drain_stdout 阻塞
+        try:
+            proc.stdout.close()
+        except Exception:
+            pass
+
+        reader.join(timeout=5)
         stderr_thread.join(timeout=5)
         wd.join(timeout=5)
 
         stderr_output = "".join(stderr_chunks)
         if stderr_output:
-            out(f"  {C.RED}[{name}] STDERR: {stderr_output[:200]}{C.RST}")
+            out(f"  {_agent_tag(name)} {C.RED}STDERR: {stderr_output[:200]}{C.RST}")
             log_file.write(stderr_output)
             agent_log.write(stderr_output)
-
-        proc.wait()
-        wd.join(timeout=5)
 
         if stuck[0]:
             # 超时被杀：记录错误并通知 main
@@ -421,7 +472,7 @@ def run_agent(agent, iteration, run_log_dir):
             msg_ts = datetime.now().strftime("%Y%m%d_%H%M")
             msg_file = os.path.join(inbox_dir, f"watchdog_{msg_ts}.md")
             with open(msg_file, "w", encoding="utf-8") as f:
-                f.write(f"# 看门狗超时报告\n- 类型：错误\n- 时间：{ts}\n\n## 内容\nAgent `{name}` 超过 30 分钟无输出，已自动终止。请检查该 Agent 的 SOUL.md 和 PROMPT.md 是否存在问题并修复。\n")
+                f.write(f"# 看门狗超时报告\n- 类型：错误\n- 时间：{ts}\n\n## 内容\nAgent `{name}` 超过 5 分钟无输出，已自动终止。\n")
         else:
             footer = f"\n[{ts}] --- 结束 (exit={proc.returncode}) ---\n"
             log_file.write(footer)
@@ -459,14 +510,16 @@ def git_push():
         git = resolve_git()
         r = subprocess.run([git, "add", "-A"], cwd=LOOPCLI_DIR, capture_output=True, text=True, timeout=30)
         if r.returncode != 0:
-            out(f"  {C.RED}[git] add 失败: {r.stderr.strip()}{C.RST}")
+            err = r.stderr.strip() if r.stderr else "unknown error"
+            out(f"  {C.RED}[git] add 失败: {err}{C.RST}")
             return
         r = subprocess.run(
             [git, "commit", "-m", f"auto: loopcli sync {datetime.now().strftime('%Y-%m-%d %H:%M')}"],
             cwd=LOOPCLI_DIR, capture_output=True, text=True, timeout=30
         )
-        if r.returncode != 0 and "nothing to commit" not in r.stdout:
-            out(f"  {C.RED}[git] commit 失败: {r.stderr.strip()}{C.RST}")
+        if r.returncode != 0 and "nothing to commit" not in (r.stdout or ""):
+            err = r.stderr.strip() if r.stderr else "unknown error"
+            out(f"  {C.RED}[git] commit 失败: {err}{C.RST}")
             return
         askpass_script = os.path.join(LOOPCLI_DIR, ".git_askpass.bat")
         with open(askpass_script, "w") as f:
@@ -483,7 +536,8 @@ def git_push():
         )
         os.remove(askpass_script)
         if r.returncode != 0:
-            out(f"  {C.RED}[git] push 失败: {r.stderr.strip()}{C.RST}")
+            err = r.stderr.strip() if r.stderr else "unknown error"
+            out(f"  {C.RED}[git] push 失败: {err}{C.RST}")
         else:
             out(f"  {C.GREEN}[git] 已同步到 GitHub{C.RST}")
     except Exception as e:
@@ -509,6 +563,26 @@ def cmd_run(args):
         print("未发现任何 Agent（需要目录下有 AGENT 标记文件）")
         sys.exit(1)
 
+    # ─── 启动微信桥接 ───
+    wechat_handler = None
+    if WECHAT_AVAILABLE:
+        config_file = os.path.join(LOOPCLI_DIR, ".wechat_config.json")
+        wechat_token = getattr(args, 'wechat_token', None)
+        if not wechat_token and os.path.exists(config_file):
+            cfg = read_json(config_file, {})
+            wechat_token = cfg.get("token")
+
+        if wechat_token:
+            try:
+                wechat_handler = create_wechat_bridge(
+                    token=wechat_token,
+                    inbox_dir="D:/loopcli/main/inbox",
+                    report_dir="D:/loopcli/main/report",
+                )
+                print(f"[微信] 桥接已启动", file=sys.stderr, flush=True)
+            except Exception as e:
+                print(f"[微信] 启动失败: {e}", file=sys.stderr, flush=True)
+
     run_id = datetime.now().strftime("run_%Y%m%d_%H%M%S")
     run_log_dir = os.path.join(LOGS_DIR, run_id)
     os.makedirs(run_log_dir, exist_ok=True)
@@ -518,6 +592,7 @@ def cmd_run(args):
         "started": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "iterations": args.iterations or "无限",
         "agents": [a["name"] for a in agents],
+        "wechat": wechat_handler is not None,
     }
     write_json(os.path.join(run_log_dir, "meta.json"), meta)
 
@@ -525,6 +600,7 @@ def cmd_run(args):
     rows, cols = shutil.get_terminal_size().lines, shutil.get_terminal_size().columns
     _ob[0] = rows - 2  # 输出区底行
 
+    sys.stdout.write("\033[?25l")              # 隐藏光标
     sys.stdout.write(f"\033[1;{_ob[0]}r")   # 滚动区域：1 到 rows-2
     sys.stdout.write(f"\033[1;1H")
     sys.stdout.flush()
@@ -615,6 +691,9 @@ def cmd_run(args):
 
     # 清理
     stop_event.set()
+    if wechat_handler:
+        wechat_handler.bridge.stop()
+    sys.stdout.write("\033[?25h")              # 恢复光标
     sys.stdout.write(f"\033[r")
     sys.stdout.write(f"\033[{rows};1H")
     sys.stdout.flush()
@@ -633,6 +712,7 @@ sub = parser.add_subparsers(dest="command")
 p_run = sub.add_parser("run", help="启动 Agent 循环（默认）")
 p_run.add_argument("-n", "--iterations", type=int, default=0, help="迭代次数，0=无限")
 p_run.add_argument("-w", "--wait", type=int, default=10, help="每轮间隔秒数（默认 10）")
+p_run.add_argument("--wechat-token", default="", help="微信 ilink bot token")
 
 p_create = sub.add_parser("create", help="从模板创建新 Agent")
 p_create.add_argument("template", help="模板 ID，如 engineering-frontend-developer")
@@ -679,6 +759,64 @@ p_enable.add_argument("agent", help="Agent 目录名")
 p_disable = sub.add_parser("disable", help="禁用 Agent（跳过调度，节省 token）")
 p_disable.add_argument("agent", help="Agent 目录名")
 
+p_weixin = sub.add_parser("weixin", help="微信扫码登录/配置")
+p_weixin.add_argument("action", nargs="?", default="setup", choices=["setup", "show", "bind"], help="操作: setup(扫码), show(查看), bind(绑定token)")
+p_weixin.add_argument("--token", default="", help="ilink bot token（bind 模式使用）")
+
+
+def cmd_weixin(args):
+    """微信配置命令"""
+    if not WECHAT_AVAILABLE:
+        print("[错误] wechat_bridge 模块未找到")
+        sys.exit(1)
+
+    config_file = os.path.join(LOOPCLI_DIR, ".wechat_config.json")
+
+    if args.action == "show":
+        if os.path.exists(config_file):
+            cfg = read_json(config_file, {})
+            t = cfg.get("token", "")
+            if t:
+                masked = t[:8] + "..." + t[-4:] if len(t) > 12 else "***"
+                print(f"[微信配置]")
+                print(f"  Token: {masked}")
+                print(f"  User ID: {cfg.get('user_id', '未知')}")
+            else:
+                print("[微信] 未配置 token")
+        else:
+            print("[微信] 未配置，运行 loopcli weixin setup 扫码登录")
+        return
+
+    if args.action == "bind":
+        if not args.token:
+            print("[错误] bind 需要指定 --token")
+            sys.exit(1)
+        print("[微信] 验证 token...")
+        if weixin_verify_token(DEFAULT_BASE_URL, args.token):
+            cfg = {"token": args.token}
+            write_json(config_file, cfg)
+            print(f"[微信] Token 已保存，运行 loopcli run 启动")
+        else:
+            print("[微信] Token 验证失败，请检查是否正确")
+        return
+
+    # setup: 扫码登录
+    print("[微信] 开始扫码登录...")
+    try:
+        result = weixin_qr_login()
+        cfg = {
+            "token": result["token"],
+            "base_url": result["base_url"],
+            "user_id": result["user_id"],
+            "bot_id": result["bot_id"],
+        }
+        write_json(config_file, cfg)
+        print(f"\n[微信] 配置已保存到 {config_file}")
+        print(f"[微信] 现在运行 loopcli run 即可启用微信桥接")
+    except Exception as e:
+        print(f"\n[微信] 扫码登录失败: {e}")
+        sys.exit(1)
+
 
 def cmd_msg(args):
     agent_dir = os.path.join(LOOPCLI_DIR, args.agent)
@@ -689,7 +827,7 @@ def cmd_msg(args):
     print(f"[已发送] -> {args.agent}/inbox/  {args.content}")
 
 
-if sys.argv[1:] and sys.argv[1] not in ("run", "create", "task", "list", "templates", "msg", "enable", "disable", "-h", "--help"):
+if sys.argv[1:] and sys.argv[1] not in ("run", "create", "task", "list", "templates", "msg", "enable", "disable", "weixin", "-h", "--help"):
     sys.argv.insert(1, "run")
 
 args = parser.parse_args()
@@ -708,6 +846,8 @@ elif args.command == "enable":
     cmd_enable(args)
 elif args.command == "disable":
     cmd_disable(args)
+elif args.command == "weixin":
+    cmd_weixin(args)
 else:
     if not hasattr(args, "iterations"):
         args.iterations = 0
