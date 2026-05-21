@@ -1074,6 +1074,156 @@ body {
   .content { padding: 16px; }
   .btn { padding: 10px 16px; font-size: 12px; }
 }
+
+/* Charts */
+.charts-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 28px;
+}
+.chart-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+}
+.chart-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.chart-title::before {
+  content: '📈';
+  font-size: 16px;
+}
+
+/* Pie Chart */
+.pie-chart-container {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.pie-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 12px;
+}
+.pie-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.pie-legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+.pie-legend-label {
+  color: var(--text2);
+}
+.pie-legend-value {
+  margin-left: auto;
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* Bar Chart */
+.bar-chart-container {
+  min-height: 180px;
+}
+.bar-chart-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.bar-chart-label {
+  width: 80px;
+  font-size: 11px;
+  color: var(--text2);
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.bar-chart-track {
+  flex: 1;
+  height: 24px;
+  background: var(--bg);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+.bar-chart-fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.5s ease;
+  display: flex;
+  align-items: center;
+  padding-left: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+}
+.bar-chart-fill.pending { background: var(--yellow); }
+.bar-chart-fill.in_progress { background: var(--blue); }
+.bar-chart-fill.completed { background: var(--green); }
+.bar-chart-fill.idle { background: var(--text2); }
+.bar-chart-fill.active { background: var(--accent); }
+.bar-chart-value {
+  margin-left: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  min-width: 40px;
+  text-align: right;
+}
+.bar-chart-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 180px;
+  color: var(--text2);
+  font-size: 13px;
+}
+
+/* Trend Chart */
+.trend-chart-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.trend-stats {
+  display: flex;
+  gap: 16px;
+}
+.trend-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.trend-label {
+  font-size: 11px;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.trend-value {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+@media (max-width: 1024px) {
+  .charts-row { grid-template-columns: 1fr; }
+}
 </style>
 </head>
 <body>
@@ -1157,6 +1307,44 @@ body {
           <div class="stat-card" id="card-cost">
             <div class="label">预估成本</div>
             <div class="value" id="stat-cost">-</div>
+          </div>
+        </div>
+
+        <!-- Data Visualization -->
+        <div class="charts-row">
+          <!-- Task Status Pie Chart -->
+          <div class="chart-card">
+            <h4 class="chart-title">任务状态分布</h4>
+            <div class="pie-chart-container">
+              <canvas id="taskPieChart" width="180" height="180"></canvas>
+              <div class="pie-legend" id="pieLegend"></div>
+            </div>
+          </div>
+
+          <!-- Agent Activity Bar Chart -->
+          <div class="chart-card">
+            <h4 class="chart-title">Agent 活跃度</h4>
+            <div class="bar-chart-container" id="agentBarChart">
+              <div class="bar-chart-placeholder">加载中...</div>
+            </div>
+          </div>
+
+          <!-- Token Trend Mini Chart -->
+          <div class="chart-card">
+            <h4 class="chart-title">Token 使用趋势 (7天)</h4>
+            <div class="trend-chart-container">
+              <canvas id="tokenTrendChart" width="280" height="120"></canvas>
+              <div class="trend-stats" id="trendStats">
+                <div class="trend-stat">
+                  <span class="trend-label">今日</span>
+                  <span class="trend-value" id="todayTokens">-</span>
+                </div>
+                <div class="trend-stat">
+                  <span class="trend-label">平均</span>
+                  <span class="trend-value" id="avgTokens">-</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -1463,6 +1651,205 @@ document.addEventListener('keydown', (e) => {
 let agents = [];
 let tasks = [];
 let agentTaskCache = {};
+
+// ============ 数据可视化图表 ============
+
+// 任务状态饼图
+function renderTaskPieChart() {
+  const canvas = document.getElementById('taskPieChart');
+  const ctx = canvas.getContext('2d');
+  const legend = document.getElementById('pieLegend');
+
+  if (!tasks || tasks.length === 0) {
+    ctx.fillStyle = '#7a8699';
+    ctx.font = '14px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('暂无任务数据', canvas.width/2, canvas.height/2);
+    legend.innerHTML = '';
+    return;
+  }
+
+  const statusCounts = {};
+  tasks.forEach(t => {
+    const s = t.status || 'unknown';
+    statusCounts[s] = (statusCounts[s] || 0) + 1;
+  });
+
+  const colors = {
+    pending: '#ffc947',
+    in_progress: '#6eb5ff',
+    completed: '#00e090',
+    failed: '#ff7a7a',
+    unknown: '#7a8699'
+  };
+  const labels = {
+    pending: '待处理',
+    in_progress: '进行中',
+    completed: '已完成',
+    failed: '失败',
+    unknown: '未知'
+  };
+
+  const total = tasks.length;
+  let startAngle = -Math.PI / 2;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  legend.innerHTML = '';
+
+  Object.entries(statusCounts).forEach(([status, count]) => {
+    const sliceAngle = (count / total) * 2 * Math.PI;
+    const color = colors[status] || colors.unknown;
+
+    ctx.beginPath();
+    ctx.moveTo(canvas.width/2, canvas.height/2);
+    ctx.arc(canvas.width/2, canvas.height/2, 80, startAngle, startAngle + sliceAngle);
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+
+    startAngle += sliceAngle;
+
+    const percent = ((count / total) * 100).toFixed(1);
+    legend.innerHTML += `
+      <div class="pie-legend-item">
+        <div class="pie-legend-color" style="background:${color}"></div>
+        <span class="pie-legend-label">${labels[status] || status}</span>
+        <span class="pie-legend-value">${count} (${percent}%)</span>
+      </div>
+    `;
+  });
+
+  // 中心白圆
+  ctx.beginPath();
+  ctx.arc(canvas.width/2, canvas.height/2, 40, 0, 2 * Math.PI);
+  ctx.fillStyle = currentTheme === 'light' ? '#ffffff' : '#0e1424';
+  ctx.fill();
+}
+
+// Agent 活跃度条形图
+function renderAgentBarChart() {
+  const container = document.getElementById('agentBarChart');
+
+  if (!agents || agents.length === 0) {
+    container.innerHTML = '<div class="bar-chart-placeholder">暂无 Agent 数据</div>';
+    return;
+  }
+
+  // 计算每个 Agent 的任务数量
+  const agentTaskCounts = agents.map(agent => {
+    const agentTasks = tasks.filter(t => t._agent_id === agent.id);
+    return {
+      ...agent,
+      taskCount: agentTasks.length
+    };
+  });
+
+  const maxTasks = Math.max(...agentTaskCounts.map(a => a.taskCount), 1);
+
+  container.innerHTML = agentTaskCounts.slice(0, 5).map(agent => {
+    const taskCount = agent.taskCount;
+    const status = agent.status || 'idle';
+    const percent = (taskCount / maxTasks) * 100;
+    const statusClass = status === 'running' ? 'active' : 'idle';
+
+    return `
+      <div class="bar-chart-row">
+        <div class="bar-chart-label" title="${agent.name}">${agent.name}</div>
+        <div class="bar-chart-track">
+          <div class="bar-chart-fill ${statusClass}" style="width:${percent}%"></div>
+        </div>
+        <div class="bar-chart-value">${taskCount}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// Token 趋势图
+function renderTokenTrendChart() {
+  const canvas = document.getElementById('tokenTrendChart');
+  const ctx = canvas.getContext('2d');
+
+  // 模拟7天数据（实际应从API获取）
+  const data = [45000, 52000, 48000, 61000, 55000, 67000, 58000];
+  const max = Math.max(...data);
+  const min = Math.min(...data);
+  const range = max - min || 1;
+
+  const padding = 20;
+  const chartWidth = canvas.width - padding * 2;
+  const chartHeight = canvas.height - padding * 2;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // 绘制网格线
+  ctx.strokeStyle = currentTheme === 'light' ? '#e1e4ed' : '#252d42';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 3; i++) {
+    const y = padding + (chartHeight / 3) * i;
+    ctx.beginPath();
+    ctx.moveTo(padding, y);
+    ctx.lineTo(canvas.width - padding, y);
+    ctx.stroke();
+  }
+
+  // 绘制趋势线
+  ctx.beginPath();
+  ctx.strokeStyle = '#9b8cf7';
+  ctx.lineWidth = 3;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  data.forEach((value, i) => {
+    const x = padding + (chartWidth / (data.length - 1)) * i;
+    const y = padding + chartHeight - ((value - min) / range) * chartHeight;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+
+  // 绘制渐变填充
+  ctx.lineTo(padding + chartWidth, padding + chartHeight);
+  ctx.lineTo(padding, padding + chartHeight);
+  ctx.closePath();
+  const gradient = ctx.createLinearGradient(0, padding, 0, padding + chartHeight);
+  gradient.addColorStop(0, 'rgba(155, 140, 247, 0.3)');
+  gradient.addColorStop(1, 'rgba(155, 140, 247, 0)');
+  ctx.fillStyle = gradient;
+  ctx.fill();
+
+  // 绘制数据点
+  data.forEach((value, i) => {
+    const x = padding + (chartWidth / (data.length - 1)) * i;
+    const y = padding + chartHeight - ((value - min) / range) * chartHeight;
+    ctx.beginPath();
+    ctx.arc(x, y, 4, 0, 2 * Math.PI);
+    ctx.fillStyle = '#fff';
+    ctx.fill();
+    ctx.strokeStyle = '#9b8cf7';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  });
+
+  // 更新统计数据
+  const today = data[data.length - 1];
+  const avg = Math.round(data.reduce((a, b) => a + b, 0) / data.length);
+
+  document.getElementById('todayTokens').textContent = formatTokens(today);
+  document.getElementById('avgTokens').textContent = formatTokens(avg);
+}
+
+function formatTokens(num) {
+  if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
+  return num.toString();
+}
+
+// 刷新所有图表
+function refreshCharts() {
+  renderTaskPieChart();
+  renderAgentBarChart();
+  renderTokenTrendChart();
+}
+
 
 // Toast Notification System
 function showToast(message, type = 'error') {
@@ -1856,6 +2243,7 @@ function render() {
   fillAgentSelect();
   fillTaskAgentFilter();
   fillLogAgentFilter();
+  refreshCharts(); // 刷新图表
 }
 
 loadData();

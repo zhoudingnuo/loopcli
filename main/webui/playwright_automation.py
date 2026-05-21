@@ -49,6 +49,9 @@ class WebUIAutomation:
             try:
                 page.keyboard.press(key)
                 page.wait_for_timeout(500)  # 等待页面切换动画
+                # 关闭可能出现的弹窗（快捷键帮助等）
+                page.keyboard.press("Escape")
+                page.wait_for_timeout(200)
                 screenshot_path = self.take_screenshot(page, f"page_{page_name}")
                 results.append({
                     "page": page_name,
