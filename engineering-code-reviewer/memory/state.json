@@ -2,8 +2,7 @@
   "agent": "engineering-code-reviewer",
   "status": "idle",
   "current_task": null,
-  "last_run": "2026-05-21 12:56:54",
-  "run_count": 130,
-  "created": "2026-05-21",
-  "blocked_reason": "任务 #8 被 #14 阻塞：engineering-frontend-developer #14 原子写入+SSE心跳 尚未完成（代码中未发现任何 atomic write 或 heartbeat 实现）"
+  "last_run": "2026-05-21 13:02:43",
+  "run_count": 132,
+  "created": "2026-05-21"
 }
