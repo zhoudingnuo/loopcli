@@ -11,6 +11,7 @@
   --border: #2e3345; --text: #e4e6ed; --text2: #8b90a0;
   --accent: #6c5ce7; --accent2: #a29bfe;
   --green: #00b894; --yellow: #fdcb6e; --red: #e17055; --blue: #74b9ff;
+  --purple: #a29bfe; --orange: #fd79a8;
   --radius: 10px;
 }
 body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
@@ -227,6 +228,8 @@ body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; background
           <div class="stat-card"><div class="label">运行中</div><div class="value" style="color:var(--green)" id="stat-running">-</div></div>
           <div class="stat-card"><div class="label">空闲</div><div class="value" style="color:var(--blue)" id="stat-idle">-</div></div>
           <div class="stat-card"><div class="label">待处理任务</div><div class="value" style="color:var(--yellow)" id="stat-pending">-</div></div>
+          <div class="stat-card"><div class="label">Token 用量</div><div class="value" style="color:var(--purple)" id="stat-tokens">-</div></div>
+          <div class="stat-card"><div class="label">预估成本</div><div class="value" style="color:var(--orange)" id="stat-cost">-</div></div>
         </div>
 
         <!-- Main Agent Activity -->
@@ -915,6 +918,45 @@ async function loadMainAgentActivity() {
 
 loadMainAgentActivity();
 setInterval(loadMainAgentActivity, 5000);
+
+// --- Token Usage ---
+async function loadUsage() {
+  try {
+    const r = await fetch('/api/usage');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+
+    if (data.error) {
+      document.getElementById('stat-tokens').textContent = 'N/A';
+      document.getElementById('stat-cost').textContent = 'N/A';
+      return;
+    }
+
+    // Format tokens: 238826681 -> 238.8M
+    const tokens = data.total_tokens || 0;
+    let tokenStr = '';
+    if (tokens >= 1_000_000) {
+      tokenStr = (tokens / 1_000_000).toFixed(1) + 'M';
+    } else if (tokens >= 1_000) {
+      tokenStr = (tokens / 1_000).toFixed(1) + 'K';
+    } else {
+      tokenStr = tokens.toString();
+    }
+    document.getElementById('stat-tokens').textContent = tokenStr;
+
+    // Format cost: $95.53
+    const cost = data.estimated_cost_usd || 0;
+    document.getElementById('stat-cost').textContent = '$' + cost.toFixed(2);
+
+  } catch (e) {
+    console.error('Failed to load usage:', e);
+    document.getElementById('stat-tokens').textContent = 'Err';
+    document.getElementById('stat-cost').textContent = 'Err';
+  }
+}
+
+loadUsage();
+setInterval(loadUsage, 30000); // Update every 30 seconds
 
 // --- Message Send ---
 function fillMsgAgentSelect() {

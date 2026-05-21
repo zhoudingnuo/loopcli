@@ -12,7 +12,9 @@ import sys
 import time
 import threading
 import uuid
-from datetime import datetime, timezone
+import urllib.request
+import urllib.parse
+from datetime import datetime, timezone, timedelta
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from socketserver import ThreadingMixIn
 from pathlib import Path
@@ -126,6 +128,47 @@ def get_main_agent_activity():
         result["error"] = str(e)
 
     return result
+
+
+def query_usage_summary():
+    """查询 token 使用摘要（从 GLM API）"""
+    try:
+        base_url = os.environ.get("ANTHROPIC_BASE_URL", "")
+        token = os.environ.get("ANTHROPIC_AUTH_TOKEN", "")
+        if not base_url or not token:
+            return {"error": "Missing ANTHROPIC_BASE_URL or ANTHROPIC_AUTH_TOKEN"}
+
+        parsed = urlparse(base_url)
+        domain = f"{parsed.scheme}://{parsed.netloc}"
+
+        now = datetime.now()
+        start = (now - timedelta(hours=24)).strftime("%Y-%m-%d %H:00:00")
+        end = now.strftime("%Y-%m-%d %H:%M:%S")
+        params = f"?startTime={urllib.parse.quote(start)}&endTime={urllib.parse.quote(end)}"
+
+        headers = {"Authorization": token, "Content-Type": "application/json"}
+
+        req = urllib.request.Request(
+            domain + "/api/monitor/usage/model-usage" + params,
+            headers=headers
+        )
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            data = json.loads(resp.read().decode())
+            summary = data.get("data", {}).get("totalUsage", {})
+            total_tokens = summary.get("totalTokensUsage", 0)
+            call_count = summary.get("totalModelCallCount", 0)
+
+            # 简单成本估算（基于 GLM-4.7 定价）
+            estimated_cost_usd = (total_tokens / 1_000_000) * 0.40
+
+            return {
+                "total_tokens": total_tokens,
+                "call_count": call_count,
+                "estimated_cost_usd": estimated_cost_usd,
+                "time_range": f"{start} ~ {end}"
+            }
+    except Exception as e:
+        return {"error": str(e)}
 
 
 # --- Loop Process Management ---
@@ -388,6 +431,9 @@ class WebUIHandler(SimpleHTTPRequestHandler):
 
         if path == "/api/agent/activity":
             return self._send_json(get_main_agent_activity())
+
+        if path == "/api/usage":
+            return self._send_json(query_usage_summary())
 
         if path == "/api/loopcli/status":
             return self._handle_loopcli_status()
