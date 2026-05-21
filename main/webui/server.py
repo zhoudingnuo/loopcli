@@ -724,6 +724,18 @@ class WebUIHandler(SimpleHTTPRequestHandler):
             except (ValueError, TypeError):
                 pass
         state["uptime_seconds"] = uptime
+
+        # 从日志文件获取实际迭代次数
+        try:
+            log_path = MAIN_DIR / "log" / "run.md"
+            if log_path.exists():
+                lines = get_recent_lines(log_path, 1000)
+                # 统计包含 | 的行数（表格行）
+                iter_count = sum(1 for line in lines if "|" in line and not line.strip().startswith("#") and not line.strip().startswith("|-"))
+                state["total_iterations"] = iter_count
+        except Exception:
+            pass
+
         self._send_json(state)
 
     def _handle_loopcli_start(self):

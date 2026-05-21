@@ -1,0 +1,96 @@
+{
+  "timestamp": "2026-05-22T07:22:37.076723",
+  "performance": {
+    "loadTime": 435.6000000014901,
+    "domReady": 407.5,
+    "firstPaint": 440
+  },
+  "pages": [
+    {
+      "page": "analytics",
+      "status": "success",
+      "screenshot": "screenshots\\page_analytics_20260522_072225.png",
+      "timestamp": "2026-05-22T07:22:25.531615"
+    },
+    {
+      "page": "dashboard",
+      "status": "success",
+      "screenshot": "screenshots\\page_dashboard_20260522_072226.png",
+      "timestamp": "2026-05-22T07:22:26.328252"
+    },
+    {
+      "page": "agents",
+      "status": "success",
+      "screenshot": "screenshots\\page_agents_20260522_072226.png",
+      "timestamp": "2026-05-22T07:22:27.315452"
+    },
+    {
+      "page": "tasks",
+      "status": "success",
+      "screenshot": "screenshots\\page_tasks_20260522_072227.png",
+      "timestamp": "2026-05-22T07:22:27.963822"
+    },
+    {
+      "page": "logs",
+      "status": "success",
+      "screenshot": "screenshots\\page_logs_20260522_072228.png",
+      "timestamp": "2026-05-22T07:22:28.894458"
+    },
+    {
+      "page": "control",
+      "status": "success",
+      "screenshot": "screenshots\\page_control_20260522_072229.png",
+      "timestamp": "2026-05-22T07:22:29.754803"
+    },
+    {
+      "page": "messages",
+      "status": "success",
+      "screenshot": "screenshots\\page_messages_20260522_072230.png",
+      "timestamp": "2026-05-22T07:22:30.522409"
+    },
+    {
+      "page": "health",
+      "status": "success",
+      "screenshot": "screenshots\\page_health_20260522_072231.png",
+      "timestamp": "2026-05-22T07:22:31.331350"
+    },
+    {
+      "page": "notifications",
+      "status": "success",
+      "screenshot": "screenshots\\page_notifications_20260522_072231.png",
+      "timestamp": "2026-05-22T07:22:32.114234"
+    },
+    {
+      "page": "cost",
+      "status": "success",
+      "screenshot": "screenshots\\page_cost_20260522_072232.png",
+      "timestamp": "2026-05-22T07:22:32.994644"
+    },
+    {
+      "page": "settings",
+      "status": "success",
+      "screenshot": "screenshots\\page_settings_20260522_072233.png",
+      "timestamp": "2026-05-22T07:22:33.902282"
+    }
+  ],
+  "features": [
+    {
+      "feature": "theme_toggle",
+      "status": "pass"
+    },
+    {
+      "feature": "sidebar_toggle",
+      "status": "pass"
+    },
+    {
+      "feature": "shortcuts_modal",
+      "status": "pass"
+    }
+  ],
+  "summary": {
+    "total_pages": 11,
+    "successful_pages": 11,
+    "total_features": 3,
+    "passed_features": 3
+  }
+}
