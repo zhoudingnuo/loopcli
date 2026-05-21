@@ -1282,6 +1282,10 @@ body {
 
       <!-- Agents -->
       <div class="page" id="page-agents">
+        <div class="log-toolbar" style="margin-bottom:18px">
+          <button class="btn" id="export-agents-csv">导出 CSV</button>
+          <button class="btn" id="export-agents-json">导出 JSON</button>
+        </div>
         <div class="agent-grid" id="agent-list"></div>
       </div>
 
@@ -1292,6 +1296,8 @@ body {
             <option value="">main</option>
             <option value="__all__">所有 Agent</option>
           </select>
+          <button class="btn" id="export-tasks-csv">导出 CSV</button>
+          <button class="btn" id="export-tasks-json">导出 JSON</button>
         </div>
         <table class="task-table">
           <thead>
@@ -1322,6 +1328,8 @@ body {
             <button class="btn" id="log-resume-btn" style="display:none">继续</button>
           </div>
           <button class="btn" id="log-clear-btn">清空显示</button>
+          <button class="btn" id="export-logs-csv">导出 CSV</button>
+          <button class="btn" id="export-logs-json">导出 JSON</button>
           <label class="log-auto-scroll">
             <input type="checkbox" id="log-autoscroll" checked />
             自动滚动
@@ -2257,6 +2265,122 @@ function renderMsgHistory() {
     ).join('') +
     '</tbody></table>';
 }
+
+// ============ 数据导出功能 ============
+
+// 通用导出函数
+function downloadFile(content, filename, type) {
+  const blob = new Blob([content], { type: type });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// 导出 Agents 为 CSV
+document.getElementById('export-agents-csv').addEventListener('click', () => {
+  if (!agents.length) {
+    showToast('暂无数据可导出', 'warn');
+    return;
+  }
+  const headers = ['ID', '名称', '状态', '描述', '最后运行', '运行次数', '任务总数', '已完成', '待处理'];
+  const rows = agents.map(a => [
+    a.id,
+    a.name,
+    a.status,
+    `"${(a.description || '').replace(/"/g, '""')}"`,
+    a.last_run || '-',
+    a.run_count || 0,
+    a.task_count || 0,
+    a.task_done || 0,
+    a.task_pending || 0
+  ]);
+  const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+  const filename = `loopcli_agents_${new Date().toISOString().slice(0,10)}.csv`;
+  downloadFile('﻿' + csv, filename, 'text/csv;charset=utf-8');
+  showToast('已导出 Agents CSV', 'success');
+});
+
+// 导出 Agents 为 JSON
+document.getElementById('export-agents-json').addEventListener('click', () => {
+  if (!agents.length) {
+    showToast('暂无数据可导出', 'warn');
+    return;
+  }
+  const json = JSON.stringify(agents, null, 2);
+  const filename = `loopcli_agents_${new Date().toISOString().slice(0,10)}.json`;
+  downloadFile(json, filename, 'application/json');
+  showToast('已导出 Agents JSON', 'success');
+});
+
+// 导出 Tasks 为 CSV
+document.getElementById('export-tasks-csv').addEventListener('click', async () => {
+  if (!tasks.length) {
+    showToast('暂无数据可导出', 'warn');
+    return;
+  }
+  const headers = ['ID', '标题', '状态', '负责人', '创建日期'];
+  const rows = tasks.map(t => [
+    t.id,
+    `"${(t.title || '').replace(/"/g, '""')}"`,
+    t.status,
+    t.assignee || '-',
+    t.created || '-'
+  ]);
+  const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+  const filename = `loopcli_tasks_${new Date().toISOString().slice(0,10)}.csv`;
+  downloadFile('﻿' + csv, filename, 'text/csv;charset=utf-8');
+  showToast('已导出 Tasks CSV', 'success');
+});
+
+// 导出 Tasks 为 JSON
+document.getElementById('export-tasks-json').addEventListener('click', async () => {
+  if (!tasks.length) {
+    showToast('暂无数据可导出', 'warn');
+    return;
+  }
+  const json = JSON.stringify(tasks, null, 2);
+  const filename = `loopcli_tasks_${new Date().toISOString().slice(0,10)}.json`;
+  downloadFile(json, filename, 'application/json');
+  showToast('已导出 Tasks JSON', 'success');
+});
+
+// 导出 Logs 为 CSV
+document.getElementById('export-logs-csv').addEventListener('click', () => {
+  if (!logLines.length) {
+    showToast('暂无日志可导出', 'warn');
+    return;
+  }
+  const headers = ['时间', 'Agent', '内容'];
+  const rows = logLines.map(l => {
+    const text = (l.text || '').replace(/"/g, '""');
+    return [`"${new Date().toLocaleString('zh-CN')}"`, `"${l.agent || 'main'}"`, `"${text}"`];
+  });
+  const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+  const filename = `loopcli_logs_${new Date().toISOString().slice(0,10)}.csv`;
+  downloadFile('﻿' + csv, filename, 'text/csv;charset=utf-8');
+  showToast('已导出 Logs CSV', 'success');
+});
+
+// 导出 Logs 为 JSON
+document.getElementById('export-logs-json').addEventListener('click', () => {
+  if (!logLines.length) {
+    showToast('暂无日志可导出', 'warn');
+    return;
+  }
+  const json = JSON.stringify(logLines.map(l => ({
+    time: new Date().toISOString(),
+    agent: l.agent || 'main',
+    content: l.text
+  })), null, 2);
+  const filename = `loopcli_logs_${new Date().toISOString().slice(0,10)}.json`;
+  downloadFile(json, filename, 'application/json');
+  showToast('已导出 Logs JSON', 'success');
+});
 
 // ============ 活动趋势图表 ============
 

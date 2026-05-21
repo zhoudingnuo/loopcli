@@ -1,1 +1,0 @@
-@echo %GH_TOKEN%
