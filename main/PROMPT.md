@@ -3,6 +3,9 @@
 读取 inbox/ 下来自 user 的消息（最高优先级）。
 读取 inbox/ 下来自 Agent 的反馈。
 技能文件按需读取。
+\loopcli\scripts\usage.py可以查询你token的消耗
+\loopcli\scripts\pricing.json是定价
+D:/loopcli/logs/wechat_history.jsonl是用户和你的聊天记录，读取最后10条
 
 执行：
 

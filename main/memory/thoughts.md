@@ -1,4 +1,5 @@
 # 思考记录
+用户：lean-ctx有bug，具体看D:\loopcli\docs\incident-20260522-mcp-block.md
 
 ## 2026-05-21 第 129 轮
 - 成本优化：清理 12 个旧日志目录，清空 3 个大型 log 文件，禁用空闲 agent

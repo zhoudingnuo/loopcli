@@ -399,6 +399,7 @@ class WeChatInboxHandler:
 
     def handle_incoming_message(self, user_id: str, content: str, message_id: int, context_token: str):
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+        now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         safe_id = user_id.replace("@", "_").replace(".", "_")
         filename = f"wechat_{safe_id}_{ts}.md"
         filepath = self.inbox_dir / filename
@@ -407,12 +408,23 @@ class WeChatInboxHandler:
             f"# 来自微信的消息\n"
             f"- 类型：指令\n"
             f"- 来源：微信 ({user_id})\n"
-            f"- 时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+            f"- 时间：{now_str}\n\n"
             f"## 内容\n\n{content}\n\n"
             f"## 上下文\n\n- User ID: {user_id}\n- Context Token: {context_token}\n",
             encoding="utf-8",
         )
         _log(f"[微信] -> inbox/{filename}")
+
+        # 追加到聊天历史
+        history_path = Path("D:/loopcli/logs/wechat_history.jsonl")
+        history_path.parent.mkdir(parents=True, exist_ok=True)
+        record = json.dumps({
+            "time": now_str,
+            "from": user_id,
+            "content": content,
+        }, ensure_ascii=False)
+        with open(history_path, "a", encoding="utf-8") as f:
+            f.write(record + "\n")
 
     def _monitor_reports(self):
         while self.bridge.running:
