@@ -138,16 +138,63 @@ body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; background
 .ctrl-input:focus { border-color: var(--accent); }
 .ctrl-dispatch-form { max-width: 500px; }
 
+/* Toast */
+.toast-container { position: fixed; top: 16px; right: 16px; z-index: 200; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+.toast { pointer-events: auto; padding: 12px 18px; border-radius: var(--radius); font-size: 13px; max-width: 380px; box-shadow: 0 4px 20px rgba(0,0,0,.4); display: flex; align-items: center; gap: 10px; animation: toast-in .25s ease; }
+.toast.error { background: var(--red); color: #fff; }
+.toast.success { background: var(--green); color: #fff; }
+.toast.warn { background: var(--yellow); color: #222; }
+.toast.info { background: var(--blue); color: #fff; }
+@keyframes toast-in { from { opacity:0; transform:translateX(40px) } to { opacity:1; transform:translateX(0) } }
+.toast-exit { animation: toast-out .2s ease forwards; }
+@keyframes toast-out { to { opacity:0; transform:translateX(40px) } }
+
+/* Poll indicator */
+.poll-indicator { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text2); }
+.poll-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+.poll-dot.error { background: var(--red); }
+
+/* Log stream controls */
+.log-stream-controls { display: flex; align-items: center; gap: 10px; }
+.log-conn-status { font-size: 12px; display: flex; align-items: center; gap: 5px; }
+.log-conn-dot { width: 6px; height: 6px; border-radius: 50%; }
+.log-conn-dot.connected { background: var(--green); }
+.log-conn-dot.disconnected { background: var(--red); }
+
 /* Responsive */
 @media (max-width: 768px) {
   .sidebar { width: 56px; }
   .brand h1, .nav-item span, .sidebar-footer { display: none; }
   .nav-item { justify-content: center; padding: 10px; }
   .content { padding: 16px; }
+  .header { flex-direction: column; gap: 10px; align-items: flex-start; padding: 12px 16px; }
+  .header-actions { width: 100%; justify-content: space-between; }
+  .stats { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .stat-card .value { font-size: 20px; }
+  .agent-grid { grid-template-columns: 1fr; }
+  .task-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .modal { width: 96vw; max-width: 96vw; padding: 18px; }
+  .ctrl-actions { flex-direction: column; }
+  .ctrl-start-group { flex-wrap: wrap; }
+  .ctrl-input { width: 100%; }
+  .ctrl-info-grid { grid-template-columns: repeat(2, 1fr); }
+  .ctrl-dispatch-form { max-width: 100%; }
+  .log-toolbar { flex-direction: column; align-items: stretch; }
+  .log-toolbar select, .log-toolbar input { width: 100%; }
+  .log-container { height: calc(100vh - 320px); }
+}
+@media (max-width: 480px) {
+  .stats { grid-template-columns: 1fr; }
+  .stat-card { padding: 12px; }
+  .stat-card .value { font-size: 18px; }
+  .ctrl-info-grid { grid-template-columns: 1fr; }
+  .content { padding: 10px; }
+  .btn { padding: 7px 12px; font-size: 12px; }
 }
 </style>
 </head>
 <body>
+<div class="toast-container" id="toast-container"></div>
 <div class="app">
   <aside class="sidebar">
     <div class="brand"><h1><span>Loop</span>CLI</h1></div>
@@ -166,6 +213,7 @@ body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; background
     <div class="header">
       <h2 id="pageTitle">仪表盘</h2>
       <div class="header-actions">
+        <span class="poll-indicator" id="poll-indicator"><span class="poll-dot" id="poll-dot"></span><span id="poll-time">-</span></span>
         <span id="log-status"></span>
         <button class="btn btn-primary" id="newTaskBtn">+ 新任务</button>
       </div>
@@ -205,6 +253,11 @@ body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; background
         <div class="log-toolbar">
           <select id="log-agent-filter"><option value="">All Agents</option></select>
           <input id="log-search" placeholder="搜索日志..." />
+          <div class="log-stream-controls">
+            <span class="log-conn-status"><span class="log-conn-dot disconnected" id="log-conn-dot"></span><span id="log-conn-text">未连接</span></span>
+            <button class="btn" id="log-pause-btn" style="display:none">暂停</button>
+            <button class="btn" id="log-resume-btn" style="display:none">继续</button>
+          </div>
           <button class="btn" id="log-clear-btn">清空显示</button>
           <label class="log-auto-scroll"><input type="checkbox" id="log-autoscroll" checked /> 自动滚动</label>
         </div>
@@ -296,11 +349,42 @@ let agents = [];
 let tasks = [];
 let agentTaskCache = {};
 
+// --- Toast Notification System ---
+function showToast(message, type = 'error') {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = 'toast ' + type;
+  toast.textContent = message;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add('toast-exit');
+    setTimeout(() => toast.remove(), 200);
+  }, 4000);
+}
+
+// --- Poll Indicator ---
+function updatePollIndicator(error) {
+  const dot = document.getElementById('poll-dot');
+  const timeEl = document.getElementById('poll-time');
+  if (error) {
+    dot.className = 'poll-dot error';
+    timeEl.textContent = '连接失败';
+  } else {
+    dot.className = 'poll-dot';
+    timeEl.textContent = '更新于 ' + new Date().toLocaleTimeString('zh-CN');
+  }
+}
+
 async function loadAgents() {
   try {
     const r = await fetch('/api/agents');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
     agents = await r.json();
-  } catch { agents = []; }
+  } catch (e) {
+    agents = [];
+    showToast('获取 Agent 列表失败: ' + e.message, 'error');
+    updatePollIndicator(true);
+  }
 }
 
 async function loadTasks(agentFilter) {
@@ -308,19 +392,29 @@ async function loadTasks(agentFilter) {
     let url = '/api/tasks';
     if (agentFilter) url += '?agent=' + encodeURIComponent(agentFilter);
     const r = await fetch(url);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
     tasks = await r.json();
-  } catch { tasks = []; }
+  } catch (e) {
+    tasks = [];
+    showToast('获取任务列表失败: ' + e.message, 'error');
+  }
 }
 
 async function loadAgentTasks(agentId) {
   try {
     const r = await fetch('/api/agents/' + encodeURIComponent(agentId) + '/tasks');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
     agentTaskCache[agentId] = await r.json();
-  } catch { agentTaskCache[agentId] = []; }
+  } catch (e) {
+    agentTaskCache[agentId] = [];
+    showToast('获取 Agent 任务失败: ' + e.message, 'error');
+  }
 }
 
 async function loadData() {
   await Promise.all([loadAgents(), loadTasks()]);
+  const hasError = agents.length === 0 && tasks.length === 0;
+  if (!hasError) updatePollIndicator(false);
   render();
 }
 
@@ -449,14 +543,21 @@ document.getElementById('modalSubmit').addEventListener('click', async () => {
   const title = document.getElementById('f-title').value.trim();
   const desc = document.getElementById('f-desc').value.trim();
   const agent = document.getElementById('f-agent').value;
-  if (!title) return;
+  if (!title) { showToast('请输入任务标题', 'warn'); return; }
   try {
-    await fetch('/api/tasks', {
+    const r = await fetch('/api/tasks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ title, description: desc, assignee: agent || undefined })
     });
-  } catch { /* fallback: will reload anyway */ }
+    if (!r.ok) {
+      const data = await r.json().catch(() => ({}));
+      throw new Error(data.error || 'HTTP ' + r.status);
+    }
+    showToast('任务创建成功', 'success');
+  } catch (e) {
+    showToast('创建任务失败: ' + e.message, 'error');
+  }
   modal.classList.remove('show');
   document.getElementById('f-title').value = '';
   document.getElementById('f-desc').value = '';
@@ -472,20 +573,49 @@ function esc(s) { const d = document.createElement('div'); d.textContent = s || 
 // --- Log SSE Stream ---
 let logEventSource = null;
 let logLines = [];
+let logPaused = false;
 const MAX_LOG_LINES = 2000;
+
+function updateLogConnUI(connected) {
+  const dot = document.getElementById('log-conn-dot');
+  const text = document.getElementById('log-conn-text');
+  const pauseBtn = document.getElementById('log-pause-btn');
+  const resumeBtn = document.getElementById('log-resume-btn');
+  if (connected) {
+    dot.className = 'log-conn-dot connected';
+    text.textContent = '已连接';
+    if (logPaused) {
+      pauseBtn.style.display = 'none';
+      resumeBtn.style.display = '';
+    } else {
+      pauseBtn.style.display = '';
+      resumeBtn.style.display = 'none';
+    }
+  } else {
+    dot.className = 'log-conn-dot disconnected';
+    text.textContent = '未连接';
+    pauseBtn.style.display = 'none';
+    resumeBtn.style.display = 'none';
+  }
+}
 
 function initLogStream() {
   if (logEventSource) return;
   const agent = document.getElementById('log-agent-filter').value;
   const url = '/api/logs/stream' + (agent ? '?agent=' + encodeURIComponent(agent) : '');
   logEventSource = new EventSource(url);
-  const statusEl = null; // could add a connection indicator
+  updateLogConnUI(true);
+
+  logEventSource.onopen = function() {
+    updateLogConnUI(true);
+  };
+
   logEventSource.onmessage = function(e) {
+    if (logPaused) return;
     try {
       const data = JSON.parse(e.data);
       const newLines = data.lines || [];
       const agentTag = data.agent || 'main';
-      // Only update if content changed
       const joined = newLines.join('\n');
       if (logLines.map(l => l.text).join('\n') !== joined) {
         logLines = newLines.map(l => ({ text: l, agent: agentTag }));
@@ -494,14 +624,37 @@ function initLogStream() {
       }
     } catch {}
   };
+
   logEventSource.onerror = function() {
+    updateLogConnUI(false);
     if (logEventSource) { logEventSource.close(); logEventSource = null; }
+    showToast('日志流连接断开', 'warn');
+    setTimeout(() => {
+      const activePage = document.querySelector('.page.active');
+      if (activePage && activePage.id === 'page-logs') initLogStream();
+    }, 5000);
   };
 }
 
 function closeLogStream() {
   if (logEventSource) { logEventSource.close(); logEventSource = null; }
+  updateLogConnUI(false);
+  logPaused = false;
 }
+
+document.getElementById('log-pause-btn').addEventListener('click', function() {
+  logPaused = true;
+  updateLogConnUI(true);
+  this.style.display = 'none';
+  document.getElementById('log-resume-btn').style.display = '';
+});
+
+document.getElementById('log-resume-btn').addEventListener('click', function() {
+  logPaused = false;
+  updateLogConnUI(true);
+  this.style.display = 'none';
+  document.getElementById('log-pause-btn').style.display = '';
+});
 
 function renderLogOutput() {
   const pre = document.getElementById('log-output');
@@ -537,7 +690,6 @@ function fillLogAgentFilter() {
   const sel = document.getElementById('log-agent-filter');
   const cur = sel.value;
   sel.innerHTML = '<option value="">All Agents</option>' +
-    '<option value="">main</option>' +
     agents.map(a => `<option value="${esc(a.id)}">${esc(a.name)}</option>`).join('');
   sel.value = cur;
 }
@@ -567,6 +719,7 @@ function fmtDuration(sec) {
 async function loadLoopStatus() {
   try {
     const r = await fetch('/api/loopcli/status');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
     const st = await r.json();
     const dot = document.getElementById('ctrl-dot');
     const txt = document.getElementById('ctrl-status-text');
@@ -583,23 +736,37 @@ async function loadLoopStatus() {
     document.getElementById('ctrl-uptime').textContent = fmtDuration(st.uptime_seconds);
     document.getElementById('ctrl-iterations').textContent = st.iterations > 0 ? st.iterations : '∞';
     document.getElementById('ctrl-started').textContent = st.started_at ? new Date(st.started_at).toLocaleString('zh-CN') : '-';
-  } catch {}
+  } catch (e) {
+    // silently retry
+  }
 }
 
 document.getElementById('ctrl-start-btn').addEventListener('click', async () => {
   const n = parseInt(document.getElementById('ctrl-iter-input').value) || 0;
-  await fetch('/api/loopcli/start', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({iterations: n}) });
+  try {
+    const r = await fetch('/api/loopcli/start', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({iterations: n}) });
+    if (!r.ok) { const d = await r.json().catch(() => ({})); throw new Error(d.error || '启动失败'); }
+    showToast('Loop 已启动', 'success');
+  } catch (e) { showToast(e.message, 'error'); }
   setTimeout(loadLoopStatus, 500);
 });
 
 document.getElementById('ctrl-stop-btn').addEventListener('click', async () => {
-  await fetch('/api/loopcli/stop', { method: 'POST' });
+  try {
+    const r = await fetch('/api/loopcli/stop', { method: 'POST' });
+    if (!r.ok) { const d = await r.json().catch(() => ({})); throw new Error(d.error || '停止失败'); }
+    showToast('Loop 已停止', 'success');
+  } catch (e) { showToast(e.message, 'error'); }
   setTimeout(loadLoopStatus, 500);
 });
 
 document.getElementById('ctrl-restart-btn').addEventListener('click', async () => {
   const n = parseInt(document.getElementById('ctrl-iter-input').value) || 0;
-  await fetch('/api/loopcli/restart', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({iterations: n}) });
+  try {
+    const r = await fetch('/api/loopcli/restart', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({iterations: n}) });
+    if (!r.ok) { const d = await r.json().catch(() => ({})); throw new Error(d.error || '重启失败'); }
+    showToast('Loop 已重启', 'success');
+  } catch (e) { showToast(e.message, 'error'); }
   setTimeout(loadLoopStatus, 500);
 });
 
@@ -616,12 +783,17 @@ document.getElementById('d-submit').addEventListener('click', async () => {
   const agent = document.getElementById('d-agent').value;
   const title = document.getElementById('d-title').value.trim();
   const desc = document.getElementById('d-desc').value.trim();
-  if (!agent || !title) return;
-  await fetch('/api/loopcli/dispatch', {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({agent, title, description: desc}),
-  });
+  if (!agent) { showToast('请选择目标 Agent', 'warn'); return; }
+  if (!title) { showToast('请输入任务标题', 'warn'); return; }
+  try {
+    const r = await fetch('/api/loopcli/dispatch', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({agent, title, description: desc}),
+    });
+    if (!r.ok) { const d = await r.json().catch(() => ({})); throw new Error(d.error || '派发失败'); }
+    showToast('任务已派发并执行', 'success');
+  } catch (e) { showToast('派发失败: ' + e.message, 'error'); }
   document.getElementById('d-title').value = '';
   document.getElementById('d-desc').value = '';
   await loadData();
@@ -653,7 +825,7 @@ document.getElementById('msg-send-btn').addEventListener('click', async () => {
   const agent = document.getElementById('msg-agent').value || 'main';
   const content = document.getElementById('msg-content').value.trim();
   const statusEl = document.getElementById('msg-status');
-  if (!content) { statusEl.textContent = '请输入消息内容'; statusEl.style.color = 'var(--red)'; return; }
+  if (!content) { statusEl.textContent = '请输入消息内容'; statusEl.style.color = 'var(--red)'; showToast('请输入消息内容', 'warn'); return; }
 
   statusEl.textContent = '发送中...';
   statusEl.style.color = 'var(--yellow)';
@@ -667,12 +839,14 @@ document.getElementById('msg-send-btn').addEventListener('click', async () => {
     if (!r.ok) { throw new Error(data.error || '发送失败'); }
     statusEl.textContent = '已发送 -> ' + agent;
     statusEl.style.color = 'var(--green)';
+    showToast('消息已发送给 ' + agent, 'success');
     msgHistory.unshift({ agent, content, time: new Date().toLocaleTimeString('zh-CN'), file: data.file });
     renderMsgHistory();
     document.getElementById('msg-content').value = '';
   } catch(e) {
     statusEl.textContent = '发送失败: ' + e.message;
     statusEl.style.color = 'var(--red)';
+    showToast('消息发送失败: ' + e.message, 'error');
   }
 });
 
