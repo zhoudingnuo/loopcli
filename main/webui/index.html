@@ -57,7 +57,7 @@
   --transition-bounce: 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
-/* 粒子背景 */
+/* 粒子背景 - 增强版 */
 #particles-canvas {
   position: fixed;
   top: 0;
@@ -66,7 +66,93 @@
   height: 100%;
   z-index: 0;
   pointer-events: none;
+  opacity: 0.4;
+  transition: opacity var(--transition-slow);
+}
+/* 粒子背景动画 */
+@keyframes particleFloat {
+  0%, 100% { transform: translateY(0) translateX(0); opacity: 0.4; }
+  25% { transform: translateY(-10px) translateX(5px); opacity: 0.6; }
+  50% { transform: translateY(-5px) translateX(-5px); opacity: 0.3; }
+  75% { transform: translateY(-15px) translateX(10px); opacity: 0.5; }
+}
+
+/* 光晕效果 */
+.glow-effect {
+  position: relative;
+}
+.glow-effect::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: var(--accent-gradient);
+  border-radius: inherit;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+  filter: blur(8px);
+}
+.glow-effect:hover::after {
   opacity: 0.6;
+}
+
+/* 玻璃态卡片增强 */
+.glass-card {
+  background: var(--surface);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-normal);
+}
+.glass-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow), 0 0 20px rgba(167, 139, 250, 0.2);
+  border-color: var(--accent);
+}
+
+/* 流光效果 */
+.shine-effect {
+  position: relative;
+  overflow: hidden;
+}
+.shine-effect::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  transition: left 0.5s;
+}
+.shine-effect:hover::before {
+  left: 100%;
+}
+
+/* 渐变边框 */
+.gradient-border {
+  position: relative;
+  background: var(--surface);
+  border-radius: var(--radius);
+}
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius);
+  padding: 1px;
+  background: var(--accent-gradient);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.8;
 }
 
 /* 滚动条美化 */
@@ -1573,7 +1659,7 @@ body {
   }
 }
 
-/* Charts */
+/* Charts - 增强版 */
 .charts-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1586,6 +1672,28 @@ body {
   border-radius: var(--radius);
   padding: 20px;
   box-shadow: var(--shadow-sm);
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+.chart-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--accent-gradient);
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+}
+.chart-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow), var(--shadow-glow);
+  border-color: var(--accent);
+}
+.chart-card:hover::before {
+  opacity: 1;
 }
 .chart-title {
   font-size: 14px;
@@ -3218,11 +3326,600 @@ function renderMsgHistory() {
 // 刷新图表（带错误处理）
 function refreshCharts() {
   try {
-    renderCharts();
+    renderTaskPieChart();
+    renderAgentBarChart();
+    renderTokenTrendChart();
   } catch (e) {
     console.error('图表渲染失败:', e);
   }
 }
+
+// ============ v5.1 新增功能 ============
+
+// 快速操作面板
+function showQuickActions() {
+  const actions = [
+    { icon: '🔄', label: '刷新数据', action: () => { loadData(); showToast('数据已刷新', 'success'); } },
+    { icon: '🧹', label: '清理日志', action: () => { document.getElementById('log-clear-btn').click(); showToast('日志已清理', 'success'); } },
+    { icon: '📊', label: '导出报告', action: () => { exportReport(); } },
+    { icon: '⚡', label: '快速任务', action: () => { document.getElementById('newTaskBtn').click(); } },
+    { icon: '📩', label: '发送消息', action: () => { document.querySelector('.nav-item[data-page="messages"]').click(); } },
+    { icon: '⚙️', label: '系统设置', action: () => { showSystemSettings(); } },
+  ];
+
+  const panel = document.createElement('div');
+  panel.style.cssText = `
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; padding: 24px; z-index: 300;
+    box-shadow: var(--shadow-lg); min-width: 320px;
+    animation: modalIn 0.3s ease;
+  `;
+
+  panel.innerHTML = `
+    <h3 style="margin: 0 0 20px 0; font-size: 18px; font-weight: 800; background: var(--accent-gradient);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;">快速操作</h3>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+      ${actions.map(a => `
+        <button class="quick-action-btn" data-action="${a.label}" style="
+          padding: 16px; border: 1px solid var(--border); border-radius: 12px;
+          background: var(--bg); color: var(--text); cursor: pointer;
+          transition: all var(--transition-normal); display: flex; flex-direction: column;
+          align-items: center; gap: 8px; font-size: 13px; font-weight: 600;
+        ">
+          <span style="font-size: 24px;">${a.icon}</span>
+          <span>${a.label}</span>
+        </button>
+      `).join('')}
+    </div>
+    <button id="closeQuickActions" style="
+      margin-top: 20px; width: 100%; padding: 12px; border: 1px solid var(--border);
+      border-radius: 10px; background: var(--surface2); color: var(--text);
+      cursor: pointer; font-weight: 600; transition: all var(--transition-normal);
+    ">关闭</button>
+  `;
+
+  document.body.appendChild(panel);
+
+  // 绑定事件
+  panel.querySelectorAll('.quick-action-btn').forEach((btn, i) => {
+    btn.addEventListener('click', () => {
+      actions[i].action();
+      panel.remove();
+    });
+    btn.addEventListener('mouseenter', () => {
+      btn.style.borderColor = 'var(--accent)';
+      btn.style.transform = 'translateY(-2px)';
+      btn.style.boxShadow = 'var(--shadow-sm)';
+    });
+    btn.addEventListener('mouseleave', () => {
+      btn.style.borderColor = 'var(--border)';
+      btn.style.transform = 'translateY(0)';
+      btn.style.boxShadow = 'none';
+    });
+  });
+
+  document.getElementById('closeQuickActions').addEventListener('click', () => panel.remove());
+
+  // 点击外部关闭
+  panel.addEventListener('click', e => {
+    if (e.target === panel) panel.remove();
+  });
+}
+
+// 导出报告功能
+function exportReport() {
+  const reportData = {
+    timestamp: new Date().toISOString(),
+    agents: agents,
+    tasks: tasks,
+    stats: {
+      totalAgents: agents.length,
+      runningAgents: agents.filter(a => a.status === 'running').length,
+      totalTasks: tasks.length,
+      pendingTasks: tasks.filter(t => t.status === 'pending').length,
+      completedTasks: tasks.filter(t => t.status === 'completed').length,
+    }
+  };
+
+  const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `loopcli-report-${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('报告已导出', 'success');
+}
+
+// 系统设置面板
+function showSystemSettings() {
+  const settings = {
+    '自动刷新': { key: 'autoRefresh', default: true, type: 'checkbox' },
+    '刷新间隔': { key: 'refreshInterval', default: 10, type: 'number', min: 5, max: 60 },
+    '显示动画': { key: 'showAnimations', default: true, type: 'checkbox' },
+    '紧凑模式': { key: 'compactMode', default: false, type: 'checkbox' },
+  };
+
+  const panel = document.createElement('div');
+  panel.style.cssText = `
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; padding: 28px; z-index: 300;
+    box-shadow: var(--shadow-lg); min-width: 400px;
+    animation: modalIn 0.3s ease;
+  `;
+
+  panel.innerHTML = `
+    <h3 style="margin: 0 0 24px 0; font-size: 18px; font-weight: 800; background: var(--accent-gradient);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;">系统设置</h3>
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+      ${Object.entries(settings).map(([label, config]) => `
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <label style="font-size: 14px; font-weight: 600; color: var(--text);">${label}</label>
+          ${config.type === 'checkbox'
+            ? `<input type="checkbox" data-setting="${config.key}" ${localStorage.getItem(config.key) !== 'false' ? 'checked' : ''} style="
+                width: 20px; height: 20px; accent-color: var(--accent); cursor: pointer;
+              ">`
+            : `<input type="number" data-setting="${config.key}" value="${localStorage.getItem(config.key) || config.default}"
+                min="${config.min}" max="${config.max}" style="
+                width: 80px; padding: 8px; border: 1px solid var(--border);
+                border-radius: 8px; background: var(--bg); color: var(--text);
+                font-size: 14px; text-align: center;
+              ">`
+          }
+        </div>
+      `).join('')}
+    </div>
+    <div style="display: flex; gap: 12px; margin-top: 24px;">
+      <button id="saveSettings" style="
+        flex: 1; padding: 12px; border: none; border-radius: 10px;
+        background: var(--accent-gradient); color: #fff; cursor: pointer;
+        font-weight: 600; transition: all var(--transition-normal);
+      ">保存设置</button>
+      <button id="closeSettings" style="
+        flex: 1; padding: 12px; border: 1px solid var(--border); border-radius: 10px;
+        background: var(--surface2); color: var(--text); cursor: pointer;
+        font-weight: 600; transition: all var(--transition-normal);
+      ">关闭</button>
+    </div>
+  `;
+
+  document.body.appendChild(panel);
+
+  document.getElementById('saveSettings').addEventListener('click', () => {
+    panel.querySelectorAll('[data-setting]').forEach(input => {
+      const key = input.dataset.setting;
+      const value = input.type === 'checkbox' ? input.checked : input.value;
+      localStorage.setItem(key, value);
+
+      // 应用设置
+      if (key === 'compactMode') {
+        document.body.classList.toggle('compact', value);
+      }
+    });
+    showToast('设置已保存', 'success');
+    panel.remove();
+  });
+
+  document.getElementById('closeSettings').addEventListener('click', () => panel.remove());
+}
+
+// 添加快捷键 Ctrl+Q 打开快速操作
+document.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'q') {
+    e.preventDefault();
+    showQuickActions();
+  }
+});
+
+// 在 header actions 中添加快速操作按钮
+const quickActionsBtn = document.createElement('button');
+quickActionsBtn.className = 'toolbar-btn';
+quickActionsBtn.id = 'quick-actions-btn';
+quickActionsBtn.title = '快速操作 (Ctrl+Q)';
+quickActionsBtn.textContent = '⚡';
+quickActionsBtn.style.cssText = 'display: none;'; // 默认隐藏，可通过设置显示
+quickActionsBtn.addEventListener('click', showQuickActions);
+
+// 添加到 header actions
+document.querySelector('.header-actions').insertBefore(
+  quickActionsBtn,
+  document.getElementById('newTaskBtn')
+);
+
+// ============ 性能优化 ============
+
+// 防抖函数
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+// 优化搜索功能 - 使用防抖
+const debouncedSearch = debounce((query) => {
+  // 搜索逻辑
+}, 300);
+
+// ============ 视觉增强 ============
+
+// 添加加载动画
+function showLoadingOverlay(message = '加载中...') {
+  const overlay = document.createElement('div');
+  overlay.id = 'loading-overlay';
+  overlay.style.cssText = `
+    position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px); display: flex; flex-direction: column;
+    justify-content: center; align-items: center; z-index: 1000;
+    animation: fadeIn 0.2s ease;
+  `;
+  overlay.innerHTML = `
+    <div style="
+      width: 48px; height: 48px; border: 4px solid var(--border);
+      border-top-color: var(--accent); border-radius: 50%;
+      animation: spin 1s linear infinite;
+    "></div>
+    <div style="margin-top: 20px; color: #fff; font-size: 16px; font-weight: 600;">${message}</div>
+    <style>
+      @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+  `;
+  document.body.appendChild(overlay);
+  return overlay;
+}
+
+function hideLoadingOverlay() {
+  const overlay = document.getElementById('loading-overlay');
+  if (overlay) overlay.remove();
+}
+
+// 优化数据加载，显示加载动画
+const _origLoadData = loadData;
+loadData = async function() {
+  const loading = showLoadingOverlay('加载数据...');
+  try {
+    await _origLoadData();
+  } finally {
+    hideLoadingOverlay();
+  }
+};
+
+// ============ 状态指示器增强 ============
+
+// 添加系统健康状态指示器
+function updateSystemHealthIndicator() {
+  const healthIndicator = document.createElement('div');
+  healthIndicator.id = 'system-health-indicator';
+  healthIndicator.style.cssText = `
+    position: fixed; bottom: 20px; right: 20px; padding: 12px 16px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; display: flex; align-items: center; gap: 8px;
+    font-size: 12px; font-weight: 700; box-shadow: var(--shadow-sm);
+    z-index: 100; transition: all var(--transition-normal);
+  `;
+
+  const updateHealth = () => {
+    const runningAgents = agents.filter(a => a.status === 'running').length;
+    const totalAgents = agents.length;
+    const pendingTasks = tasks.filter(t => t.status === 'pending').length;
+
+    let health = 'good';
+    let healthText = '系统正常';
+    let healthColor = 'var(--green)';
+
+    if (pendingTasks > 10) {
+      health = 'busy';
+      healthText = '任务积压';
+      healthColor = 'var(--yellow)';
+    }
+    if (runningAgents === 0 && totalAgents > 0) {
+      health = 'idle';
+      healthText = '系统空闲';
+      healthColor = 'var(--blue)';
+    }
+
+    healthIndicator.innerHTML = `
+      <span style="
+        width: 8px; height: 8px; border-radius: 50%; background: ${healthColor};
+        box-shadow: 0 0 8px ${healthColor};
+      "></span>
+      <span style="color: var(--text);">${healthText}</span>
+      <span style="color: var(--text2);">| ${runningAgents}/${totalAgents} Agent | ${pendingTasks} 待处理</span>
+    `;
+  };
+
+  document.body.appendChild(healthIndicator);
+  updateHealth();
+
+  // 定期更新
+  setInterval(updateHealth, 10000);
+  // 每次数据加载后更新
+  const _origRender = render;
+  render = function() {
+    _origRender();
+    updateHealth();
+  };
+}
+
+// 初始化系统健康指示器
+updateSystemHealthIndicator();
+
+console.log('✨ LoopCLI WebUI v5.1 增强版已加载');
+
+// ============ 粒子背景动画 ============
+
+class ParticleBackground {
+  constructor() {
+    this.canvas = document.getElementById('particles-canvas');
+    if (!this.canvas) return;
+
+    this.ctx = this.canvas.getContext('2d');
+    this.particles = [];
+    this.resize();
+    this.createParticles();
+    this.animate();
+
+    window.addEventListener('resize', () => this.resize());
+  }
+
+  resize() {
+    this.canvas.width = window.innerWidth;
+    this.canvas.height = window.innerHeight;
+  }
+
+  createParticles() {
+    const particleCount = Math.floor((this.canvas.width * this.canvas.height) / 15000);
+    this.particles = [];
+
+    for (let i = 0; i < particleCount; i++) {
+      this.particles.push({
+        x: Math.random() * this.canvas.width,
+        y: Math.random() * this.canvas.height,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: (Math.random() - 0.5) * 0.5,
+        radius: Math.random() * 2 + 1,
+        opacity: Math.random() * 0.5 + 0.2,
+      });
+    }
+  }
+
+  animate() {
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    // 更新和绘制粒子
+    this.particles.forEach(p => {
+      // 更新位置
+      p.x += p.vx;
+      p.y += p.vy;
+
+      // 边界检查
+      if (p.x < 0 || p.x > this.canvas.width) p.vx *= -1;
+      if (p.y < 0 || p.y > this.canvas.height) p.vy *= -1;
+
+      // 绘制粒子
+      this.ctx.beginPath();
+      this.ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+      this.ctx.fillStyle = `rgba(167, 139, 250, ${p.opacity})`;
+      this.ctx.fill();
+    });
+
+    // 绘制连接线
+    this.drawConnections();
+
+    requestAnimationFrame(() => this.animate());
+  }
+
+  drawConnections() {
+    const maxDistance = 150;
+    const lineWidth = 0.5;
+
+    for (let i = 0; i < this.particles.length; i++) {
+      for (let j = i + 1; j < this.particles.length; j++) {
+        const dx = this.particles[i].x - this.particles[j].x;
+        const dy = this.particles[i].y - this.particles[j].y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance < maxDistance) {
+          const opacity = (1 - distance / maxDistance) * 0.2;
+          this.ctx.beginPath();
+          this.ctx.moveTo(this.particles[i].x, this.particles[i].y);
+          this.ctx.lineTo(this.particles[j].x, this.particles[j].y);
+          this.ctx.strokeStyle = `rgba(167, 139, 250, ${opacity})`;
+          this.ctx.lineWidth = lineWidth;
+          this.ctx.stroke();
+        }
+      }
+    }
+  }
+}
+
+// 初始化粒子背景
+try {
+  new ParticleBackground();
+} catch (e) {
+  console.log('粒子背景初始化失败:', e);
+}
+
+// ============ 鼠标跟随效果 ============
+
+class MouseFollower {
+  constructor() {
+    this.cursor = document.createElement('div');
+    this.cursor.style.cssText = `
+      position: fixed; width: 20px; height: 20px; border: 2px solid var(--accent);
+      border-radius: 50%; pointer-events: none; z-index: 9999;
+      transition: transform 0.15s ease, opacity 0.15s ease;
+      opacity: 0; transform: translate(-50%, -50%);
+    `;
+    document.body.appendChild(this.cursor);
+
+    this.dot = document.createElement('div');
+    this.dot.style.cssText = `
+      position: fixed; width: 4px; height: 4px; background: var(--accent);
+      border-radius: 50%; pointer-events: none; z-index: 10000;
+      transition: transform 0.05s ease; opacity: 0;
+      transform: translate(-50%, -50%);
+    `;
+    document.body.appendChild(this.dot);
+
+    this.x = 0;
+    this.y = 0;
+    this.targetX = 0;
+    this.targetY = 0;
+
+    document.addEventListener('mousemove', (e) => {
+      this.targetX = e.clientX;
+      this.targetY = e.clientY;
+      this.cursor.style.opacity = '1';
+      this.dot.style.opacity = '1';
+    });
+
+    document.addEventListener('mouseleave', () => {
+      this.cursor.style.opacity = '0';
+      this.dot.style.opacity = '0';
+    });
+
+    this.animate();
+  }
+
+  animate() {
+    // 平滑跟随
+    this.x += (this.targetX - this.x) * 0.1;
+    this.y += (this.targetY - this.y) * 0.1;
+
+    this.cursor.style.left = this.x + 'px';
+    this.cursor.style.top = this.y + 'px';
+    this.dot.style.left = this.targetX + 'px';
+    this.dot.style.top = this.targetY + 'px';
+
+    requestAnimationFrame(() => this.animate());
+  }
+}
+
+// 在桌面端启用鼠标跟随
+if (window.innerWidth > 768) {
+  try {
+    new MouseFollower();
+  } catch (e) {
+    console.log('鼠标跟随效果初始化失败:', e);
+  }
+}
+
+// ============ 页面加载动画 ============
+
+window.addEventListener('load', () => {
+  document.body.style.opacity = '0';
+  setTimeout(() => {
+    document.body.style.transition = 'opacity 0.5s ease';
+    document.body.style.opacity = '1';
+  }, 100);
+});
+
+// ============ 卡片入场动画 ============
+
+function animateCardsEntry() {
+  const cards = document.querySelectorAll('.stat-card, .agent-card, .chart-card');
+  cards.forEach((card, index) => {
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(20px)';
+    setTimeout(() => {
+      card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+      card.style.opacity = '1';
+      card.style.transform = 'translateY(0)';
+    }, index * 50);
+  });
+}
+
+// 在数据加载后执行入场动画
+const _origRender = render;
+render = function() {
+  _origRender();
+  animateCardsEntry();
+};
+
+// ============ 数字滚动动画 ============
+
+function animateNumber(element, target, duration = 1000) {
+  const start = 0;
+  const startTime = performance.now();
+
+  function update(currentTime) {
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+
+    // 缓动函数
+    const easeOut = 1 - Math.pow(1 - progress, 3);
+    const current = Math.floor(start + (target - start) * easeOut);
+
+    element.textContent = current.toLocaleString();
+
+    if (progress < 1) {
+      requestAnimationFrame(update);
+    }
+  }
+
+  requestAnimationFrame(update);
+}
+
+// ============ 波纹点击效果 ============
+
+class RippleEffect {
+  constructor() {
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('.btn, .action-btn, .nav-item')) {
+        this.createRipple(e);
+      }
+    });
+  }
+
+  createRipple(e) {
+    const button = e.target.closest('.btn, .action-btn, .nav-item');
+    if (!button) return;
+
+    const ripple = document.createElement('span');
+    const rect = button.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    const x = e.clientX - rect.left - size / 2;
+    const y = e.clientY - rect.top - size / 2;
+
+    ripple.style.cssText = `
+      position: absolute; width: ${size}px; height: ${size}px;
+      left: ${x}px; top: ${y}px; background: rgba(255, 255, 255, 0.3);
+      border-radius: 50%; transform: scale(0); animation: ripple 0.6s ease-out;
+      pointer-events: none;
+    `;
+
+    button.style.position = button.style.position || 'relative';
+    button.style.overflow = 'hidden';
+    button.appendChild(ripple);
+
+    setTimeout(() => ripple.remove(), 600);
+  }
+}
+
+// 添加波纹动画样式
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes ripple {
+    to {
+      transform: scale(4);
+      opacity: 0;
+    }
+  }
+`;
+document.head.appendChild(style);
+
+// 初始化波纹效果
+new RippleEffect();
+
+console.log('🎨 视觉效果增强已加载');
 
 // 渲染所有图表
 async function renderCharts() {
