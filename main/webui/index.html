@@ -628,7 +628,9 @@ body {
   z-index: 1000;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
+  max-height: 40vh;
+  overflow: hidden;
 }
 .notification {
   display: flex;
@@ -1439,6 +1441,11 @@ function showNotification(message, type = 'info', duration = 5000) {
 
   container.appendChild(notification);
 
+  // 最多显示3条通知
+  while (container.children.length > 3) {
+    container.firstChild.remove();
+  }
+
   setTimeout(() => {
     if (notification.parentElement) {
       notification.remove();
@@ -1802,9 +1809,9 @@ function drawProgressBars(containerId, data, maxBar) {
   container.innerHTML = data.map(item => {
     const pct = Math.round((item.value / maxVal) * 100);
     return `<div style="margin-bottom:10px;">
-      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
-        <span style="color:var(--text2)">${item.label}</span>
-        <span style="color:var(--text);font-weight:600">${item.value}</span>
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;gap:8px;">
+        <span style="color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;">${item.label}</span>
+        <span style="color:var(--text);font-weight:600;flex-shrink:0;">${item.value}</span>
       </div>
       <div style="height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;">
         <div style="height:100%;width:${pct}%;background:var(--accent-gradient);border-radius:4px;transition:width .5s ease;"></div>
@@ -2044,24 +2051,45 @@ async function loadTasks() {
 
 // 加载 Performance 页面
 async function loadPerformance() {
-  // 模拟趋势图数据（从run.md解析）
-  const trendData = [
-    { label: '05/16', date: '2026-05-16', value: 0 },
-    { label: '05/17', date: '2026-05-17', value: 0 },
-    { label: '05/18', date: '2026-05-18', value: 0 },
-    { label: '05/19', date: '2026-05-19', value: 0 },
-    { label: '05/20', date: '2026-05-20', value: 0 },
-    { label: '05/21', date: '2026-05-21', value: 28 },
-    { label: '今天', date: '2026-05-22', value: 35 }
-  ];
-  drawLineChart('token-trend-chart', trendData, '#3b82f6');
-  document.getElementById('token-trend-summary').textContent = '7天累计 63 次任务，平均 9.0 次/天';
+  try {
+    // 加载真实系统数据
+    const healthResp = await fetch(`${API_BASE}/health`);
+    if (healthResp.ok) {
+      const health = await healthResp.json();
+      if (health.system) {
+        document.getElementById('cpu-usage').textContent = health.system.cpu_percent + '%';
+        document.getElementById('memory-usage').textContent = health.system.memory_percent + '%';
+      }
+    }
+  } catch(e) {}
 
-  // 模拟其他性能数据
-  document.getElementById('cpu-usage').textContent = Math.round(Math.random() * 30 + 10) + '%';
-  document.getElementById('memory-usage').textContent = Math.round(Math.random() * 200 + 100) + ' MB';
+  // Token消耗趋势
+  try {
+    const trendResp = await fetch(`${API_BASE}/usage/trend`);
+    if (trendResp.ok) {
+      const trendData = await trendResp.json();
+      if (Array.isArray(trendData) && trendData.length) {
+        drawLineChart('token-trend-chart', trendData, '#3b82f6');
+        const total = trendData.reduce((s, d) => s + d.value, 0);
+        const avg = Math.round(total / trendData.length);
+        document.getElementById('token-trend-summary').textContent =
+          `${trendData.length}天累计 ${total} 次任务，平均 ${avg} 次/天`;
+      }
+    }
+  } catch(e) {}
+
+  // Token总量
+  try {
+    const usageResp = await fetch(`${API_BASE}/usage`);
+    if (usageResp.ok) {
+      const usage = await usageResp.json();
+      if (usage.total_tokens) {
+        document.getElementById('token-usage').textContent = Number(usage.total_tokens).toLocaleString();
+      }
+    }
+  } catch(e) {}
+
   document.getElementById('response-time').textContent = Math.round(Math.random() * 50 + 10) + 'ms';
-  document.getElementById('token-usage').textContent = Math.round(Math.random() * 100000 + 50000).toLocaleString();
 }
 
 // 加载 Logs 页面
@@ -2508,18 +2536,20 @@ function showKeyboardHelp() {
 
 // 键盘事件监听
 document.addEventListener('keydown', (e) => {
-  // 如果在输入框中，不处理快捷键
-  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-
-  const key = e.key.toLowerCase();
-
-  // ESC 关闭弹窗
-  if (key === 'escape') {
+  // ESC 关闭弹窗（无论是否在输入框中）
+  if (e.key === 'Escape') {
+    const createModal = document.getElementById('create-agent-modal');
+    if (createModal) { closeCreateAgentModal(); e.preventDefault(); return; }
     closeShortcutsPanel();
     const help = document.querySelector('[data-keyboard-help]');
     if (help) help.remove();
     return;
   }
+
+  // 如果在输入框中，不处理其他快捷键
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+  const key = e.key.toLowerCase();
 
   // 处理其他快捷键
   if (keyboardShortcuts[key]) {

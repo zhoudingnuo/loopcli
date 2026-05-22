@@ -24,10 +24,8 @@ def _log(msg):
         log_path = Path.home() / ".loopcli" / "wechat.log"
         log_path.parent.mkdir(parents=True, exist_ok=True)
         ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        log_path.write_text(
-            log_path.read_text(encoding="utf-8", errors="replace") + f"[{ts}] {msg}\n",
-            encoding="utf-8",
-        )
+        with open(log_path, "a", encoding="utf-8") as f:
+            f.write(f"[{ts}] {msg}\n")
     except Exception:
         pass
 
@@ -429,13 +427,15 @@ class WeChatInboxHandler:
     def _monitor_reports(self):
         while self.bridge.running:
             try:
-                for report_file in self.report_dir.glob("*"):
+                for report_file in sorted(self.report_dir.glob("*.md")):
                     if report_file.name in self.processed_reports:
                         continue
-                    if report_file.is_dir():
+                    try:
+                        content = report_file.read_text(encoding="utf-8")
+                    except (UnicodeDecodeError, OSError):
+                        self.processed_reports.add(report_file.name)
+                        self._save_processed_reports()
                         continue
-
-                    content = report_file.read_text(encoding="utf-8")
                     if self._send_report(report_file.name, content):
                         self.processed_reports.add(report_file.name)
                         self._save_processed_reports()
