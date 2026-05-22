@@ -22,20 +22,25 @@
   --accent-gradient: linear-gradient(135deg, #a78bfa 0%, #f472b6 50%, #38bdf8 100%);
   --accent-gradient-subtle: linear-gradient(135deg, rgba(167, 139, 250, 0.15) 0%, rgba(244, 114, 182, 0.15) 50%, rgba(56, 189, 248, 0.15) 100%);
 
-  /* 状态色 - 更鲜艳 */
-  --green: #22d3ee;
-  --green-bg: rgba(34, 211, 238, 0.15);
-  --green-glow: rgba(34, 211, 238, 0.4);
-  --yellow: #fbbf24;
-  --yellow-bg: rgba(251, 191, 36, 0.15);
-  --yellow-glow: rgba(251, 191, 36, 0.4);
-  --red: #f87171;
-  --red-bg: rgba(248, 113, 113, 0.15);
-  --red-glow: rgba(248, 113, 113, 0.4);
-  --blue: #60a5fa;
-  --blue-bg: rgba(96, 165, 250, 0.15);
-  --purple: #c084fc;
-  --purple-bg: rgba(192, 132, 252, 0.15);
+  /* 状态色 - 更鲜艳和对比 */
+  --green: #00e676;
+  --green-bg: rgba(0, 230, 118, 0.2);
+  --green-glow: rgba(0, 230, 118, 0.5);
+  --yellow: #ffc107;
+  --yellow-bg: rgba(255, 193, 7, 0.2);
+  --yellow-glow: rgba(255, 193, 7, 0.5);
+  --red: #ff5252;
+  --red-bg: rgba(255, 82, 82, 0.2);
+  --red-glow: rgba(255, 82, 82, 0.5);
+  --blue: #448aff;
+  --blue-bg: rgba(68, 138, 255, 0.2);
+  --purple: #e040fb;
+  --purple-bg: rgba(224, 64, 251, 0.2);
+
+  /* 新增：禁用状态色 */
+  --gray: #9e9e9e;
+  --gray-bg: rgba(158, 158, 158, 0.15);
+  --gray-glow: rgba(158, 158, 158, 0.3);
 
   --radius: 16px;
   --radius-sm: 10px;
@@ -460,7 +465,7 @@ body {
   font-weight: 700;
 }
 .stat-card .value {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 900;
   background: var(--accent-gradient);
   -webkit-background-clip: text;
@@ -507,7 +512,7 @@ body {
   position: relative;
 }
 
-/* Agent 卡片 */
+/* Agent 卡片 - 增强版 */
 .agent-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -534,46 +539,69 @@ body {
   opacity: 0;
   transition: opacity var(--transition-normal);
 }
+.agent-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 0%, var(--accent-gradient-subtle), transparent 70%);
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+  pointer-events: none;
+}
 .agent-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow);
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: var(--shadow-lg), var(--shadow-glow);
   border-color: var(--accent);
 }
 .agent-card:hover::before {
   opacity: 1;
+}
+.agent-card:hover::after {
+  opacity: 0.5;
 }
 .agent-card .top {
   display: flex;
   justify-content: space-between;
   align-items: start;
   margin-bottom: 16px;
+  position: relative;
+  z-index: 1;
 }
 .agent-card .name {
   font-weight: 800;
   font-size: 17px;
   letter-spacing: -0.3px;
+  color: var(--text);
 }
 .agent-card .desc {
   font-size: 13px;
   color: var(--text2);
   margin-bottom: 16px;
   line-height: 1.7;
+  position: relative;
+  z-index: 1;
 }
 .agent-card .bottom {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 .agent-card .task-stats {
   display: flex;
   gap: 10px;
   margin-bottom: 14px;
+  flex-wrap: wrap;
 }
 .agent-card .task-stat {
   font-size: 11px;
   padding: 5px 12px;
   border-radius: 20px;
   font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 .agent-card .task-stat.done-stat {
   background: var(--green-bg);
@@ -582,6 +610,10 @@ body {
 .agent-card .task-stat.pending-stat {
   background: var(--yellow-bg);
   color: var(--yellow);
+}
+.agent-card .task-stat::before {
+  content: '•';
+  font-size: 14px;
 }
 .agent-card .expand-tasks {
   margin-top: 14px;
@@ -604,6 +636,41 @@ body {
   color: var(--accent2);
   text-decoration: underline;
 }
+/* Agent 操作按钮组 */
+.agent-card .action-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.agent-card .action-btn {
+  font-size: 11px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text);
+  cursor: pointer;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.agent-card .action-btn:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  transform: translateY(-1px);
+}
+.agent-card .action-btn.primary {
+  background: var(--accent-gradient);
+  border: none;
+  color: #fff;
+}
+.agent-card .action-btn.danger:hover {
+  background: var(--red);
+  border-color: var(--red);
+}
 .agent-card .mini-task-list {
   max-height: 220px;
   overflow-y: auto;
@@ -618,32 +685,56 @@ body {
 }
 .agent-card .mini-task:last-child { border-bottom: none; }
 
-/* 状态标签 */
+/* 状态标签 - 增强版 */
 .status-badge {
   font-size: 11px;
-  padding: 5px 14px;
+  padding: 6px 14px;
   border-radius: 20px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid transparent;
+  transition: all var(--transition-normal);
+}
+.status-badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
 }
 .status-badge.running {
   background: var(--green-bg);
   color: var(--green);
+  border-color: var(--green);
   animation: statusPulse 2s infinite;
+  box-shadow: 0 0 12px var(--green-glow);
 }
 .status-badge.idle {
   background: var(--blue-bg);
   color: var(--blue);
+  border-color: var(--blue);
 }
 .status-badge.busy {
   background: var(--yellow-bg);
   color: var(--yellow);
+  border-color: var(--yellow);
+  box-shadow: 0 0 12px var(--yellow-glow);
 }
 .status-badge.error {
   background: var(--red-bg);
   color: var(--red);
+  border-color: var(--red);
   animation: statusPulse 1s infinite;
+  box-shadow: 0 0 12px var(--red-glow);
+}
+.status-badge.disabled {
+  background: var(--gray-bg);
+  color: var(--gray);
+  border-color: var(--gray);
 }
 @keyframes statusPulse {
   0%, 100% { opacity: 1; }
@@ -1162,41 +1253,312 @@ body {
 .compact .header { padding: 12px 20px; }
 .compact .content { padding: 20px; }
 
-/* 响应式 */
+/* 响应式设计优化 */
+@media (max-width: 1024px) {
+  .charts-row { grid-template-columns: 1fr; }
+  .chart-card { min-height: 200px; }
+}
+
 @media (max-width: 768px) {
-  .sidebar { width: 70px; }
-  .sidebar .brand h1, .sidebar .brand-tag, .sidebar .nav-item span, .sidebar .sidebar-footer { display: none; }
-  .sidebar .nav-item { justify-content: center; padding: 14px; }
-  .sidebar-toggle { display: none; }
-  .content { padding: 20px; }
+  /* 侧边栏优化 - 滑出效果 */
+  .sidebar {
+    position: fixed;
+    left: -280px;
+    width: 280px;
+    height: 100vh;
+    z-index: 1000;
+    transition: left var(--transition-normal);
+    box-shadow: var(--shadow-lg);
+  }
+  .sidebar.mobile-open {
+    left: 0;
+  }
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+  }
+  .sidebar-overlay.show {
+    display: block;
+    opacity: 1;
+  }
+  .sidebar .brand h1, .sidebar .brand-tag, .sidebar .nav-item span, .sidebar .sidebar-footer {
+    display: block !important;
+  }
+  .sidebar .nav-item {
+    justify-content: flex-start;
+    padding: 14px 16px;
+  }
+  .sidebar-toggle {
+    display: flex;
+    right: -12px;
+  }
+
+  /* Header 优化 */
+  .content { padding: 16px; }
   .header {
     flex-direction: column;
-    gap: 14px;
-    align-items: flex-start;
-    padding: 16px 20px;
+    gap: 12px;
+    align-items: stretch;
+    padding: 12px 16px;
   }
-  .header-actions { width: 100%; justify-content: space-between; }
-  .stats { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-  .stat-card .value { font-size: 24px; }
-  .agent-grid { grid-template-columns: 1fr; }
-  .task-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  .modal { width: 96vw; max-width: 96vw; padding: 24px; }
-  .ctrl-actions { flex-direction: column; }
-  .ctrl-start-group { flex-wrap: wrap; }
-  .ctrl-input { width: 100%; }
-  .ctrl-info-grid { grid-template-columns: repeat(2, 1fr); }
-  .ctrl-dispatch-form { max-width: 100%; }
-  .log-toolbar { flex-direction: column; align-items: stretch; }
-  .log-toolbar select, .log-toolbar input { width: 100%; }
-  .log-container { height: calc(100vh - 340px); }
+  .header h2 {
+    font-size: 18px;
+    min-width: auto;
+  }
+  .header-search {
+    max-width: 100%;
+    order: 3;
+  }
+  .header-actions {
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .header-actions .btn {
+    flex: 1;
+    min-width: 120px;
+    justify-content: center;
+  }
+
+  /* 统计卡片优化 */
+  .stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .stat-card {
+    padding: 16px;
+    min-height: 100px;
+  }
+  .stat-card .value {
+    font-size: 24px;
+  }
+  .stat-card .label {
+    font-size: 10px;
+  }
+
+  /* Agent 卡片优化 */
+  .agent-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .agent-card {
+    padding: 16px;
+  }
+  .agent-card .action-buttons {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+  .agent-card .action-btn {
+    flex: 1;
+    min-width: 80px;
+    justify-content: center;
+    padding: 8px 12px;
+  }
+
+  /* 任务表格优化 */
+  .task-table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: var(--radius);
+  }
+  .task-table thead {
+    display: none;
+  }
+  .task-table tbody {
+    display: block;
+  }
+  .task-table tr {
+    display: block;
+    margin-bottom: 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+  }
+  .task-table td {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border: none;
+    font-size: 13px;
+  }
+  .task-table td::before {
+    content: attr(data-label);
+    font-weight: 700;
+    color: var(--text2);
+    margin-right: 12px;
+  }
+
+  /* Modal 优化 */
+  .modal {
+    width: 94vw;
+    max-width: 94vw;
+    padding: 20px;
+    margin: 20px;
+  }
+  .modal h3 {
+    font-size: 18px;
+    margin-bottom: 20px;
+  }
+  .form-group {
+    margin-bottom: 16px;
+  }
+
+  /* Control 面板优化 */
+  .ctrl-section {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  .ctrl-title {
+    font-size: 16px;
+    margin-bottom: 16px;
+  }
+  .ctrl-actions {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .ctrl-start-group {
+    flex-direction: column;
+    width: 100%;
+  }
+  .ctrl-input {
+    width: 100%;
+  }
+  .ctrl-info-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .ctrl-info {
+    padding: 12px 16px;
+  }
+  .ctrl-val {
+    font-size: 18px;
+  }
+
+  /* 日志优化 */
+  .log-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .log-toolbar select, .log-toolbar input {
+    width: 100%;
+    padding: 12px;
+  }
+  .log-stream-controls {
+    justify-content: space-between;
+  }
+  .log-container {
+    height: calc(100vh - 360px);
+    font-size: 12px;
+  }
 }
+
 @media (max-width: 480px) {
-  .stats { grid-template-columns: 1fr; }
-  .stat-card { padding: 16px; }
-  .stat-card .value { font-size: 20px; }
-  .ctrl-info-grid { grid-template-columns: 1fr; }
-  .content { padding: 16px; }
-  .btn { padding: 10px 16px; font-size: 12px; }
+  /* 超小屏幕优化 */
+  .stats {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .stat-card {
+    padding: 14px;
+    min-height: 90px;
+  }
+  .stat-card .value {
+    font-size: 22px;
+  }
+  .ctrl-info-grid {
+    grid-template-columns: 1fr;
+  }
+  .content {
+    padding: 12px;
+  }
+  .btn {
+    padding: 10px 16px;
+    font-size: 12px;
+  }
+  .btn-primary {
+    padding: 12px 20px;
+    font-size: 13px;
+  }
+
+  /* Header 进一步优化 */
+  .header h2 {
+    font-size: 16px;
+  }
+  .search-input {
+    padding: 10px 36px 10px 14px;
+    font-size: 13px;
+  }
+
+  /* Agent 卡片进一步优化 */
+  .agent-card {
+    padding: 14px;
+  }
+  .agent-card .name {
+    font-size: 15px;
+  }
+  .agent-card .desc {
+    font-size: 12px;
+  }
+
+  /* Modal 进一步优化 */
+  .modal {
+    padding: 16px;
+    margin: 12px;
+    width: calc(100vw - 24px);
+  }
+  .form-group input, .form-group textarea, .form-group select {
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+
+  /* Toast 优化 */
+  .toast {
+    font-size: 13px;
+    padding: 12px 16px;
+    max-width: calc(100vw - 48px);
+  }
+}
+
+/* 触摸优化 */
+@media (hover: none) and (pointer: coarse) {
+  /* 增大触摸目标 */
+  .btn, .action-btn, .toolbar-btn {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 12px 20px;
+  }
+  .nav-item {
+    min-height: 48px;
+    padding: 16px;
+  }
+  .stat-card {
+    min-height: 100px;
+  }
+
+  /* 移除 hover 效果，优化触摸反馈 */
+  .agent-card:hover {
+    transform: none;
+  }
+  .stat-card:hover {
+    transform: none;
+  }
+
+  /* 添加触摸反馈 */
+  .btn:active, .action-btn:active, .toolbar-btn:active {
+    transform: scale(0.96);
+    opacity: 0.8;
+  }
+  .nav-item:active {
+    background: var(--surface2);
+  }
 }
 
 /* Charts */
@@ -1352,6 +1714,7 @@ body {
 </head>
 <body>
 <div class="toast-container" id="toast-container"></div>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-toggle" id="sidebar-toggle" title="折叠/展开 (Ctrl+B)">◀</div>
@@ -1791,12 +2154,41 @@ themeToggle.addEventListener('click', () => {
   showToast('主题已切换', 'info');
 });
 
-// 侧边栏折叠
+// 侧边栏折叠 - 移动端优化
 const sidebar = document.getElementById('sidebar');
 const sidebarToggle = document.getElementById('sidebar-toggle');
+const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+// 检测是否为移动端
+function isMobile() {
+  return window.innerWidth <= 768;
+}
+
+// 侧边栏切换功能
 sidebarToggle.addEventListener('click', () => {
-  sidebar.classList.toggle('collapsed');
-  sidebarToggle.textContent = sidebar.classList.contains('collapsed') ? '▶' : '◀';
+  if (isMobile()) {
+    // 移动端：滑出/收起
+    sidebar.classList.toggle('mobile-open');
+    sidebarOverlay.classList.toggle('show', sidebar.classList.contains('mobile-open'));
+  } else {
+    // 桌面端：折叠/展开
+    sidebar.classList.toggle('collapsed');
+    sidebarToggle.textContent = sidebar.classList.contains('collapsed') ? '▶' : '◀';
+  }
+});
+
+// 点击遮罩层关闭侧边栏
+sidebarOverlay.addEventListener('click', () => {
+  sidebar.classList.remove('mobile-open');
+  sidebarOverlay.classList.remove('show');
+});
+
+// 窗口大小变化时重置状态
+window.addEventListener('resize', () => {
+  if (!isMobile()) {
+    sidebar.classList.remove('mobile-open');
+    sidebarOverlay.classList.remove('show');
+  }
 });
 
 // 全屏模式
@@ -2152,11 +2544,13 @@ function renderAgentCards(containerId, list) {
     const tc = a.task_count || 0;
     const td = a.task_done || 0;
     const tp = a.task_pending || 0;
+    const isDisabled = a.status === 'disabled' || a.enabled === false;
+    const statusClass = isDisabled ? 'disabled' : (a.status || 'idle');
     return `
     <div class="agent-card" data-agent-id="${esc(a.id)}">
       <div class="top">
         <div class="name">${esc(a.name)}</div>
-        <span class="status-badge ${a.status}">${statusLabel(a.status)}</span>
+        <span class="status-badge ${statusClass}">${statusLabel(isDisabled ? 'disabled' : a.status)}</span>
       </div>
       <div class="desc">${esc(a.description)}</div>
       <div class="task-stats">
@@ -2166,7 +2560,11 @@ function renderAgentCards(containerId, list) {
       </div>
       <div class="bottom">
         <span style="font-size:12px;color:var(--text2)">最后运行: ${fmtTime(a.last_run)}</span>
-        <button class="expand-btn" onclick="toggleAgentTasks(this, '${esc(a.id)}')">展开任务 ▼</button>
+        <div class="action-buttons">
+          <button class="action-btn primary" onclick="quickRunAgent('${esc(a.id)}')" title="立即运行">▶</button>
+          <button class="action-btn" onclick="toggleAgentTasks(this, '${esc(a.id)}')">展开任务 ▼</button>
+          <button class="action-btn danger" onclick="toggleAgentEnabled('${esc(a.id)}', ${isDisabled})" title="${isDisabled ? '启用' : '禁用'}">${isDisabled ? '⏻' : '⏼'}</button>
+        </div>
       </div>
       <div class="expand-tasks">
         <div class="mini-task-list" id="agent-tasks-${esc(a.id)}">加载中...</div>
@@ -2180,12 +2578,12 @@ function renderTasks() {
   const showAgent = !!(tasks.length && tasks[0]._agent_id);
   tbody.innerHTML = tasks.map(t => `
     <tr>
-      <td>#${t.id}</td>
-      <td>${esc(t.title)}</td>
-      <td><span class="task-status ${t.status}">${statusLabel(t.status)}</span></td>
-      <td>${t.assignee ? esc(t.assignee) : '<span style="color:var(--text2)">未指派</span>'}</td>
-      ${showAgent ? '<td>' + (t._agent_id ? esc(t._agent_id) : '-') + '</td>' : ''}
-      <td style="color:var(--text2)">${t.created}</td>
+      <td data-label="ID">#${t.id}</td>
+      <td data-label="标题">${esc(t.title)}</td>
+      <td data-label="状态"><span class="task-status ${t.status}">${statusLabel(t.status)}</span></td>
+      <td data-label="负责人">${t.assignee ? esc(t.assignee) : '<span style="color:var(--text2)">未指派</span>'}</td>
+      ${showAgent ? '<td data-label="Agent">' + (t._agent_id ? esc(t._agent_id) : '-') + '</td>' : ''}
+      <td data-label="创建时间" style="color:var(--text2)">${t.created}</td>
     </tr>
   `).join('');
 }
@@ -2193,7 +2591,10 @@ function renderTasks() {
 async function toggleAgentTasks(btn, agentId) {
   const card = btn.closest('.agent-card');
   const isExpanded = card.classList.toggle('expanded');
-  btn.textContent = isExpanded ? '收起任务 ▲' : '展开任务 ▼';
+  const expandBtn = card.querySelector('.action-btn:nth-child(2)');
+  if (expandBtn) {
+    expandBtn.textContent = isExpanded ? '收起任务 ▲' : '展开任务 ▼';
+  }
   if (isExpanded) {
     await loadAgentTasks(agentId);
     const container = document.getElementById('agent-tasks-' + agentId);
@@ -2208,6 +2609,46 @@ async function toggleAgentTasks(btn, agentId) {
         </div>
       `).join('');
     }
+  }
+}
+
+// 快速运行 Agent
+async function quickRunAgent(agentId) {
+  try {
+    showToast(`正在启动 Agent: ${agentId}`, 'info');
+    const r = await fetch(`/api/agents/${encodeURIComponent(agentId)}/run`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    if (!r.ok) {
+      const d = await r.json().catch(() => ({}));
+      throw new Error(d.error || '启动失败');
+    }
+    showToast(`Agent ${agentId} 已启动`, 'success');
+    setTimeout(() => loadData(), 1000);
+  } catch (e) {
+    showToast(`启动失败: ${e.message}`, 'error');
+  }
+}
+
+// 切换 Agent 启用/禁用状态
+async function toggleAgentEnabled(agentId, currentlyDisabled) {
+  try {
+    const action = currentlyDisabled ? '启用' : '禁用';
+    showToast(`正在${action} Agent: ${agentId}`, 'info');
+    const r = await fetch(`/api/agents/${encodeURIComponent(agentId)}/enabled`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ enabled: currentlyDisabled })
+    });
+    if (!r.ok) {
+      const d = await r.json().catch(() => ({}));
+      throw new Error(d.error || '操作失败');
+    }
+    showToast(`Agent ${agentId} 已${action}`, 'success');
+    setTimeout(() => loadData(), 1000);
+  } catch (e) {
+    showToast(`${currentlyDisabled ? '启用' : '禁用'}失败: ${e.message}`, 'error');
   }
 }
 
@@ -2310,7 +2751,8 @@ function statusLabel(s) {
     done: '已完成',
     pending: '待处理',
     in_progress: '进行中',
-    blocked: '已阻塞'
+    blocked: '已阻塞',
+    disabled: '已禁用'
   };
   return labels[s] || s;
 }
