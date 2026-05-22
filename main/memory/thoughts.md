@@ -29,3 +29,27 @@
 ### 成本控制
 - 7个agent已禁用
 - WebUI运行正常（8080端口）
+
+## 2026-05-22 轮次299-300
+
+**WebUI API测试完成**：
+- 创建test_api_endpoints.py直接测试API
+- 测试结果：77.8%成功率（7/9通过）
+- API响应时间：~2秒（可优化）
+- 失败项：Health API（404，代码已添加待重启）、favicon.ico（不影响功能）
+
+**移动端优化**：
+- 添加触摸反馈（:active缩放效果）
+- 优化最小触摸尺寸（44px）
+- 添加触摸设备专用样式
+- 小屏幕（375px）专用优化
+
+**工具创建**：
+- health_check.py - 独立健康检查脚本
+- test_api_endpoints.py - API端点测试
+- test_webui_simple.py - 简化版浏览器测试
+
+**优化发现**：
+- 所有Agent已禁用，成本控制良好
+- WebUI核心功能正常
+- 可优化点：重启服务器应用Health API、减少API响应时间

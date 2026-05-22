@@ -1,0 +1,112 @@
+{
+  "timestamp": "2026-05-22T18:54:00.831841",
+  "tests": [
+    {
+      "name": "WebUI加载",
+      "status": "passed"
+    },
+    {
+      "name": "页面控制台",
+      "status": "failed",
+      "error": "Page.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator(\"[data-page=\\\"dashboard\\\"]\")\n"
+    },
+    {
+      "name": "页面代理",
+      "status": "passed"
+    },
+    {
+      "name": "页面任务",
+      "status": "passed"
+    },
+    {
+      "name": "页面日志",
+      "status": "passed"
+    },
+    {
+      "name": "页面消息",
+      "status": "failed",
+      "error": "Page.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator(\"[data-page=\\\"messages\\\"]\")\n"
+    },
+    {
+      "name": "页面通知",
+      "status": "failed",
+      "error": "Page.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator(\"[data-page=\\\"notifications\\\"]\")\n"
+    },
+    {
+      "name": "页面健康",
+      "status": "failed",
+      "error": "Page.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator(\"[data-page=\\\"health\\\"]\")\n"
+    },
+    {
+      "name": "页面分析",
+      "status": "failed",
+      "error": "Page.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator(\"[data-page=\\\"analytics\\\"]\")\n"
+    },
+    {
+      "name": "页面成本",
+      "status": "failed",
+      "error": "Page.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator(\"[data-page=\\\"cost\\\"]\")\n"
+    },
+    {
+      "name": "页面设置",
+      "status": "passed"
+    },
+    {
+      "name": "页面控制",
+      "status": "failed",
+      "error": "Page.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator(\"[data-page=\\\"control\\\"]\")\n"
+    },
+    {
+      "name": "主题light",
+      "status": "passed"
+    },
+    {
+      "name": "主题dark",
+      "status": "passed"
+    },
+    {
+      "name": "主题cyberpunk",
+      "status": "passed"
+    },
+    {
+      "name": "响应式桌面",
+      "status": "passed"
+    },
+    {
+      "name": "响应式平板",
+      "status": "passed"
+    },
+    {
+      "name": "响应式手机",
+      "status": "passed"
+    },
+    {
+      "name": "侧边栏切换",
+      "status": "failed",
+      "error": "Page.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator(\"[data-action=\\\"toggle-sidebar\\\"]\")\n"
+    },
+    {
+      "name": "API/api/agents",
+      "status": "passed"
+    },
+    {
+      "name": "API/api/tasks",
+      "status": "passed"
+    },
+    {
+      "name": "API/api/messages",
+      "status": "passed"
+    },
+    {
+      "name": "API/api/stats",
+      "status": "passed"
+    }
+  ],
+  "summary": {
+    "total": 23,
+    "passed": 15,
+    "failed": 8,
+    "warning": 0,
+    "success_rate": "65.2%"
+  }
+}

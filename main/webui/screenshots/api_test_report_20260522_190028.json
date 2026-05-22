@@ -1,0 +1,63 @@
+{
+  "timestamp": "2026-05-22T19:00:28.867071",
+  "tests": [
+    {
+      "name": "主页加载",
+      "status": "passed",
+      "status_code": 200
+    },
+    {
+      "name": "Agents API",
+      "status": "passed",
+      "status_code": 200,
+      "response_time": 2.040975
+    },
+    {
+      "name": "Tasks API",
+      "status": "passed",
+      "status_code": 200,
+      "response_time": 2.039388
+    },
+    {
+      "name": "Messages API",
+      "status": "passed",
+      "status_code": 200,
+      "response_time": 2.034463
+    },
+    {
+      "name": "LongTask API",
+      "status": "passed",
+      "status_code": 200,
+      "response_time": 2.044124
+    },
+    {
+      "name": "Stats API",
+      "status": "passed",
+      "status_code": 200,
+      "response_time": 2.038929
+    },
+    {
+      "name": "Health API",
+      "status": "failed",
+      "status_code": 404
+    },
+    {
+      "name": "主页HTML",
+      "status": "passed",
+      "status_code": 200,
+      "response_time": 2.032382
+    },
+    {
+      "name": "图标",
+      "status": "failed",
+      "status_code": 404
+    }
+  ],
+  "summary": {
+    "total": 9,
+    "passed": 7,
+    "failed": 2,
+    "errors": 0,
+    "success_rate": "77.8%"
+  }
+}

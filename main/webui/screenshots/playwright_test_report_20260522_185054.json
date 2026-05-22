@@ -1,0 +1,183 @@
+{
+  "timestamp": "2026-05-22T18:50:54.213023",
+  "summary": {
+    "total": 18,
+    "passed": 15,
+    "failed": 1,
+    "skipped": 0
+  },
+  "tests": [
+    {
+      "page": "控制台",
+      "tests": [],
+      "status": "failed",
+      "error": "Page.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator(\"[data-page=\\\"dashboard\\\"]\")\n"
+    },
+    {
+      "page": "代理",
+      "tests": [
+        {
+          "name": "页面 代理 加载",
+          "status": "passed",
+          "screenshot": "D:\\loopcli\\main\\webui\\screenshots\\pages\\page_agents_20260522_185126.png"
+        },
+        {
+          "name": "页面 代理 内容验证",
+          "status": "passed"
+        },
+        {
+          "name": "页面 代理 按钮数量: 32",
+          "status": "passed"
+        },
+        {
+          "name": "页面 代理 按钮1 点击",
+          "status": "failed",
+          "error": "ElementHandle.click: Timeout 30000ms exceeded.\nCall log:\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    56 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n"
+        },
+        {
+          "name": "页面 代理 按钮2 点击",
+          "status": "passed"
+        },
+        {
+          "name": "页面 代理 按钮3 点击",
+          "status": "passed"
+        }
+      ],
+      "status": "passed"
+    },
+    {
+      "page": "任务",
+      "tests": [],
+      "status": "failed",
+      "error": "Page.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator(\"[data-page=\\\"tasks\\\"]\")\n    - locator resolved to <div class=\"nav-item\" data-page=\"tasks\">…</div>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <div id=\"shortcuts-overlay\" class=\"panel-overlay active\"></div> intercepts pointer events\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <div id=\"shortcuts-overlay\" class=\"panel-overlay active\"></div> intercepts pointer events\n    - retrying click action\n      - waiting 100ms\n    56 × waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <div id=\"shortcuts-overlay\" class=\"panel-overlay active\"></div> intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n"
+    },
+    {
+      "page": "日志",
+      "tests": [],
+      "status": "failed",
+      "error": "Page.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator(\"[data-page=\\\"logs\\\"]\")\n    - locator resolved to <div class=\"nav-item\" data-page=\"logs\">…</div>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <div id=\"shortcuts-overlay\" class=\"panel-overlay active\"></div> intercepts pointer events\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <div id=\"shortcuts-overlay\" class=\"panel-overlay active\"></div> intercepts pointer events\n    - retrying click action\n      - waiting 100ms\n    56 × waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <div id=\"shortcuts-overlay\" class=\"panel-overlay active\"></div> intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n"
+    },
+    {
+      "page": "消息",
+      "tests": [],
+      "status": "failed",
+      "error": "Page.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator(\"[data-page=\\\"messages\\\"]\")\n"
+    },
+    {
+      "page": "通知",
+      "tests": [],
+      "status": "failed",
+      "error": "Page.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator(\"[data-page=\\\"notifications\\\"]\")\n"
+    },
+    {
+      "page": "健康",
+      "tests": [],
+      "status": "failed",
+      "error": "Page.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator(\"[data-page=\\\"health\\\"]\")\n"
+    },
+    {
+      "page": "分析",
+      "tests": [],
+      "status": "failed",
+      "error": "Page.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator(\"[data-page=\\\"analytics\\\"]\")\n"
+    },
+    {
+      "page": "成本",
+      "tests": [],
+      "status": "failed",
+      "error": "Page.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator(\"[data-page=\\\"cost\\\"]\")\n"
+    },
+    {
+      "page": "设置",
+      "tests": [],
+      "status": "failed",
+      "error": "Page.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator(\"[data-page=\\\"settings\\\"]\")\n    - locator resolved to <div class=\"nav-item\" data-page=\"settings\">…</div>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <div id=\"shortcuts-overlay\" class=\"panel-overlay active\"></div> intercepts pointer events\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <div id=\"shortcuts-overlay\" class=\"panel-overlay active\"></div> intercepts pointer events\n    - retrying click action\n      - waiting 100ms\n    56 × waiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <div id=\"shortcuts-overlay\" class=\"panel-overlay active\"></div> intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n"
+    },
+    {
+      "page": "控制",
+      "tests": [],
+      "status": "failed",
+      "error": "Page.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator(\"[data-page=\\\"control\\\"]\")\n"
+    },
+    {
+      "category": "主题切换",
+      "tests": [
+        {
+          "name": "主题 dark",
+          "status": "passed",
+          "screenshot": "D:\\loopcli\\main\\webui\\screenshots\\themes\\theme_dark_20260522_185627.png"
+        },
+        {
+          "name": "主题 light",
+          "status": "passed",
+          "screenshot": "D:\\loopcli\\main\\webui\\screenshots\\themes\\theme_light_20260522_185627.png"
+        },
+        {
+          "name": "主题 cyberpunk",
+          "status": "passed",
+          "screenshot": "D:\\loopcli\\main\\webui\\screenshots\\themes\\theme_cyberpunk_20260522_185627.png"
+        }
+      ]
+    },
+    {
+      "category": "响应式设计",
+      "tests": [
+        {
+          "name": "响应式 桌面",
+          "status": "passed",
+          "screenshot": "D:\\loopcli\\main\\webui\\screenshots\\responsive\\responsive_桌面_20260522_185628.png"
+        },
+        {
+          "name": "响应式 平板",
+          "status": "passed",
+          "screenshot": "D:\\loopcli\\main\\webui\\screenshots\\responsive\\responsive_平板_20260522_185628.png"
+        },
+        {
+          "name": "响应式 手机",
+          "status": "passed",
+          "screenshot": "D:\\loopcli\\main\\webui\\screenshots\\responsive\\responsive_手机_20260522_185629.png"
+        }
+      ]
+    },
+    {
+      "category": "交互功能",
+      "tests": [
+        {
+          "name": "侧边栏折叠",
+          "status": "skipped",
+          "error": "按钮未找到"
+        },
+        {
+          "name": "快捷键帮助",
+          "status": "skipped",
+          "error": "按钮未找到"
+        }
+      ]
+    },
+    {
+      "category": "API端点",
+      "tests": [
+        {
+          "name": "API Agents",
+          "status": "passed",
+          "status_code": 200
+        },
+        {
+          "name": "API Tasks",
+          "status": "passed",
+          "status_code": 200
+        },
+        {
+          "name": "API Messages",
+          "status": "passed",
+          "status_code": 200
+        },
+        {
+          "name": "API Stats",
+          "status": "passed",
+          "status_code": 200
+        }
+      ]
+    }
+  ]
+}

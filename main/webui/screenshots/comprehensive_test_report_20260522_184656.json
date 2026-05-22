@@ -1,0 +1,212 @@
+{
+  "timestamp": "2026-05-22T18:46:56.069327",
+  "summary": {
+    "total": 40,
+    "success": 29,
+    "error": 0,
+    "warning": 0,
+    "success_rate": "72.5%"
+  },
+  "results": [
+    {
+      "time": "18:46:44",
+      "message": "WebUI 加载成功",
+      "status": "success"
+    },
+    {
+      "time": "18:46:44",
+      "message": "测试页面导航",
+      "status": "info"
+    },
+    {
+      "time": "18:46:45",
+      "message": "页面 analytics 加载成功",
+      "status": "success"
+    },
+    {
+      "time": "18:46:45",
+      "message": "页面 dashboard 加载成功",
+      "status": "success"
+    },
+    {
+      "time": "18:46:46",
+      "message": "页面 agents 加载成功",
+      "status": "success"
+    },
+    {
+      "time": "18:46:46",
+      "message": "页面 tasks 加载成功",
+      "status": "success"
+    },
+    {
+      "time": "18:46:47",
+      "message": "页面 logs 加载成功",
+      "status": "success"
+    },
+    {
+      "time": "18:46:47",
+      "message": "页面 control 加载成功",
+      "status": "success"
+    },
+    {
+      "time": "18:46:48",
+      "message": "页面 messages 加载成功",
+      "status": "success"
+    },
+    {
+      "time": "18:46:48",
+      "message": "页面 health 加载成功",
+      "status": "success"
+    },
+    {
+      "time": "18:46:49",
+      "message": "页面 notifications 加载成功",
+      "status": "success"
+    },
+    {
+      "time": "18:46:49",
+      "message": "页面 cost 加载成功",
+      "status": "success"
+    },
+    {
+      "time": "18:46:50",
+      "message": "页面 settings 加载成功",
+      "status": "success"
+    },
+    {
+      "time": "18:46:50",
+      "message": "测试主题切换功能",
+      "status": "info"
+    },
+    {
+      "time": "18:46:50",
+      "message": "主题 light 应用成功",
+      "status": "success"
+    },
+    {
+      "time": "18:46:51",
+      "message": "主题 dark 应用成功",
+      "status": "success"
+    },
+    {
+      "time": "18:46:51",
+      "message": "主题 cyberpunk 应用成功",
+      "status": "success"
+    },
+    {
+      "time": "18:46:51",
+      "message": "测试按钮功能",
+      "status": "info"
+    },
+    {
+      "time": "18:46:51",
+      "message": "发现 32 个按钮",
+      "status": "info"
+    },
+    {
+      "time": "18:46:51",
+      "message": "按钮/快捷键 主题切换 响应正常",
+      "status": "success"
+    },
+    {
+      "time": "18:46:52",
+      "message": "按钮/快捷键 侧边栏切换 响应正常",
+      "status": "success"
+    },
+    {
+      "time": "18:46:52",
+      "message": "按钮/快捷键 快捷键帮助 响应正常",
+      "status": "success"
+    },
+    {
+      "time": "18:46:52",
+      "message": "测试 API 端点",
+      "status": "info"
+    },
+    {
+      "time": "18:46:53",
+      "message": "Agents API 响应正常 (200)",
+      "status": "success"
+    },
+    {
+      "time": "18:46:53",
+      "message": "Tasks API 响应正常 (200)",
+      "status": "success"
+    },
+    {
+      "time": "18:46:53",
+      "message": "Messages API 响应正常 (200)",
+      "status": "success"
+    },
+    {
+      "time": "18:46:54",
+      "message": "LongTask API 响应正常 (200)",
+      "status": "success"
+    },
+    {
+      "time": "18:46:54",
+      "message": "Stats API 响应正常 (200)",
+      "status": "success"
+    },
+    {
+      "time": "18:46:54",
+      "message": "测试响应式设计",
+      "status": "info"
+    },
+    {
+      "time": "18:46:54",
+      "message": "桌面 视图响应正常",
+      "status": "success"
+    },
+    {
+      "time": "18:46:55",
+      "message": "平板 视图响应正常",
+      "status": "success"
+    },
+    {
+      "time": "18:46:55",
+      "message": "手机 视图响应正常",
+      "status": "success"
+    },
+    {
+      "time": "18:46:55",
+      "message": "测试性能指标",
+      "status": "info"
+    },
+    {
+      "time": "18:46:56",
+      "message": "加载时间: 7ms",
+      "status": "info"
+    },
+    {
+      "time": "18:46:56",
+      "message": "DOM 就绪: 6ms",
+      "status": "info"
+    },
+    {
+      "time": "18:46:56",
+      "message": "资源数量: 1",
+      "status": "info"
+    },
+    {
+      "time": "18:46:56",
+      "message": "性能优秀 (< 500ms)",
+      "status": "success"
+    },
+    {
+      "time": "18:46:56",
+      "message": "测试可访问性",
+      "status": "info"
+    },
+    {
+      "time": "18:46:56",
+      "message": "所有图片都有 alt 属性",
+      "status": "success"
+    },
+    {
+      "time": "18:46:56",
+      "message": "所有按钮都有文本标签",
+      "status": "success"
+    }
+  ]
+}

@@ -20,6 +20,12 @@ from socketserver import ThreadingMixIn
 from pathlib import Path
 from urllib.parse import urlparse, parse_qs
 
+try:
+    import psutil
+    HAS_PSUTIL = True
+except ImportError:
+    HAS_PSUTIL = False
+
 from loopcli_lib import (
     LOOPCLI_ROOT,
     AGENT_MARKER,
@@ -37,7 +43,8 @@ from loopcli_lib import (
 )
 
 # Import create agent functions from run.py
-SUBAGENT_DIR = str(LOOPCLI_ROOT / "subagent")
+# Agent 模板目录
+SUBAGENT_DIR = str(LOOPCLI_ROOT / "agent template")
 
 DEFAULT_PROMPT = """# 身份与初始化
 - 所有回答用中文
@@ -601,6 +608,9 @@ class WebUIHandler(SimpleHTTPRequestHandler):
 
         if path == "/api/screenshots":
             return self._handle_screenshots_get()
+
+        if path == "/api/health":
+            return self._handle_health_get()
 
         # Static files
         super().do_GET()
@@ -1263,6 +1273,64 @@ class WebUIHandler(SimpleHTTPRequestHandler):
             })
         except Exception as e:
             return self._send_json({"error": str(e)}, status=500)
+
+    def _handle_health_get(self):
+        """健康检查端点"""
+        try:
+            # WebUI运行状态
+            uptime = time.time() - SERVER_START_TIME
+
+            # Agent状态
+            agents = scan_agents()
+            active_agents = [a for a in agents if not a.get("disabled", False)]
+            disabled_agents = [a for a in agents if a.get("disabled", False)]
+
+            # 日志大小
+            log_size = 0
+            log_path = MAIN_DIR / "log" / "run.md"
+            if log_path.exists():
+                log_size = log_path.stat().st_size
+
+            response_data = {
+                "status": "healthy",
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "uptime_seconds": round(uptime, 2),
+                "agents": {
+                    "total": len(agents),
+                    "active": len(active_agents),
+                    "disabled": len(disabled_agents)
+                },
+                "webui": {
+                    "port": 8080,
+                    "log_size_bytes": log_size
+                }
+            }
+
+            # 如果psutil可用，添加系统信息
+            if HAS_PSUTIL:
+                try:
+                    cpu_percent = psutil.cpu_percent(interval=0.1)
+                    memory = psutil.virtual_memory()
+                    disk = psutil.disk_usage(str(LOOPCLI_ROOT))
+
+                    response_data["system"] = {
+                        "cpu_percent": cpu_percent,
+                        "memory_percent": memory.percent,
+                        "memory_available_gb": round(memory.available / (1024**3), 2),
+                        "disk_percent": disk.percent,
+                        "disk_free_gb": round(disk.free / (1024**3), 2)
+                    }
+                except Exception as e:
+                    response_data["system"] = {"error": str(e)}
+
+            return self._send_json(response_data)
+
+        except Exception as e:
+            return self._send_json({
+                "status": "unhealthy",
+                "error": str(e),
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }, status=500)
 
     def _handle_longtask_clear(self):
         """清空长期任务"""
