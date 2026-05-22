@@ -593,6 +593,12 @@ class WebUIHandler(SimpleHTTPRequestHandler):
         if path == "/api/longtask":
             return self._handle_longtask_get()
 
+        if path == "/api/messages":
+            return self._handle_messages_get()
+
+        if path == "/api/stats":
+            return self._handle_stats_get()
+
         # Static files
         super().do_GET()
 
@@ -1079,6 +1085,155 @@ class WebUIHandler(SimpleHTTPRequestHandler):
         try:
             content = longtask_file.read_text(encoding="utf-8")
             return self._send_json({"exists": True, "content": content})
+        except Exception as e:
+            return self._send_json({"error": str(e)}, status=500)
+
+    def _handle_messages_get(self):
+        """获取所有 agent 的消息列表"""
+        messages = []
+        agents_dir = LOOPCLI_ROOT / "agents"
+
+        # 扫描 agents 目录
+        if agents_dir.is_dir():
+            for child in agents_dir.iterdir():
+                if not child.is_dir() or not (child / "AGENT").exists():
+                    continue
+                inbox_dir = child / "inbox"
+                if not inbox_dir.is_dir():
+                    continue
+                # 读取 inbox 中的消息文件
+                for msg_file in sorted(inbox_dir.glob("*.md"), reverse=True):
+                    try:
+                        content = msg_file.read_text(encoding="utf-8")
+                        # 提取消息元数据
+                        lines = content.splitlines()
+                        sender = "unknown"
+                        msg_type = "消息"
+                        time_str = ""
+                        msg_content = ""
+                        for line in lines:
+                            if line.startswith("# 来自"):
+                                sender = line.split()[2] if len(line.split()) > 2 else "unknown"
+                            elif line.startswith("- 类型："):
+                                msg_type = line.split("：")[1] if "：" in line else "消息"
+                            elif line.startswith("- 时间："):
+                                time_str = line.split("：")[1] if "：" in line else ""
+                            elif line.startswith("## 内容"):
+                                break
+                        # 获取实际内容
+                        content_start = content.find("## 内容")
+                        if content_start != -1:
+                            msg_content = content[content_start + 6:].strip()
+
+                        messages.append({
+                            "id": msg_file.stem,
+                            "agent": child.name,
+                            "sender": sender,
+                            "type": msg_type,
+                            "time": time_str,
+                            "content": msg_content[:200] + "..." if len(msg_content) > 200 else msg_content,
+                            "file": msg_file.name
+                        })
+                    except Exception as e:
+                        continue
+
+        # 也检查 main agent 的 inbox
+        main_dir = LOOPCLI_ROOT / "main"
+        if main_dir.is_dir() and (main_dir / "AGENT").exists():
+            inbox_dir = main_dir / "inbox"
+            if inbox_dir.is_dir():
+                for msg_file in sorted(inbox_dir.glob("*.md"), reverse=True):
+                    try:
+                        content = msg_file.read_text(encoding="utf-8")
+                        lines = content.splitlines()
+                        sender = "unknown"
+                        msg_type = "消息"
+                        time_str = ""
+                        msg_content = ""
+                        for line in lines:
+                            if line.startswith("# 来自"):
+                                sender = line.split()[2] if len(line.split()) > 2 else "unknown"
+                            elif line.startswith("- 类型："):
+                                msg_type = line.split("：")[1] if "：" in line else "消息"
+                            elif line.startswith("- 时间："):
+                                time_str = line.split("：")[1] if "：" in line else ""
+                            elif line.startswith("## 内容"):
+                                break
+                        content_start = content.find("## 内容")
+                        if content_start != -1:
+                            msg_content = content[content_start + 6:].strip()
+
+                        messages.append({
+                            "id": msg_file.stem,
+                            "agent": "main",
+                            "sender": sender,
+                            "type": msg_type,
+                            "time": time_str,
+                            "content": msg_content[:200] + "..." if len(msg_content) > 200 else msg_content,
+                            "file": msg_file.name
+                        })
+                    except Exception as e:
+                        continue
+
+        return self._send_json({"messages": messages[:50]})  # 限制返回最近 50 条
+
+    def _handle_stats_get(self):
+        """获取系统统计信息"""
+        try:
+            # 统计 agents
+            all_agents = scan_agents()
+            enabled_agents = [a for a in all_agents if a.get("status") != "disabled"]
+            disabled_agents = [a for a in all_agents if a.get("status") == "disabled"]
+
+            # 统计任务
+            all_tasks = get_all_agent_tasks()
+            done_tasks = sum(1 for t in all_tasks if t.get("status") == "done")
+            pending_tasks = sum(1 for t in all_tasks if t.get("status") == "pending")
+
+            # 统计消息
+            total_messages = 0
+            agents_dir = LOOPCLI_ROOT / "agents"
+            if agents_dir.is_dir():
+                for child in agents_dir.iterdir():
+                    if not child.is_dir():
+                        continue
+                    inbox_dir = child / "inbox"
+                    if inbox_dir.is_dir():
+                        total_messages += len(list(inbox_dir.glob("*.md")))
+
+            # 获取运行时间
+            main_state = read_json(LOOPCLI_ROOT / "main" / "memory" / "state.json", {})
+            run_count = main_state.get("run_count", 0)
+            last_run = main_state.get("last_run", "未知")
+
+            # 获取日志大小
+            import os
+            total_log_size = 0
+            for child in LOOPCLI_ROOT.iterdir():
+                if child.is_dir() and (child / "log").is_dir():
+                    for log_file in (child / "log").glob("*.md"):
+                        total_log_size += log_file.stat().st_size
+
+            return self._send_json({
+                "agents": {
+                    "total": len(all_agents),
+                    "enabled": len(enabled_agents),
+                    "disabled": len(disabled_agents)
+                },
+                "tasks": {
+                    "total": len(all_tasks),
+                    "done": done_tasks,
+                    "pending": pending_tasks
+                },
+                "messages": total_messages,
+                "runtime": {
+                    "run_count": run_count,
+                    "last_run": last_run
+                },
+                "storage": {
+                    "log_size_mb": round(total_log_size / 1024 / 1024, 2)
+                }
+            })
         except Exception as e:
             return self._send_json({"error": str(e)}, status=500)
 
