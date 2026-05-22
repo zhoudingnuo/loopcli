@@ -1,5 +1,16 @@
 # LoopCLI 记忆
 
+## 2026-05-22 轮次335
+
+**WebUI v8.7 深度优化**：
+- 性能页响应时间：改为测量 /api/health（不再依赖 /api/usage），从"- ms"修复为实际值(106ms)
+- Token消耗：显示"暂无"降级逻辑，当前显示290,589,950真实数据
+- 搜索框与导出按钮：flex布局+min-width:0+white-space:nowrap，不再重叠
+- 统计卡片标签：--text2从#9ca3af提升至#b0b8c4，对比度提升
+- Agent卡片按钮：agent-actions添加justify-content:stretch，按钮均匀分布
+- 长期任务文字：添加overflow-wrap:break-word+word-break:break-word，防截断
+- Playwright 9/9全通过，API验证全部通过
+
 ## 2026-05-22 轮次333
 
 **WebUI v8.6 深度优化**：
@@ -9,12 +20,3 @@
 - 移动端sidebar品牌文字缩小防截断
 - 性能页面硬编码变化值改为动态ID
 - Playwright 64/64全通过，零JS错误
-
-## 2026-05-22 轮次331
-
-**WebUI v8.5 图表美化**：
-- 圆环图：加大size(160)、圆角stroke-linecap、drop-shadow、百分比图例、gapAngle分隔
-- 进度条：卡片化(surface2背景+border-radius:10px)、渐变bar+box-shadow、百分比高亮
-- 用量面板：grid卡片统计(居中大字)、额度左border色条卡片、模型明细flex-wrap
-- 容器：border-radius:16px、box-shadow、标题前加色条装饰
-- Playwright 14/14全通过，零JS错误

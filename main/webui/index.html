@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LoopCLI - Agent 控制台 v8.6</title>
+<title>LoopCLI - Agent 控制台 v8.7</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -13,8 +13,8 @@
   --surface2: #1f2937;
   --border: #374151;
   --text: #f3f4f6;
-  --text2: #9ca3af;
-  --text3: #6b7280;
+  --text2: #b0b8c4;
+  --text3: #7c8594;
 
   /* 品牌色 */
   --accent: #3b82f6;
@@ -588,6 +588,11 @@ body {
   display: flex;
   gap: 8px;
   margin-top: 16px;
+  justify-content: stretch;
+}
+.agent-actions .btn {
+  flex: 1;
+  text-align: center;
 }
 
 /* 按钮 */
@@ -1069,9 +1074,9 @@ body {
           </button>
         </div>
 
-        <div class="search-bar" style="display: flex; gap: 8px;">
-          <input type="text" class="search-input" id="agent-search" placeholder="搜索 Agent (按名称、ID 或状态)..." style="flex: 1;">
-          <button class="btn btn-secondary" id="export-btn" onclick="exportAgentsData()" style="flex-shrink: 0;">
+        <div class="search-bar" style="display: flex; gap: 12px; align-items: center;">
+          <input type="text" class="search-input" id="agent-search" placeholder="搜索 Agent (按名称、ID 或状态)..." style="flex: 1; min-width: 0;">
+          <button class="btn btn-secondary" id="export-btn" onclick="exportAgentsData()" style="flex-shrink: 0; white-space: nowrap;">
             📥 导出
           </button>
         </div>
@@ -1105,9 +1110,9 @@ body {
                 <h3 style="font-size: 20px; font-weight: 700; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">长期任务</h3>
                 <span id="longtask-badge" style="display: none; background: var(--accent); color: white; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 600;">进行中</span>
               </div>
-              <div id="longtask-display" style="color: var(--text); line-height: 1.7;">
+              <div id="longtask-display" style="color: var(--text); line-height: 1.7; min-width: 0; overflow-wrap: break-word;">
                 <div id="longtask-status-main" style="font-size: 14px; color: var(--text2);">加载中...</div>
-                <div id="longtask-content-main" style="display: none; margin-top: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; font-family: monospace; font-size: 13px; white-space: pre-wrap; color: var(--text2); max-height: 300px; overflow-y: auto;"></div>
+                <div id="longtask-content-main" style="display: none; margin-top: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; font-family: monospace; font-size: 13px; white-space: pre-wrap; word-break: break-word; color: var(--text2); max-height: 300px; overflow-y: auto;"></div>
                 <div id="longtask-edit-main" style="display: none; margin-top: 12px;">
                   <textarea id="longtask-editor-main" style="width: 100%; min-height: 120px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-family: monospace; font-size: 13px; color: var(--text); resize: vertical;" placeholder="输入长期任务内容..."></textarea>
                   <div style="display: flex; gap: 8px; margin-top: 8px;">
@@ -2083,9 +2088,11 @@ async function loadTasks() {
 
 // 加载 Performance 页面
 async function loadPerformance() {
+  // 1) 系统指标 + 响应时间（测量 health API）
   try {
-    // 加载真实系统数据
+    const t0 = performance.now();
     const healthResp = await fetch(`${API_BASE}/health`);
+    const latency = performance.now() - t0;
     if (healthResp.ok) {
       const health = await healthResp.json();
       if (health.system) {
@@ -2093,9 +2100,12 @@ async function loadPerformance() {
         document.getElementById('memory-usage').textContent = health.system.memory_percent + '%';
       }
     }
-  } catch(e) {}
+    document.getElementById('response-time').textContent = Math.round(latency) + 'ms';
+  } catch(e) {
+    document.getElementById('response-time').textContent = '离线';
+  }
 
-  // Token消耗趋势
+  // 2) Token消耗趋势
   try {
     const trendResp = await fetch(`${API_BASE}/usage/trend`);
     if (trendResp.ok) {
@@ -2106,35 +2116,31 @@ async function loadPerformance() {
         drawLineChart('token-trend-chart', trendData, '#3b82f6');
         document.getElementById('token-trend-summary').textContent =
           trendRaw.summary || `${trendData.length}天累计 ${total} 次任务，平均 ${Math.round(total / trendData.length)} 次/天`;
-      } else if (trendData.length) {
-        const canvas = document.getElementById('token-trend-chart');
-        if (canvas) {
-          const ctx = canvas.getContext('2d');
-          const theme = document.documentElement.dataset.theme || 'dark';
-          ctx.fillStyle = theme === 'light' ? '#6b7280' : '#9ca3af';
-          ctx.font = '14px sans-serif';
-          ctx.textAlign = 'center';
-          ctx.fillText('近7天暂无显著任务数据', canvas.width / 4, canvas.height / 4);
-        }
+      } else {
+        drawLineChart('token-trend-chart', [], '#3b82f6');
         document.getElementById('token-trend-summary').textContent = '近7天数据收集中';
       }
     }
   } catch(e) {}
 
-  // Token总量
+  // 3) Token用量摘要
   try {
-    const t0 = performance.now();
     const usageResp = await fetch(`${API_BASE}/usage`);
-    const latency = performance.now() - t0;
     if (usageResp.ok) {
       const usage = await usageResp.json();
-      if (usage.total_tokens) {
+      if (usage.error) {
+        document.getElementById('token-usage').textContent = '暂无';
+      } else if (usage.total_tokens) {
         document.getElementById('token-usage').textContent = Number(usage.total_tokens).toLocaleString();
+      } else if (usage.weekly) {
+        const wk = usage.weekly;
+        document.getElementById('token-usage').textContent = (wk.total_runs || 0) + '次';
+      } else {
+        document.getElementById('token-usage').textContent = '暂无';
       }
     }
-    document.getElementById('response-time').textContent = Math.round(latency) + 'ms';
   } catch(e) {
-    document.getElementById('response-time').textContent = '- ms';
+    document.getElementById('token-usage').textContent = '暂无';
   }
 }
 

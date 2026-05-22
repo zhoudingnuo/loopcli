@@ -802,7 +802,9 @@ def cmd_run(args):
             t.start()
             threads.append(t)
         for t in threads:
-            t.join()
+            t.join(timeout=3)  # 7 分钟硬上限（watchdog 5 分钟 + 2 分钟清理余量）
+            if t.is_alive():
+                out(f"  {C.RED}⚠ agent 线程未正常退出，强制继续下一轮{C.RST}")
 
         git_push()
 

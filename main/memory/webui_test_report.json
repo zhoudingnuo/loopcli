@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-22T19:32:28.674298",
+  "timestamp": "2026-05-22T22:28:09.147527",
   "summary": {
     "total": 9,
     "passed": 9,
@@ -9,12 +9,12 @@
     {
       "test": "page_load",
       "status": "pass",
-      "time": "2026-05-22T19:32:10.230157"
+      "time": "2026-05-22T22:27:50.668437"
     },
     {
       "test": "navigation",
       "status": "pass",
-      "time": "2026-05-22T19:32:11.939407"
+      "time": "2026-05-22T22:27:52.426530"
     },
     {
       "test": "agents_page",
@@ -22,36 +22,36 @@
       "data": {
         "total_agents": "8"
       },
-      "time": "2026-05-22T19:32:12.498387"
+      "time": "2026-05-22T22:27:52.986737"
     },
     {
       "test": "tasks_page",
       "status": "pass",
-      "time": "2026-05-22T19:32:13.043410"
+      "time": "2026-05-22T22:27:53.539295"
     },
     {
       "test": "performance_page",
       "status": "pass",
       "data": {
-        "cpu": "25%",
-        "memory": "164 MB"
+        "cpu": "4%",
+        "memory": "51%"
       },
-      "time": "2026-05-22T19:32:13.590524"
+      "time": "2026-05-22T22:27:54.077489"
     },
     {
       "test": "logs_page",
       "status": "pass",
-      "time": "2026-05-22T19:32:14.147355"
+      "time": "2026-05-22T22:27:54.620631"
     },
     {
       "test": "settings_page",
       "status": "pass",
-      "time": "2026-05-22T19:32:15.812039"
+      "time": "2026-05-22T22:27:56.296413"
     },
     {
       "test": "responsive_design",
       "status": "pass",
-      "time": "2026-05-22T19:32:16.762367"
+      "time": "2026-05-22T22:27:57.245284"
     },
     {
       "test": "auto_refresh",
@@ -59,7 +59,7 @@
       "data": {
         "initial_agents": "8"
       },
-      "time": "2026-05-22T19:32:28.674298"
+      "time": "2026-05-22T22:28:09.147527"
     }
   ]
 }
