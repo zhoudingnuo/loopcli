@@ -30,11 +30,9 @@
 
 **修复**：WebUI 后端长期任务更新 API bug
 
-**问题根因**：`_handle_longtask_update` 函数中 debug print 语句在 content 变量定义前执行
+## 轮次286 - 2026-05-22 18:15
 
-**解决方案**：将 print 语句移到 content 变量定义之后
+**验证**：长期任务修改功能完全正常（GET/POST API、前端编辑）
 
-**文件修改**：webui/server.py:1097-1103
-
-**状态**：WebUI 服务器需要重启以应用修复
+**优化**：压缩日志 run_20260522_055344/main.log (37M→14M，节省23M)
 
