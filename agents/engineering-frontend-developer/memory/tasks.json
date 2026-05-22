@@ -214,5 +214,14 @@
     "created": "2026-05-23",
     "assignee": "engineering-frontend-developer",
     "completed": "2026-05-23 06:36:29"
+  },
+  {
+    "id": 25,
+    "status": "done",
+    "title": "三消游戏P1/P2修复+提审准备",
+    "description": "1.阅读D:/game-projects/douyin-match3/results/中的测试报告，了解所有P1/P2 bug列表；2.修复所有P1级bug（至少4个）；3.全量功能测试确保无回归；4.准备抖音小游戏提审包：检查index.html入口、确保所有资源本地化、包体<4MB、添加必要meta标签；5.完成后在inbox报告修改清单和提审就绪状态。禁止AskUserQuestion。修改文件在D:/game-projects/douyin-match3/目录下。",
+    "created": "2026-05-23",
+    "assignee": "engineering-frontend-developer",
+    "completed": "2026-05-23 06:48:15"
   }
 ]

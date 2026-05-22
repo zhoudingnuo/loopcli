@@ -93,3 +93,25 @@
   3. ScoreSystem.useMove() 步数边界 → 先检查再递增
 - **关卡平衡**: Level35 Boss HP 200→120, Level50 Boss HP 300→180
 - **结果文件**: memory/results/20260523_063629_bugfix_p0.md
+
+---
+
+## Run #25 — 2026-05-23 06:48:15
+
+**任务**: #25 三消游戏P1/P2修复+提审准备
+
+**修复清单**:
+- **BUG-4 (P0)**: _removeAndCascade 添加重力动画
+- **BUG-6 (P1)**: auto_obstacle 技能改用 onTilesMatched 统一销毁
+- **BUG-7 (P1)**: InputHandler/canvas click 事件冲突防护
+- **BUG-8 (P1)**: 实现 tap 选择→点击相邻交换交互
+- **BUG-9/10 (P2)**: levels.js 注释更新 + 删除未使用 JSON 文件
+- **Analytics**: console.log → console.debug
+- **清理**: 删除 .codegraph/ 和 levels/*.json
+
+**抖音提审准备**:
+- 创建 game.json (竖屏) + project.config.json
+- 添加 meta 标签 (orientation/screen-orientation)
+- 包体 283KB (<4MB), 21个 JS 文件语法全部通过
+
+**结果文件**: memory/results/20260523_064815_p1p2_fix_submission.md
