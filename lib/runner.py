@@ -115,6 +115,15 @@ def run_agent(agent, iteration, run_log_dir, claude_cmd, activity=None):
 
     proc = None
     stuck = [False]
+
+    # 启动前立即写入 running 状态，让 web UI 能实时检测
+    state_file = os.path.join(path, "memory", "state.json")
+    state = _load_agent_state(path) or {}
+    state["status"] = "running"
+    state["current_iteration"] = iteration
+    state["last_run"] = ts
+    write_json(state_file, state)
+
     try:
         header = f"\n[{ts}] --- 开始 (第{iteration}轮) ---\n"
         log_file.write(header)

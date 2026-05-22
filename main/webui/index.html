@@ -1019,7 +1019,11 @@ body {
       <h1>∞ LoopCLI</h1>
     </div>
     <nav class="nav">
-      <div class="nav-item active" data-page="agents">
+      <div class="nav-item active" data-page="dashboard">
+        <i class="ti ti-dashboard"></i>
+        <span>主页</span>
+      </div>
+      <div class="nav-item" data-page="agents">
         <i class="ti ti-robot"></i>
         <span>Agents</span>
       </div>
@@ -1057,30 +1061,11 @@ body {
   <!-- 主内容 -->
   <main class="main">
     <div class="content">
-      <!-- Agents 页面 -->
-      <div class="page active" id="page-agents">
+      <!-- 主页 Dashboard -->
+      <div class="page active" id="page-dashboard">
         <div class="page-header">
-          <h2>Agent 控制台</h2>
-          <p>管理和监控所有 Agent 的运行状态</p>
-        </div>
-
-        <div class="action-bar" style="display: flex; gap: 12px; margin-bottom: 20px;">
-          <button class="btn btn-primary" id="create-agent-btn" onclick="showCreateAgentModal()" style="display: flex; align-items: center; gap: 8px;">
-            <i class="ti ti-plus"></i>
-            <span>创建 Agent</span>
-          </button>
-          <button class="btn btn-secondary" id="refresh-btn" onclick="refreshAgents()" style="display: flex; align-items: center; gap: 8px;">
-            <i class="ti ti-refresh"></i>
-            <span>刷新</span>
-          </button>
-        </div>
-
-        <div class="search-bar" style="display: flex; gap: 12px; align-items: center; position: relative;">
-          <i class="ti ti-search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text2); z-index: 1;"></i>
-          <input type="text" class="search-input" id="agent-search" placeholder="搜索 Agent (按名称、ID 或状态)..." style="flex: 1; min-width: 0;">
-          <button class="btn btn-secondary" id="export-btn" onclick="exportAgentsData()" style="flex-shrink: 0; white-space: nowrap;">
-            <i class="ti ti-download"></i> 导出
-          </button>
+          <h2>系统概览</h2>
+          <p>LoopCLI 运行状态与关键指标</p>
         </div>
 
         <div class="stats-grid">
@@ -1102,7 +1087,7 @@ body {
           </div>
         </div>
 
-        <!-- 长期任务卡片 - 醒目位置 -->
+        <!-- 长期任务卡片 -->
         <div id="longtask-card" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 50%, rgba(16, 185, 129, 0.1) 100%); border: 2px solid var(--accent); border-radius: var(--radius); padding: 24px; margin-bottom: 32px; position: relative; overflow: hidden;">
           <div style="position: absolute; top: -50%; right: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 70%); pointer-events: none;"></div>
           <div style="display: flex; justify-content: space-between; align-items: flex-start; position: relative; z-index: 1;">
@@ -1140,22 +1125,49 @@ body {
           <div id="usage-content" style="color: var(--text2); font-size: 14px;">加载中...</div>
         </div>
 
-        <div class="agents-grid" id="agents-grid">
-          <div class="loading">
-            <div class="spinner"></div>
-            <div>加载 Agents...</div>
-          </div>
-        </div>
-
-        <!-- 可视化图表区域（SVG 美化版） -->
+        <!-- 可视化图表区域 -->
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 32px;">
           <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
             <h3 style="font-size: 15px; font-weight: 700; margin-bottom: 20px; color: var(--text2); display:flex; align-items:center; gap:8px;"><span style="display:inline-block;width:4px;height:18px;background:linear-gradient(180deg,#6366f1,#8b5cf6);border-radius:2px;"></span>Agent 状态分布</h3>
-            <div id="agent-status-chart" style="display:flex;align-items:center;justify-content:center;min-height:200px;"></div>
+            <div id="agent-status-chart" style="display:flex;align-items:center;justify-content:center;min-height:200px;width:100%;"></div>
           </div>
           <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
             <h3 style="font-size: 15px; font-weight: 700; margin-bottom: 20px; color: var(--text2); display:flex; align-items:center; gap:8px;"><span style="display:inline-block;width:4px;height:18px;background:linear-gradient(180deg,#10b981,#34d399);border-radius:2px;"></span>任务完成进度</h3>
             <div id="task-progress-chart" style="min-height:200px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Agents 页面 -->
+      <div class="page" id="page-agents">
+        <div class="page-header">
+          <h2>Agent 控制台</h2>
+          <p>管理和监控所有 Agent</p>
+        </div>
+
+        <div class="action-bar" style="display: flex; gap: 12px; margin-bottom: 20px;">
+          <button class="btn btn-primary" id="create-agent-btn" onclick="showCreateAgentModal()" style="display: flex; align-items: center; gap: 8px;">
+            <i class="ti ti-plus"></i>
+            <span>创建 Agent</span>
+          </button>
+          <button class="btn btn-secondary" id="refresh-btn" onclick="refreshAgents()" style="display: flex; align-items: center; gap: 8px;">
+            <i class="ti ti-refresh"></i>
+            <span>刷新</span>
+          </button>
+        </div>
+
+        <div class="search-bar" style="display: flex; gap: 12px; align-items: center; position: relative;">
+          <i class="ti ti-search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text2); z-index: 1;"></i>
+          <input type="text" class="search-input" id="agent-search" placeholder="搜索 Agent (按名称、ID 或状态)..." style="flex: 1; min-width: 0;">
+          <button class="btn btn-secondary" id="export-btn" onclick="exportAgentsData()" style="flex-shrink: 0; white-space: nowrap;">
+            <i class="ti ti-download"></i> 导出
+          </button>
+        </div>
+
+        <div class="agents-grid" id="agents-grid">
+          <div class="loading">
+            <div class="spinner"></div>
+            <div>加载 Agents...</div>
           </div>
         </div>
       </div>
@@ -1573,6 +1585,9 @@ function navigateTo(pageId) {
 // 加载页面数据
 async function loadPageData(pageId) {
   switch (pageId) {
+    case 'dashboard':
+      await loadDashboard();
+      break;
     case 'agents':
       await loadAgents();
       break;
@@ -1807,11 +1822,6 @@ function drawDonutChart(containerId, data, colors) {
   let offset = 0;
   const gapAngle = data.filter(d => d.value > 0).length > 1 ? 3 : 0;
 
-  const gradients = colors.map((c, i) => {
-    const id = `grad-${containerId}-${i}`;
-    return `<defs><linearGradient id="${id}" x1="0%" y1="0%" x2="100%" y2="100%">`;
-  }).join('');
-
   let arcs = data.map((item, i) => {
     if (item.value === 0) return '';
     const pct = item.value / total;
@@ -1823,7 +1833,7 @@ function drawDonutChart(containerId, data, colors) {
     return html;
   }).join('');
 
-  const svg = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="filter:drop-shadow(0 4px 12px rgba(0,0,0,0.15));">${arcs}<text x="${cx}" y="${cy - 8}" text-anchor="middle" fill="var(--text)" font-size="28" font-weight="800" font-family="system-ui,sans-serif">${total}</text><text x="${cx}" y="${cy + 14}" text-anchor="middle" fill="var(--text3)" font-size="11" font-family="system-ui,sans-serif">总计</text></svg>`;
+  const svg = `<svg viewBox="0 0 ${size} ${size}" style="width:100%;max-width:180px;height:auto;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.15));">${arcs}<text x="${cx}" y="${cy - 8}" text-anchor="middle" fill="var(--text)" font-size="28" font-weight="800" font-family="system-ui,sans-serif">${total}</text><text x="${cx}" y="${cy + 14}" text-anchor="middle" fill="var(--text3)" font-size="11" font-family="system-ui,sans-serif">总计</text></svg>`;
 
   const legend = data.filter(d => d.value > 0).map((item, i) => {
     const origIdx = data.indexOf(item);
@@ -1957,44 +1967,22 @@ async function loadAgents() {
   // 按 run_count 降序排序
   agents.sort((a, b) => (b.run_count || 0) - (a.run_count || 0));
 
-  // 更新统计
+  // 更新统计（主页和Agent页共享的统计卡片）
   const total = agents.length;
   const active = agents.filter(a => a.status !== 'disabled').length;
   const totalTasks = agents.reduce((sum, a) => sum + (a.task_count || 0), 0);
   const doneTasks = agents.reduce((sum, a) => sum + (a.task_done || 0), 0);
 
-  document.getElementById('total-agents').textContent = total;
-  document.getElementById('active-agents').textContent = active;
-  document.getElementById('total-tasks').textContent = totalTasks;
-  document.getElementById('done-tasks').textContent = doneTasks;
+  const totalEl = document.getElementById('total-agents');
+  const activeEl = document.getElementById('active-agents');
+  const totalTasksEl = document.getElementById('total-tasks');
+  const doneTasksEl = document.getElementById('done-tasks');
+  if (totalEl) totalEl.textContent = total;
+  if (activeEl) activeEl.textContent = active;
+  if (totalTasksEl) totalTasksEl.textContent = totalTasks;
+  if (doneTasksEl) doneTasksEl.textContent = doneTasks;
 
-  // 绘制图表
-  // Agent 状态分布（SVG圆环图）
-  const statusCounts = {};
-  agents.forEach(a => {
-    statusCounts[a.status] = (statusCounts[a.status] || 0) + 1;
-  });
-
-  const statusData = Object.entries(statusCounts).map(([status, count]) => ({
-    label: status,
-    value: count
-  }));
-
-  const statusColors = ['#10b981', '#f59e0b', '#ef4444', '#3b82f6'];
-  drawDonutChart('agent-status-chart', statusData, statusColors);
-
-  // 任务进度（进度条列表）
-  const taskData = agents
-    .filter(a => a.task_count > 0)
-    .map(a => ({
-      label: a.name.substring(0, 12),
-      value: a.task_done,
-      max: a.task_count
-    }));
-
-  drawProgressBars('task-progress-chart', taskData.map(d => ({label: `${d.label} (${d.value}/${d.max})`, value: d.value})));
-
-  // 渲染 agents
+  // 渲染 agent cards
   const grid = document.getElementById('agents-grid');
   if (agents.length === 0) {
     grid.innerHTML = '<div class="loading"><div>暂无 Agents</div></div>';
@@ -2060,6 +2048,55 @@ async function loadAgents() {
       </div>
     `;
   }).join('');
+}
+
+// 加载主页 Dashboard
+async function loadDashboard() {
+  const agents = await fetchAgents();
+  agents.sort((a, b) => (b.run_count || 0) - (a.run_count || 0));
+
+  // 更新统计
+  const total = agents.length;
+  const active = agents.filter(a => a.status !== 'disabled').length;
+  const totalTasks = agents.reduce((sum, a) => sum + (a.task_count || 0), 0);
+  const doneTasks = agents.reduce((sum, a) => sum + (a.task_done || 0), 0);
+
+  const totalEl = document.getElementById('total-agents');
+  const activeEl = document.getElementById('active-agents');
+  const totalTasksEl = document.getElementById('total-tasks');
+  const doneTasksEl = document.getElementById('done-tasks');
+  if (totalEl) totalEl.textContent = total;
+  if (activeEl) activeEl.textContent = active;
+  if (totalTasksEl) totalTasksEl.textContent = totalTasks;
+  if (doneTasksEl) doneTasksEl.textContent = doneTasks;
+
+  // 绘制圆环图
+  const statusCounts = {};
+  agents.forEach(a => {
+    statusCounts[a.status] = (statusCounts[a.status] || 0) + 1;
+  });
+  const statusData = Object.entries(statusCounts).map(([status, count]) => ({
+    label: status,
+    value: count
+  }));
+  const statusColors = ['#10b981', '#f59e0b', '#ef4444', '#3b82f6'];
+  drawDonutChart('agent-status-chart', statusData, statusColors);
+
+  // 任务进度
+  const taskData = agents
+    .filter(a => a.task_count > 0)
+    .map(a => ({
+      label: a.name.substring(0, 12),
+      value: a.task_done,
+      max: a.task_count
+    }));
+  drawProgressBars('task-progress-chart', taskData.map(d => ({label: `${d.label} (${d.value}/${d.max})`, value: d.value})));
+
+  // 加载长期任务
+  if (typeof loadLongTask === 'function') loadLongTask();
+
+  // 加载用量统计
+  if (typeof loadUsageStats === 'function') loadUsageStats();
 }
 
 // 加载 Tasks 页面
@@ -2542,12 +2579,13 @@ function stopAutoRefresh() {
 
 // 键盘快捷键
 const keyboardShortcuts = {
-  '1': 'agents',
-  '2': 'tasks',
-  '3': 'performance',
-  '4': 'logs',
-  '5': 'screenshots',
-  '6': 'settings',
+  '1': 'dashboard',
+  '2': 'agents',
+  '3': 'tasks',
+  '4': 'performance',
+  '5': 'logs',
+  '6': 'screenshots',
+  '7': 'settings',
   'r': 'refresh',
   'h': 'help'
 };
@@ -2722,17 +2760,13 @@ async function init() {
   // 初始化主题
   initTheme();
 
-  // 加载初始页面
-  await loadAgents();
-
-  // 加载长期任务（修复：主页卡片需要显示）
-  loadLongTask();
+  // 加载初始页面（dashboard）
+  await loadDashboard();
 
   // 初始化搜索功能
   initSearch();
 
-  // 加载用量统计
-  loadUsageStats();
+  // 定期刷新用量统计
   setInterval(loadUsageStats, 5 * 60 * 1000);
 
   // 启动自动刷新（10秒）
