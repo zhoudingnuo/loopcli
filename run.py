@@ -54,6 +54,8 @@ DEFAULT_PROMPT = """读取 SOUL.md 作为你的身份。
 6. 将本次运行摘要追加到 log/run.md
 7. 通过 inbox 通知 main：写入 D:/loopcli/main/inbox/<你的名字>_<时间>.md，简要报告任务结果
 8. 如果没有 pending 任务，输出 "IDLE" 并结束本轮
+
+发送图片给用户：将图片文件（.png/.jpg/.jpeg/.gif/.bmp/.webp）复制到 D:/loopcli/main/report/ 目录即可，微信桥接会自动发送。
 """
 
 
@@ -165,15 +167,26 @@ def cmd_run(args):
         out(f"{C.BOLD}{C.CYAN}══ Loop {iter_label} | {len(agents)} Agents | {ts} ══{C.RST}")
 
         threads = []
+        thread_agents = {}
+        activity = {}
         for agent in agents:
             p_agent_header(agent["name"], count)
-            t = threading.Thread(target=run_agent, args=(agent, count, run_log_dir, CLAUDE))
+            t = threading.Thread(target=run_agent, args=(agent, count, run_log_dir, CLAUDE, activity))
             t.start()
             threads.append(t)
+            thread_agents[t] = agent["name"]
         for t in threads:
-            t.join(timeout=420)
+            aname = thread_agents[t]
+            while t.is_alive():
+                last_active = activity.get(aname, 0)
+                if last_active > 0 and time.time() - last_active > 600:
+                    out(f"  {C.RED}⚠ {aname} 10分钟无输出，跳过等待{C.RST}")
+                    break
+                t.join(timeout=30)
+            else:
+                continue
             if t.is_alive():
-                out(f"  {C.RED}⚠ agent 线程未正常退出，强制继续下一轮{C.RST}")
+                out(f"  {C.RED}⚠ {aname} 线程未正常退出，强制继续下一轮{C.RST}")
 
         git_push()
 

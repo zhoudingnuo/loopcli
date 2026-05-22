@@ -1,6 +1,7 @@
 ---
 name: webui-pitfalls
 type: experience
+tags: [webui, dark-theme, css, layout, bug-fix, frontend]
 created: 2026-05-23
 ---
 

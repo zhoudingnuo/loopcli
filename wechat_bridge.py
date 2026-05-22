@@ -7,6 +7,8 @@
 import os
 import sys
 import json
+import math
+import struct
 import time
 import threading
 import requests
@@ -16,6 +18,8 @@ from typing import Optional, Callable, Dict, List
 import hashlib
 import random
 import base64
+
+from Crypto.Cipher import AES
 
 
 def _log(msg):
@@ -38,7 +42,9 @@ CHANNEL_VERSION = "loopcli-weixin/1.0"
 MESSAGE_TYPE_USER = 1
 MESSAGE_TYPE_BOT = 2
 MESSAGE_ITEM_TEXT = 1
+MESSAGE_ITEM_IMAGE = 2
 MESSAGE_ITEM_VOICE = 3
+CDN_BASE = "https://novac2c.cdn.weixin.qq.com/c2c"
 MESSAGE_STATE_FINISH = 2
 SESSION_EXPIRED_ERRCODE = -14
 
@@ -301,6 +307,95 @@ class WeChatBridge:
             time.sleep(0.1)
         return True
 
+    @staticmethod
+    def _aes_ecb_encrypt(data: bytes, key: bytes) -> bytes:
+        """AES-128-ECB 加密 + PKCS7 填充"""
+        pad_len = 16 - (len(data) % 16)
+        data += bytes([pad_len] * pad_len)
+        cipher = AES.new(key, AES.MODE_ECB)
+        return cipher.encrypt(data)
+
+    def send_image(self, to_user_id: str, image_path: str, context_token: Optional[str] = None) -> bool:
+        """发送图片：AES 加密 → 获取上传 URL → 上传 CDN → sendmessage"""
+        if context_token is None:
+            context_token = self.context_tokens.get(to_user_id)
+        if not context_token:
+            raise Exception("缺少 context_token，用户需要先发一条消息")
+
+        raw = Path(image_path).read_bytes()
+        raw_size = len(raw)
+        raw_md5 = hashlib.md5(raw).hexdigest()
+
+        # 生成随机 AES-128 密钥（16 字节）
+        aes_key = os.urandom(16)
+        aes_key_hex = aes_key.hex()  # 32 个 hex 字符
+        aes_key_b64 = base64.b64encode(aes_key_hex.encode("ascii")).decode()
+
+        # 加密
+        encrypted = self._aes_ecb_encrypt(raw, aes_key)
+        cipher_size = len(encrypted)
+
+        # 随机 filekey
+        filekey = os.urandom(16).hex()
+
+        # 1. getuploadurl
+        upload_resp = self._post("ilink/bot/getuploadurl", {
+            "filekey": filekey,
+            "media_type": 1,  # IMAGE
+            "to_user_id": to_user_id,
+            "rawsize": raw_size,
+            "rawfilemd5": raw_md5,
+            "filesize": cipher_size,
+            "aeskey": aes_key_hex,
+            "no_need_thumb": True,
+        })
+        if upload_resp.get("ret") != 0:
+            raise Exception(f"getuploadurl 失败: {upload_resp}")
+
+        upload_param = upload_resp.get("upload_param", "")
+        if not upload_param:
+            raise Exception("getuploadurl 未返回 upload_param")
+
+        # 2. 上传到 CDN
+        cdn_url = f"{CDN_BASE}/upload?encrypted_query_param={upload_param}&filekey={filekey}"
+        cdn_resp = requests.post(
+            cdn_url,
+            data=encrypted,
+            headers={"Content-Type": "application/octet-stream"},
+            timeout=60,
+        )
+        cdn_resp.raise_for_status()
+
+        encrypt_query_param = cdn_resp.headers.get("x-encrypted-param", "")
+        if not encrypt_query_param:
+            raise Exception("CDN 上传响应缺少 x-encrypted-param 头")
+
+        # 3. sendmessage with image_item
+        client_id = f"lc-{hashlib.md5(f'{time.time()}{random.randint(0,0xFFFF)}'.encode()).hexdigest()[:8]}"
+        self._post("ilink/bot/sendmessage", {
+            "msg": {
+                "from_user_id": "",
+                "to_user_id": to_user_id,
+                "client_id": client_id,
+                "message_type": MESSAGE_TYPE_BOT,
+                "message_state": MESSAGE_STATE_FINISH,
+                "item_list": [{
+                    "type": MESSAGE_ITEM_IMAGE,
+                    "image_item": {
+                        "mid_size": cipher_size,
+                        "media": {
+                            "aes_key": aes_key_b64,
+                            "encrypt_type": 1,
+                            "encrypt_query_param": encrypt_query_param,
+                        },
+                    },
+                }],
+                "context_token": context_token,
+            }
+        })
+        _log(f"[微信] 图片已发送: {image_path} ({raw_size} bytes)")
+        return True
+
     def _is_allowed(self, user_id: str) -> bool:
         if "*" in self.allow_from or not self.allow_from:
             return True
@@ -427,8 +522,15 @@ class WeChatInboxHandler:
     def _monitor_reports(self):
         while self.bridge.running:
             try:
-                for report_file in sorted(self.report_dir.glob("*.md")):
+                for report_file in sorted(self.report_dir.glob("*")):
                     if report_file.name in self.processed_reports:
+                        continue
+                    if report_file.suffix.lower() in (".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp"):
+                        if self._send_image_report(report_file):
+                            self.processed_reports.add(report_file.name)
+                            self._save_processed_reports()
+                        continue
+                    if not report_file.suffix.lower() == ".md":
                         continue
                     try:
                         content = report_file.read_text(encoding="utf-8")
@@ -462,6 +564,19 @@ class WeChatInboxHandler:
             return True
         except Exception as e:
             _log(f"[微信] 发送报告失败 {filename}: {e}")
+            return False
+
+    def _send_image_report(self, image_path: Path) -> bool:
+        if not self.bridge.context_tokens:
+            _log(f"[微信] 跳过图片 {image_path.name}：无可用 context_token")
+            return False
+        user_id = list(self.bridge.context_tokens.keys())[0]
+        try:
+            self.bridge.send_image(user_id, str(image_path))
+            _log(f"[微信] 图片报告已发送: {image_path.name}")
+            return True
+        except Exception as e:
+            _log(f"[微信] 发送图片失败 {image_path.name}: {e}")
             return False
 
     def start(self):

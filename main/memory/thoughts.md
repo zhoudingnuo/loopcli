@@ -1,13 +1,9 @@
 # LoopCLI 工作记忆
 
-## 2026-05-23 轮次341
+## 2026-05-23 轮次342
 
-**三层记忆系统实现完成**：
-- 创建 Hot/Warm/Cold 三层架构：MEMORY.md 索引 → facts/ 知识文件 → archive/ 归档
-- 迁移 thoughts.md 关键知识到 9 个独立 fact 文件，每个带 [[wiki-link]] 链式关联
-- PROMPT.md 已适配新记忆系统：初始化读索引、按需 Grep 搜索、链式回忆流程
-- 参考项目：Cog（三层文件记忆）、Claude Code 自身指针索引模式
-
-**深色主题修复**：
-- 用户报告深色主题主背景白色，根因是 html 和 .main 缺少显式 background: var(--bg)
-- 已修复，已推送微信通知
+**记忆系统迭代优化**：
+- PROMPT.md 回忆触发规则从模糊的"根据任务需要"改为 5 条具体触发规则（修改代码前、遇到报错、调度Agent、用户提往事、发现wiki-link）
+- 9 个 fact 文件全部添加 tags 标签（frontmatter），提高 Grep 搜索命中率
+- 链式回忆限制最多 3 层，防止过度消耗 token
+- 系统核心能力：Hot索引(~300 tokens/轮) → 按需Grep → wiki-link链式 → 3层截断

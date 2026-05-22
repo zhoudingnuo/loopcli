@@ -1,6 +1,7 @@
 ---
 name: open-issues
 type: reference
+tags: [bug, todo, issues, pending, known-bugs]
 created: 2026-05-23
 ---
 

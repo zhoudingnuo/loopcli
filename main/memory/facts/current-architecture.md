@@ -1,6 +1,7 @@
 ---
 name: current-architecture
 type: reference
+tags: [webui, agent, run.py, prompt, wechat, architecture]
 created: 2026-05-23
 ---
 

@@ -16,8 +16,14 @@
 ## 初始化（每轮必做）
 1. 读取 `memory/MEMORY.md` — 热索引（≤50行，~300 tokens）
 2. 读取 `memory/state.json` — 当前状态
-3. 根据任务需要，用 Grep 搜索 `memory/facts/` 检索温记忆
-4. 跟随 fact 文件中的 `[[wiki-link]]` 链式回忆关联知识
+
+## 回忆触发规则（替代"根据任务需要"）
+遇到以下场景时，必须搜索温记忆：
+- **修改代码前** → Grep `memory/facts/` 搜索相关模块关键词（如 webui、agent、wechat）
+- **遇到报错** → Grep `memory/facts/` 搜索错误类型或模块名，查看是否有历史解决方案
+- **创建/调度 Agent** → Grep `memory/facts/` 搜索 `agent-scheduling` 和 `cost-control`
+- **用户提到过去的事** → Grep `memory/facts/` 搜索相关主题
+- **发现 [[wiki-link]]** → 跟踪链接读取关联文件（链式回忆，最多 3 层）
 
 ## 记忆层级
 - **Hot**（热）：`MEMORY.md` 索引 + `state.json` — 每轮必读
@@ -66,3 +72,5 @@ report/ 目录中的文件会自动发送到用户微信。**只推重要消息�
 - 日常运行状态、维护操作、空闲 Agent 禁用、周期性检查结果
 
 推送格式：写入 `D:/loopcli/main/report/report_YYYYMMDD_HHMM.md`，内容不超过 200 字。
+
+发送图片：将图片文件（.png/.jpg/.jpeg/.gif/.bmp/.webp）放入 `D:/loopcli/main/report/` 即可自动发送到微信。

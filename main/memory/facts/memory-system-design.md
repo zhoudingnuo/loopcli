@@ -1,6 +1,7 @@
 ---
 name: memory-system-design
 type: reference
+tags: [memory, recall, hot-warm-cold, wiki-link, token-efficiency]
 created: 2026-05-23
 ---
 

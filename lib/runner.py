@@ -93,7 +93,7 @@ def handle_event(agent_name, line, result_signal=None):
         out(f"  {tag} {C.RED}✘ {event.get('error', '')}{C.RST}")
 
 
-def run_agent(agent, iteration, run_log_dir, claude_cmd):
+def run_agent(agent, iteration, run_log_dir, claude_cmd, activity=None):
     name = agent["name"]
     path = agent["path"]
     prompt_file = os.path.join(path, "PROMPT.md")
@@ -154,9 +154,14 @@ def run_agent(agent, iteration, run_log_dir, claude_cmd):
                     return
                 time.sleep(5 if got_result[0] else 10)
 
+        def _touch():
+            last_output[0] = time.time()
+            if activity is not None:
+                activity[name] = last_output[0]
+
         def drain_stdout():
             for line in iter(proc.stdout.readline, b''):
-                last_output[0] = time.time()
+                _touch()
                 decoded = line.decode("utf-8", errors="replace")
                 log_file.write(decoded)
                 agent_log.write(decoded)
@@ -173,7 +178,7 @@ def run_agent(agent, iteration, run_log_dir, claude_cmd):
         stderr_chunks = []
         def drain_stderr():
             for line in proc.stderr:
-                last_output[0] = time.time()
+                _touch()
                 stderr_chunks.append(line.decode("utf-8", errors="replace"))
 
         stderr_thread = threading.Thread(target=drain_stderr, daemon=True)

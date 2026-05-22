@@ -1,6 +1,7 @@
 ---
 name: key-decisions
 type: reference
+tags: [decision, architecture, trade-off, design-choice]
 created: 2026-05-23
 ---
 

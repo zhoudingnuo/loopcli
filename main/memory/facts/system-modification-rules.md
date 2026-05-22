@@ -1,6 +1,7 @@
 ---
 name: system-modification-rules
 type: rule
+tags: [testing, safety, core-files, run.py, mcp, critical]
 created: 2026-05-22
 ---
 

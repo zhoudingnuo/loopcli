@@ -1,6 +1,7 @@
 ---
 name: wechat-notification
 type: rule
+tags: [wechat, notification, report, push, message]
 created: 2026-05-22
 ---
 

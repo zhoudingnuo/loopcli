@@ -1,6 +1,7 @@
 ---
 name: agent-scheduling
 type: experience
+tags: [agent, parallel, disable, scheduling, loopcli-create]
 created: 2026-05-22
 ---
 

@@ -1,6 +1,7 @@
 ---
 name: cost-control
 type: rule
+tags: [token, agent-disable, budget, rotation, cost]
 created: 2026-05-22
 ---
 
