@@ -1,0 +1,10 @@
+[
+  {
+    "id": 1,
+    "status": "pending",
+    "title": "分析 LoopCLI 的 token 使用模式，找出高消耗操作，推荐优化方案。重点：1) 提升 MCP 工具使用率（当前仅 3%）2) 优化日志管理和归档策略 3) 识别可自动化的成本控制措施",
+    "description": "分析 LoopCLI 的 token 使用模式，找出高消耗操作，推荐优化方案。重点：1) 提升 MCP 工具使用率（当前仅 3%）2) 优化日志管理和归档策略 3) 识别可自动化的成本控制措施",
+    "created": "2026-05-22",
+    "assignee": "engineering-autonomous-optimization-architect"
+  }
+]

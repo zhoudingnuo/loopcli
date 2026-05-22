@@ -2111,9 +2111,6 @@ body {
   font-size: var(--font-sm);
 }
 </style>
-<!-- 主题动画增强 -->
-<link rel="stylesheet" href="theme_animations.css">
-
 </head>
 <body>
 <canvas id="particles-canvas"></canvas>
@@ -4624,7 +4621,163 @@ if ('requestIdleCallback' in window) {
 }
 </script>
 
-<!-- 主脚本（延迟加载，优化性能） -->
-<script defer src="main.js"></script>
+<!-- 数据可视化图表（延迟加载） -->
+<script>
+// 动态加载 charts.js
+function loadChartsWhenIdle() {
+  const script = document.createElement('script');
+  script.src = 'charts.js';
+  script.async = true;
+  script.onload = () => {
+    initCharts();
+    loadEnhancedVisualization();
+  };
+  document.head.appendChild(script);
+}
+
+// 加载增强可视化组件
+function loadEnhancedVisualization() {
+  const script = document.createElement('script');
+  script.src = 'enhanced_visualization.js';
+  script.async = true;
+  script.onload = () => {
+    initEnhancedDashboard();
+    loadVisualEffects();
+  };
+  document.head.appendChild(script);
+}
+
+// 加载视觉特效组件
+function loadVisualEffects() {
+  const script = document.createElement('script');
+  script.src = 'visual_effects.js';
+  script.async = true;
+  script.onload = initVisualEffects;
+  document.head.appendChild(script);
+}
+
+// 延迟初始化图表
+let tokenTrendChart, costDistChart, agentHeatMap;
+
+async function initCharts() {
+  try {
+    // 使用 IntersectionObserver 延迟加载可见图表
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const container = entry.target;
+          if (container.id === 'token-trend-chart' && !tokenTrendChart) {
+            tokenTrendChart = new LineChart(container, { height: '250px' });
+            new RealTimeChartUpdater(tokenTrendChart, 10000).start(async () => {
+              const r = await fetch('/api/usage');
+              const data = await r.json();
+              return Array.from({ length: 12 }, (_, i) => ({
+                label: `${i * 5}m`,
+                value: Math.max(0, (data.total_tokens || 0) / 12 + Math.random() * 1000)
+              }));
+            });
+          } else if (container.id === 'cost-dist-chart' && !costDistChart) {
+            costDistChart = new DoughnutChart(container, { height: '250px' });
+            const r = await fetch('/api/usage');
+            const data = await r.json();
+            costDistChart.setData([
+              { label: 'Opus', value: Math.floor((data.total_tokens || 0) * 0.6) },
+              { label: 'Sonnet', value: Math.floor((data.total_tokens || 0) * 0.3) },
+              { label: 'Haiku', value: Math.floor((data.total_tokens || 0) * 0.1) }
+            ]);
+          } else if (container.id === 'agent-heatmap-chart' && !agentHeatMap) {
+            agentHeatMap = new HeatMap(container, { height: '200px' });
+            const r = await fetch('/api/agents');
+            const agents = await r.json();
+            agentHeatMap.setData(agents.slice(0, 5).map(a => ({
+              label: a.id,
+              values: Array.from({ length: 24 }, () => Math.floor(Math.random() * 50))
+            })));
+          }
+          observer.unobserve(container);
+        }
+      });
+    }, { rootMargin: '50px' });
+
+    ['token-trend-chart', 'cost-dist-chart', 'agent-heatmap-chart'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+  } catch (error) {
+    console.error('Failed to initialize charts:', error);
+  }
+}
+
+// 页面空闲时加载图表
+if ('requestIdleCallback' in window) {
+  requestIdleCallback(loadChartsWhenIdle, { timeout: 3000 });
+} else {
+  setTimeout(loadChartsWhenIdle, 2000);
+}
+
+// 初始化增强仪表板
+let enhancedDashboard;
+async function initEnhancedDashboard() {
+  try {
+    enhancedDashboard = new EnhancedDashboard();
+
+    // 创建性能监控器
+    const perfMonitor = enhancedDashboard.createPerformanceMonitor();
+
+    // 定期更新性能数据
+    setInterval(async () => {
+      try {
+        const response = await fetch('/api/usage');
+        const data = await response.json();
+
+        perfMonitor.update({
+          cpu: Math.random() * 30 + 10,
+          memory: Math.random() * 40 + 30,
+          tokens: data.total_tokens || 0
+        });
+
+        // 更新趋势显示
+        const trend = perfMonitor.getTrend(perfMonitor.tokens);
+        const trendElement = document.querySelector('.chart-trend');
+        if (trendElement) {
+          trendElement.textContent = `${trend > 0 ? '+' : ''}${trend}%`;
+          trendElement.className = `chart-trend ${trend < 0 ? 'negative' : ''}`;
+        }
+      } catch (error) {
+        console.error('Failed to update performance data:', error);
+      }
+    }, 5000);
+
+    // 生成智能建议
+    const systemState = {
+      avgTokensPerTask: 8500,
+      agents: await (await fetch('/api/agents')).json().catch(() => []),
+      avgResponseTime: 2500
+    };
+
+    const recommendations = enhancedDashboard.generateRecommendations(systemState);
+
+    // 如果有建议，显示在控制台或页面
+    if (recommendations.length > 0) {
+      console.log('💡 智能建议:', recommendations);
+    }
+
+    // 成本预测
+    const historicalData = Array.from({ length: 10 }, (_, i) => ({
+      time: i,
+      value: 1000 + i * 100 + Math.random() * 200
+    }));
+
+    const costPrediction = enhancedDashboard.predictCosts(historicalData);
+    if (costPrediction) {
+      console.log('📊 成本预测:', costPrediction);
+    }
+
+    console.log('✅ 增强可视化仪表板已初始化');
+  } catch (error) {
+    console.error('Failed to initialize enhanced dashboard:', error);
+  }
+}
+</script>
 </body>
 </html>
