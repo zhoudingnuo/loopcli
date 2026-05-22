@@ -1129,7 +1129,15 @@ body {
           </div>
         </div>
 
-        
+        <!-- 用量统计面板 -->
+        <div id="usage-panel" style="background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px; margin-bottom: 32px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 style="font-size: 15px; font-weight: 700; color: var(--text2); display:flex; align-items:center; gap:8px;"><span style="display:inline-block;width:4px;height:18px;background:linear-gradient(180deg,#f59e0b,#fbbf24);border-radius:2px;"></span>用量统计</h3>
+            <span id="usage-refresh-time" style="font-size: 12px; color: var(--text3);">每5分钟刷新</span>
+          </div>
+          <div id="usage-content" style="color: var(--text2); font-size: 14px;">加载中...</div>
+        </div>
+
         <div class="agents-grid" id="agents-grid">
           <div class="loading">
             <div class="spinner"></div>
@@ -1147,15 +1155,6 @@ body {
             <h3 style="font-size: 15px; font-weight: 700; margin-bottom: 20px; color: var(--text2); display:flex; align-items:center; gap:8px;"><span style="display:inline-block;width:4px;height:18px;background:linear-gradient(180deg,#10b981,#34d399);border-radius:2px;"></span>任务完成进度</h3>
             <div id="task-progress-chart" style="min-height:200px;"></div>
           </div>
-        </div>
-
-        <!-- 用量统计面板 -->
-        <div id="usage-panel" style="background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px; margin-bottom: 32px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h3 style="font-size: 15px; font-weight: 700; color: var(--text2); display:flex; align-items:center; gap:8px;"><span style="display:inline-block;width:4px;height:18px;background:linear-gradient(180deg,#f59e0b,#fbbf24);border-radius:2px;"></span>用量统计</h3>
-            <span id="usage-refresh-time" style="font-size: 12px; color: var(--text3);">每5分钟刷新</span>
-          </div>
-          <div id="usage-content" style="color: var(--text2); font-size: 14px;">加载中...</div>
         </div>
       </div>
 
