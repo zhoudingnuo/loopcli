@@ -1,19 +1,22 @@
 # LoopCLI 记忆
 
+## 2026-05-22 轮次323
+
+**WebUI用量统计增强**：
+- 后端query_usage_summary()新增weekly字段（7天Token/调用统计），独立try不影响主数据
+- 前端新增彩色进度条（barColor用硬编码hex色值，不用CSS变量以确保可见性）
+- 显示：24h调用/Token、7天Token/调用、MCP月度配额(130/4000分钟=3%)、两个Token 5h配额(17%、29%)
+- MCP配额详情显示"分钟"单位，Token配额API返回current=0/total=?所以不显示详情
+- 前端用rgba(128,128,128,0.2)做进度条背景，确保在任何主题下可见
+
+**经验**：进度条CSS变量(var(--green))在某些场景下不可见，用硬编码hex色值更可靠
+
 ## 2026-05-22 轮次320
 
 **微信通知修复**：
-- wechat_bridge.py `_log`函数bug：首次调用时文件不存在导致静默失败（read_text在空文件上报错）
-- `_monitor_reports`对PNG文件调用read_text崩溃，导致报告循环中断，18:03后的7条报告未发送
-- 修复：_log改用append模式，_monitor_reports只处理*.md文件
-- 手动补发了7条未发送报告
+- wechat_bridge.py `_log`函数bug：首次调用时文件不存在导致静默失败
+- `_monitor_reports`对PNG文件调用read_text崩溃，修复：只处理*.md文件
 
 **WebUI深度优化**：
-- 修复键盘事件bug：Escape弹窗关闭时误删`const key`声明，导致后续快捷键报"key is not defined"
-- 修复创建Agent弹窗无法Escape关闭（原只处理非input的keydown）
-- 性能页改用真实API数据替代随机模拟值
-- 通知堆叠：限制最多3条，加max-height防溢出
-- 进度条label截断：添加overflow/text-overflow样式
-- 全部11个API端点200 OK，0个页面错误
-
-**Playwright测试覆盖**：6页面导航、搜索过滤、弹窗开关、主题切换、数据导出、Agent启用禁用
+- 修复键盘事件bug、性能页改用真实API数据、通知堆叠限制、进度条label截断
+- 全部11个API端点200 OK，Playwright测试覆盖6页面

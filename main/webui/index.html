@@ -2584,15 +2584,39 @@ async function loadUsageStats() {
     const pctColor = p => p > 80 ? 'var(--red)' : p > 50 ? 'var(--yellow)' : 'var(--green)';
     const pctBadge = (label, pct) => `<span style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:var(--surface2);border-radius:8px;font-size:13px;"><span style="color:var(--text2)">${label}</span><span style="font-weight:700;color:${pctColor(pct)}">${pct}%</span></span>`;
 
-    let html = `<div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;margin-bottom:16px;">
-      <div style="padding:6px 14px;background:var(--surface2);border-radius:8px;font-size:13px;"><span style="color:var(--text2)">调用</span> <strong style="color:var(--text)">${fmt(data.call_count)}</strong></div>
-      <div style="padding:6px 14px;background:var(--surface2);border-radius:8px;font-size:13px;"><span style="color:var(--text2)">Token</span> <strong style="color:var(--text)">${fmt(data.total_tokens)}</strong></div>`;
+    // 额度进度条组件
+    const barColor = p => p > 80 ? '#ef4444' : p > 50 ? '#f59e0b' : '#22c55e';
+    const quotaBar = (label, pct, detail) => {
+      const c = barColor(pct);
+      return `<div style="margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+          <span style="font-size:13px;font-weight:600;color:var(--text2)">${label}</span>
+          <span style="font-size:13px;font-weight:700;color:${c}">${pct}%${detail ? ` (${detail})` : ''}</span>
+        </div>
+        <div style="height:10px;background:rgba(128,128,128,0.2);border-radius:5px;overflow:hidden;">
+          <div style="height:100%;width:${Math.min(pct,100)}%;background:${c};border-radius:5px;transition:width .6s ease;"></div>
+        </div>
+      </div>`;
+    };
 
-    // 配额
-    (data.quotas || []).forEach(q => {
-      html += pctBadge(q.label, q.percentage);
-    });
-    html += `</div>`;
+    let html = `<div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;margin-bottom:16px;">
+      <div style="padding:6px 14px;background:var(--surface2);border-radius:8px;font-size:13px;"><span style="color:var(--text2)">24h调用</span> <strong style="color:var(--text)">${fmt(data.call_count)}</strong></div>
+      <div style="padding:6px 14px;background:var(--surface2);border-radius:8px;font-size:13px;"><span style="color:var(--text2)">24h Token</span> <strong style="color:var(--text)">${fmt(data.total_tokens)}</strong></div>
+      ${data.weekly && data.weekly.tokens ? `<div style="padding:6px 14px;background:var(--surface2);border-radius:8px;font-size:13px;"><span style="color:var(--text2)">7天 Token</span> <strong style="color:var(--text)">${fmt(data.weekly.tokens)}</strong></div><div style="padding:6px 14px;background:var(--surface2);border-radius:8px;font-size:13px;"><span style="color:var(--text2)">7天调用</span> <strong style="color:var(--text)">${fmt(data.weekly.calls)}</strong></div>` : ''}
+    </div>`;
+
+    // 额度面板
+    if (data.quotas && data.quotas.length > 0) {
+      html += `<div style="margin-bottom:16px;">`;
+      (data.quotas).forEach(q => {
+        let detail = '';
+        if (q.type === 'mcp_month' && q.current !== undefined && q.total !== undefined) {
+          detail = `${q.current}/${q.total} 分钟`;
+        }
+        html += quotaBar(q.label, q.percentage, detail);
+      });
+      html += `</div>`;
+    }
 
     // 模型明细
     if (data.models && data.models.length > 0) {

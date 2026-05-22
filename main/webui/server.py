@@ -271,9 +271,20 @@ def query_usage_summary():
             cur = item.get("currentValue", 0)
             total = item.get("usage", "?")
             if "TOKEN" in t:
-                quotas.append({"type": "token_5h", "percentage": round(pct, 1), "label": "Token 配额 (5h)"})
+                quotas.append({"type": "token_5h", "percentage": round(pct, 1), "current": cur, "total": total, "label": "Token 配额 (5h)"})
             elif "TIME" in t:
-                quotas.append({"type": "mcp_month", "percentage": round(pct, 1), "current": cur, "total": total, "label": f"MCP 配额 (月) {cur}/{total} 分钟"})
+                quotas.append({"type": "mcp_month", "percentage": round(pct, 1), "current": cur, "total": total, "label": f"MCP 配额 (月)"})
+
+        # 每周用量（7天汇总，单独 try 不影响主数据）
+        weekly = {}
+        try:
+            week_start = (now - timedelta(days=7)).strftime("%Y-%m-%d %H:00:00")
+            week_params = f"?startTime={urllib.parse.quote(week_start)}&endTime={urllib.parse.quote(end)}"
+            week_data, _ = _query_api("/api/monitor/usage/model-usage", week_params)
+            week_summary = week_data.get("totalUsage", {})
+            weekly = {"tokens": week_summary.get("totalTokensUsage", 0), "calls": week_summary.get("totalModelCallCount", 0), "days": 7}
+        except Exception:
+            pass
 
         return {
             "total_tokens": total_tokens,
@@ -281,6 +292,7 @@ def query_usage_summary():
             "models": models,
             "tools": tools,
             "quotas": quotas,
+            "weekly": weekly,
             "time_range": f"{start} ~ {end}"
         }
     except Exception as e:
