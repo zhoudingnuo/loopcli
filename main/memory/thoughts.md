@@ -1,5 +1,16 @@
 # LoopCLI 记忆
 
+## 2026-05-22 轮次327
+
+**WebUI 布局优化 + Playwright全面测试**：
+- **Agent卡片前置**：原来Agent列表在页面最底部（图表和用量之后），用户需要大量滚动。重排后顺序：统计卡片→长期任务→Agent列表→图表→用量统计，视口内可见2个Agent卡片（之前0个）
+- **按钮ID补全**：给创建Agent、刷新、导出按钮添加了id属性，便于测试和交互
+- **Playwright测试38/38全部通过**：导航6页、Agent卡片、搜索、所有按钮、性能指标、设置主题、6个API端点、长期任务卡片
+- **确认非bug项**：Token格式实际正确(266,973,354)、任务页空是因tasks.json无数据、Token趋势图有渲染但需滚动查看
+- **性能页结构**：page-performance与page-agents分离正确，full_page截图会包含隐藏页面导致分析误导
+
+**经验**：Playwright full_page=True会截取所有隐藏页面元素，分析截图时要用viewport-only截图。测试按钮时用page.evaluate()调用JS关闭函数比找DOM元素更可靠。
+
 ## 2026-05-22 轮次324
 
 **WebUI 深度优化 — 性能页面修复**：
