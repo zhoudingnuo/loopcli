@@ -118,15 +118,14 @@ class ChartManager {
   }
 
   initAll() {
-    ['token-trend-chart', 'cost-dist-chart', 'agent-heatmap-chart'].forEach(id => {
+    ['cost-dist-chart', 'agent-heatmap-chart'].forEach(id => {
       const el = document.getElementById(id);
       if (!el) return;
 
       const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
-            if (id === 'token-trend-chart') this.initTokenTrend(entry.target);
-            else if (id === 'cost-dist-chart') this.initCostDist(entry.target);
+            if (id === 'cost-dist-chart') this.initCostDist(entry.target);
             else if (id === 'agent-heatmap-chart') this.initAgentHeatMap(entry.target);
             observer.unobserve(entry.target);
           }

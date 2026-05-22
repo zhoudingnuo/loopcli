@@ -1095,7 +1095,7 @@ body {
               </div>
               <div id="longtask-display" style="color: var(--text); line-height: 1.7;">
                 <div id="longtask-status-main" style="font-size: 14px; color: var(--text2);">加载中...</div>
-                <div id="longtask-content-main" style="display: none; margin-top: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; font-family: monospace; font-size: 13px; white-space: pre-wrap; color: var(--text2); max-height: 200px; overflow-y: auto;"></div>
+                <div id="longtask-content-main" style="display: none; margin-top: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; font-family: monospace; font-size: 13px; white-space: pre-wrap; color: var(--text2); max-height: 300px; overflow-y: auto;"></div>
                 <div id="longtask-edit-main" style="display: none; margin-top: 12px;">
                   <textarea id="longtask-editor-main" style="width: 100%; min-height: 120px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-family: monospace; font-size: 13px; color: var(--text); resize: vertical;" placeholder="输入长期任务内容..."></textarea>
                   <div style="display: flex; gap: 8px; margin-top: 8px;">
@@ -1810,7 +1810,7 @@ function drawProgressBars(containerId, data, maxBar) {
     const pct = Math.round((item.value / maxVal) * 100);
     return `<div style="margin-bottom:10px;">
       <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;gap:8px;">
-        <span style="color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;">${item.label}</span>
+        <span style="color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;max-width:60%;">${item.label}</span>
         <span style="color:var(--text);font-weight:600;flex-shrink:0;">${item.value}</span>
       </div>
       <div style="height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;">
@@ -2067,29 +2067,43 @@ async function loadPerformance() {
   try {
     const trendResp = await fetch(`${API_BASE}/usage/trend`);
     if (trendResp.ok) {
-      const trendData = await trendResp.json();
-      if (Array.isArray(trendData) && trendData.length) {
+      const trendRaw = await trendResp.json();
+      const trendData = Array.isArray(trendRaw) ? trendRaw : (trendRaw.data || []);
+      const total = trendData.reduce((s, d) => s + d.value, 0);
+      if (trendData.length && total > 0) {
         drawLineChart('token-trend-chart', trendData, '#3b82f6');
-        const total = trendData.reduce((s, d) => s + d.value, 0);
-        const avg = Math.round(total / trendData.length);
         document.getElementById('token-trend-summary').textContent =
-          `${trendData.length}天累计 ${total} 次任务，平均 ${avg} 次/天`;
+          trendRaw.summary || `${trendData.length}天累计 ${total} 次任务，平均 ${Math.round(total / trendData.length)} 次/天`;
+      } else if (trendData.length) {
+        const canvas = document.getElementById('token-trend-chart');
+        if (canvas) {
+          const ctx = canvas.getContext('2d');
+          const theme = document.documentElement.dataset.theme || 'dark';
+          ctx.fillStyle = theme === 'light' ? '#6b7280' : '#9ca3af';
+          ctx.font = '14px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('近7天暂无显著任务数据', canvas.width / 4, canvas.height / 4);
+        }
+        document.getElementById('token-trend-summary').textContent = '近7天数据收集中';
       }
     }
   } catch(e) {}
 
   // Token总量
   try {
+    const t0 = performance.now();
     const usageResp = await fetch(`${API_BASE}/usage`);
+    const latency = performance.now() - t0;
     if (usageResp.ok) {
       const usage = await usageResp.json();
       if (usage.total_tokens) {
         document.getElementById('token-usage').textContent = Number(usage.total_tokens).toLocaleString();
       }
     }
-  } catch(e) {}
-
-  document.getElementById('response-time').textContent = Math.round(Math.random() * 50 + 10) + 'ms';
+    document.getElementById('response-time').textContent = Math.round(latency) + 'ms';
+  } catch(e) {
+    document.getElementById('response-time').textContent = '- ms';
+  }
 }
 
 // 加载 Logs 页面
