@@ -1,13 +1,12 @@
 {
   "agent": "main",
   "status": "idle",
-  "last_run": "2026-05-23 06:18:56",
-  "run_count": 382,
-  "last_action": "dispatched_match3_test_and_idiom_gdd",
+  "last_run": "2026-05-23 06:28:56",
+  "run_count": 384,
+  "last_action": "assigned_p0_fix_task24_disabled_game_designer",
   "active_agents": [
-    "engineering-frontend-developer",
-    "game-designer"
+    "engineering-frontend-developer"
   ],
   "pending_user_requests": [],
-  "current_iteration": 8
+  "current_iteration": 10
 }

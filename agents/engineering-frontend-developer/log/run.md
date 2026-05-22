@@ -83,3 +83,13 @@
 - **包体**: 1.3MB (目标<4MB ✓)
 - **提审材料**: 全部缺失（game.json、project.config.json、图标、隐私政策等10项）
 - **结果文件**: memory/results/2026-05-23_062525_full-test.md
+
+## Run #213 — 2026-05-23 06:36:29
+- **Task**: #24 修复三消游戏3个P0 Bug + 关卡平衡
+- **Status**: DONE
+- **修复**:
+  1. DailySystem.reportEvent() clear_obstacle 双倍计数 → else if 互斥
+  2. Board.shuffle() null崩溃 → 跳过 null 格子
+  3. ScoreSystem.useMove() 步数边界 → 先检查再递增
+- **关卡平衡**: Level35 Boss HP 200→120, Level50 Boss HP 300→180
+- **结果文件**: memory/results/20260523_063629_bugfix_p0.md

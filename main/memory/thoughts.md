@@ -1,20 +1,15 @@
 # LoopCLI 工作记忆
 
+## 2026-05-23 轮次383
+- game-designer 任务清零已禁用，成语闯关GDD完成
+- 三消测试发现3P0+4P1+8P2 bug，派发#24 P0修复+关卡平衡→frontend
+- 用户微信已回复：codegraph已安装运行
+- 下一步：等frontend修复完成→成语项目启动→提审
+
 ## 2026-05-23 轮次380
-- 前端开发者已完成22项任务，空闲，已归档反馈
-- 派发 #23：三消游戏全量测试+提审准备 → engineering-frontend-developer
-- 派发 #5：成语闯关GDD立项 → game-designer
-- 两个 agent 已启用，等待执行结果
-- 所有微信消息已处理（最后一条 06:10 CodeGraph，已安装）
+- 派发 #23：三消测试+提审 → frontend | #5：成语GDD → game-designer
+- 微信已处理（最后 06:10 codegraph，已安装）
 
 ## 2026-05-23 轮次378
-
-- CodeGraph v0.9.3 已全局安装，MCP 配置写入 ~/.claude.json
-- LoopCLI 项目索引完成(126文件, 4369符号)，抖音三消游戏索引完成(21文件, 361符号)
-- engineering-frontend-developer Phase4 完成(变现+广告+埋点)，已禁用
-- 下一步：游戏测试+提审流程，或开始新游戏项目
-
-## 2026-05-23 轮次376
-
-- Phase 3b 完成(task#21)：DailySystem(396行)+SocialSystem(363行)+关卡21-50，已归档反馈
-- Phase 4 已派发(task#22)：变现系统+穿山甲广告SDK+6广告位UI+数据埋点+包体优化+上线准备
+- CodeGraph v0.9.3 已安装，126文件4369符号
+- Phase4完成，frontend已禁用

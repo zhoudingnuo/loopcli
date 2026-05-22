@@ -205,5 +205,14 @@
     "created": "2026-05-23",
     "assignee": "engineering-frontend-developer",
     "completed": "2026-05-23 06:25:25"
+  },
+  {
+    "id": 24,
+    "status": "done",
+    "title": "修复三消游戏3个P0 Bug + 关卡平衡",
+    "description": "根据全量测试报告修复P0:1)DailySystem任务双倍计数 2)Board.shuffle null崩溃 3)ScoreSystem步数边界。调整Level35/50 Boss血量。项目D:/game-projects/douyin-match3/ 禁止AskUserQuestion",
+    "created": "2026-05-23",
+    "assignee": "engineering-frontend-developer",
+    "completed": "2026-05-23 06:36:29"
   }
 ]
