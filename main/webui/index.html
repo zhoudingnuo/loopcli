@@ -1213,6 +1213,24 @@ body {
             </div>
           </div>
         </div>
+
+        <div class="settings-section">
+          <h3>长期任务</h3>
+          <div class="setting-item">
+            <div class="setting-label">
+              <div class="title">当前长期任务</div>
+              <div class="description" id="longtask-status">加载中...</div>
+            </div>
+            <div class="setting-control">
+              <button class="btn btn-secondary" id="cancel-longtask-btn" onclick="cancelLongTask()" style="display: none;">
+                ✕ 取消任务
+              </button>
+            </div>
+          </div>
+          <div id="longtask-content" style="display: none; margin-top: 16px;">
+            <div style="background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 16px; font-family: monospace; font-size: 13px; white-space: pre-wrap; color: var(--text2); max-height: 200px; overflow-y: auto;" id="longtask-text"></div>
+          </div>
+        </div>
       </div>
     </div>
   </main>
@@ -1704,6 +1722,9 @@ function loadSettings() {
   const hours = Math.floor(uptime / 3600);
   const minutes = Math.floor((uptime % 3600) / 60);
   document.getElementById('uptime').textContent = `${hours}小时 ${minutes}分钟`;
+
+  // 加载长期任务
+  loadLongTask();
 }
 
 // 启用 agent
@@ -1736,6 +1757,50 @@ async function disableAgent(id) {
 function clearLogs() {
   document.getElementById('logs-content').innerHTML = '<div style="text-align: center; color: var(--text2);">日志已清空</div>';
   showNotification('日志已清空', 'success');
+}
+
+// 长期任务相关函数
+async function loadLongTask() {
+  try {
+    const response = await fetch(`${API_BASE}/longtask`);
+    if (!response.ok) throw new Error('API 请求失败');
+    const data = await response.json();
+
+    const statusEl = document.getElementById('longtask-status');
+    const contentEl = document.getElementById('longtask-content');
+    const textEl = document.getElementById('longtask-text');
+    const cancelBtn = document.getElementById('cancel-longtask-btn');
+
+    if (data.exists) {
+      statusEl.textContent = '有活动任务';
+      textEl.textContent = data.content;
+      contentEl.style.display = 'block';
+      cancelBtn.style.display = 'block';
+    } else {
+      statusEl.textContent = '无长期任务';
+      contentEl.style.display = 'none';
+      cancelBtn.style.display = 'none';
+    }
+  } catch (error) {
+    console.error('加载长期任务失败:', error);
+    document.getElementById('longtask-status').textContent = '加载失败';
+  }
+}
+
+async function cancelLongTask() {
+  if (!confirm('确定要取消长期任务吗？此操作不可恢复。')) return;
+
+  try {
+    const response = await fetch(`${API_BASE}/longtask/clear`, { method: 'POST' });
+    if (!response.ok) throw new Error('API 请求失败');
+    const data = await response.json();
+
+    showNotification(data.message || '长期任务已取消', 'success');
+    await loadLongTask();
+  } catch (error) {
+    console.error('取消长期任务失败:', error);
+    showNotification('取消失败: ' + error.message, 'error');
+  }
 }
 
 // 通知系统

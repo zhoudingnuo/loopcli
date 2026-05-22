@@ -523,6 +523,9 @@ class WebUIHandler(SimpleHTTPRequestHandler):
         if path == "/api/loopcli/status":
             return self._handle_loopcli_status()
 
+        if path == "/api/longtask":
+            return self._handle_longtask_get()
+
         # Static files
         super().do_GET()
 
@@ -573,6 +576,8 @@ class WebUIHandler(SimpleHTTPRequestHandler):
             return self._handle_automation_health_check()
         if path == "/api/automation/git-sync":
             return self._handle_automation_git_sync()
+        if path == "/api/longtask/clear":
+            return self._handle_longtask_clear()
 
         self._send_json({"error": "Not found"}, status=404)
 
@@ -996,6 +1001,29 @@ class WebUIHandler(SimpleHTTPRequestHandler):
             self._send_json({"action": "git_sync", "status": "timeout", "error": "命令超时"}, status=500)
         except Exception as e:
             self._send_json({"action": "git_sync", "status": "error", "error": str(e)}, status=500)
+
+    def _handle_longtask_get(self):
+        """获取长期任务内容"""
+        longtask_file = LOOPCLI_ROOT / "longtask.md"
+        if not longtask_file.exists():
+            return self._send_json({"exists": False, "content": ""})
+        try:
+            content = longtask_file.read_text(encoding="utf-8")
+            return self._send_json({"exists": True, "content": content})
+        except Exception as e:
+            return self._send_json({"error": str(e)}, status=500)
+
+    def _handle_longtask_clear(self):
+        """清空长期任务"""
+        longtask_file = LOOPCLI_ROOT / "longtask.md"
+        try:
+            if longtask_file.exists():
+                longtask_file.unlink()
+                return self._send_json({"status": "cleared", "message": "长期任务已取消"})
+            else:
+                return self._send_json({"status": "no_task", "message": "无长期任务"})
+        except Exception as e:
+            return self._send_json({"error": str(e)}, status=500)
 
 
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
