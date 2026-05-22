@@ -43,3 +43,4 @@
 | 2026-05-23 04:25:10 | 完成 | #16 侧边栏全面中文化 | 添加themeNames/statusNames映射表，翻译快捷键帮助页面名称、主题切换通知、任务状态标签、圆环图状态标签、模型用量单位，更新版本号v8.8 |
 | 2026-05-23 04:43:00 | 完成 | #17 修复配额重复显示bug | server.py配额处理添加seen_token去重标记，只取第一个TOKEN条目，解决WebUI显示两个Token配额5h的问题 |
 | 2026-05-23 05:13:19 | 完成 | #18 三消游戏核心引擎Phase1 | 7个JS模块(Board/MatchEngine/Renderer/Input/Score/Animation/Game)+index.html，8x8棋盘+6色水果+滑动交换+3+匹配检测+消除动画+重力下落+连锁+特殊方块(条纹/区域/彩虹)+步数限制+10关卡配置 |
+| 2026-05-23 05:36:30 | 完成 | #19 三消游戏Phase2障碍物与关卡系统 | 新增Obstacle.js(冰块/锁链/巧克力)+AudioManager.js(Web Audio音效)+Boss.js(Boss敌人)+levels.js(20关配置)+20个JSON关卡文件，修改Game/ScoreSystem/Renderer/Board集成所有系统，支持5种目标类型+Boss战+巧克力蔓延+Boss技能 |

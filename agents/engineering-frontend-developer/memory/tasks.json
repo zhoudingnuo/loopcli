@@ -160,5 +160,14 @@
     "created": "2026-05-23",
     "assignee": "engineering-frontend-developer",
     "completed": "2026-05-23 05:13:19"
+  },
+  {
+    "id": 19,
+    "status": "done",
+    "title": "三消游戏Phase2：障碍物与关卡系统",
+    "description": "基于Phase 1完成的核心引擎（D:/game-projects/douyin-match3/），继续开发Phase 2功能：\n\n1. 障碍物系统（Obstacle.js）：\n   - 冰块：需相邻消除才能击碎\n   - 链条：需消除被锁定的方块\n   - 巧克力：每步扩散，必须优先消除\n\n2. 关卡配置系统：\n   - 创建 levels/ 目录和 JSON 格式关卡定义文件\n   - 包含：棋盘布局、障碍物位置、目标类型+数量、步数限制\n   - 至少设计前20关配置（含Boss关）\n\n3. 更多目标类型：\n   - 收集指定颜色方块\n   - 消除指定障碍物\n   - 双重目标（分数+收集）\n\n4. Boss关卡（每5关）：\n   - Boss有血条，消除相邻方块造成伤害\n   - Boss技能：冻结方块、生成障碍物\n\n5. 音效系统（AudioManager.js）：\n   - 使用 Web Audio API 生成音效，不依赖外部音频文件\n   - 消除音效、连锁音效、过关/失败音效\n\n保持现有代码结构一致，继续在 D:/game-projects/douyin-match3/ 开发。禁止AskUserQuestion。",
+    "created": "2026-05-23",
+    "assignee": "engineering-frontend-developer",
+    "completed": "2026-05-23 05:36:30"
   }
 ]
