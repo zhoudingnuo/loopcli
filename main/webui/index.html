@@ -3213,6 +3213,259 @@ function renderMsgHistory() {
     '</tbody></table>';
 }
 
+// ============ 图表渲染功能 ============
+
+// 刷新图表（带错误处理）
+function refreshCharts() {
+  try {
+    renderCharts();
+  } catch (e) {
+    console.error('图表渲染失败:', e);
+  }
+}
+
+// 渲染所有图表
+async function renderCharts() {
+  renderTaskPieChart();
+  renderAgentBarChart();
+  renderTokenTrendChart();
+}
+
+// 任务状态分布饼图
+function renderTaskPieChart() {
+  const canvas = document.getElementById('taskPieChart');
+  if (!canvas) return;
+
+  const ctx = canvas.getContext('2d');
+  const width = canvas.width;
+  const height = canvas.height;
+  const centerX = width / 2;
+  const centerY = height / 2;
+  const radius = Math.min(width, height) / 2 - 10;
+
+  // 计算任务状态分布
+  const statusCount = {};
+  tasks.forEach(t => {
+    statusCount[t.status] = (statusCount[t.status] || 0) + 1;
+  });
+
+  const total = tasks.length;
+  if (total === 0) {
+    ctx.fillStyle = '#8896aa';
+    ctx.font = '14px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('暂无数据', centerX, centerY);
+    return;
+  }
+
+  const colors = {
+    'pending': '#ffc107',
+    'in_progress': '#38bdf8',
+    'completed': '#00e676',
+    'failed': '#ff5252',
+    'cancelled': '#9e9e9e'
+  };
+
+  const labels = {
+    'pending': '待处理',
+    'in_progress': '进行中',
+    'completed': '已完成',
+    'failed': '失败',
+    'cancelled': '已取消'
+  };
+
+  let currentAngle = -Math.PI / 2;
+
+  // 绘制饼图
+  Object.entries(statusCount).forEach(([status, count]) => {
+    const sliceAngle = (count / total) * 2 * Math.PI;
+
+    ctx.beginPath();
+    ctx.moveTo(centerX, centerY);
+    ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle);
+    ctx.closePath();
+    ctx.fillStyle = colors[status] || '#a78bfa';
+    ctx.fill();
+
+    currentAngle += sliceAngle;
+  });
+
+  // 绘制中心圆（创建环形效果）
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, radius * 0.6, 0, 2 * Math.PI);
+  ctx.fillStyle = '#050810';
+  ctx.fill();
+
+  // 中心显示总数
+  ctx.fillStyle = '#f8faff';
+  ctx.font = 'bold 24px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(total.toString(), centerX, centerY);
+
+  // 更新图例
+  const legendEl = document.getElementById('pieLegend');
+  if (legendEl) {
+    legendEl.innerHTML = Object.entries(statusCount)
+      .sort((a, b) => b[1] - a[1])
+      .map(([status, count]) => `
+        <div class="pie-legend-item">
+          <span class="pie-legend-color" style="background:${colors[status] || '#a78bfa'}"></span>
+          <span class="pie-legend-label">${labels[status] || status}</span>
+          <span class="pie-legend-value">${count} (${Math.round(count/total*100)}%)</span>
+        </div>
+      `).join('');
+  }
+}
+
+// Agent活跃度柱状图
+function renderAgentBarChart() {
+  const container = document.getElementById('agentBarChart');
+  if (!container) return;
+
+  if (agents.length === 0) {
+    container.innerHTML = '<div class="bar-chart-placeholder">暂无Agent数据</div>';
+    return;
+  }
+
+  // 获取最近活跃的Agent（按任务数排序）
+  const activeAgents = agents
+    .map(a => ({
+      ...a,
+      totalTasks: (a.task_done || 0) + (a.task_pending || 0)
+    }))
+    .sort((a, b) => b.totalTasks - a.totalTasks)
+    .slice(0, 6);
+
+  const maxTasks = Math.max(...activeAgents.map(a => a.totalTasks), 1);
+
+  container.innerHTML = activeAgents.map(agent => {
+    const barWidth = (agent.totalTasks / maxTasks) * 100;
+    const statusClass = agent.status === 'running' ? 'active' :
+                      agent.status === 'disabled' || agent.enabled === false ? 'idle' : 'in_progress';
+
+    return `
+      <div class="bar-chart-row">
+        <div class="bar-chart-label">${agent.name || agent.id}</div>
+        <div class="bar-chart-track">
+          <div class="bar-chart-fill ${statusClass}" style="width:${barWidth}%"></div>
+        </div>
+        <div class="bar-chart-value">${agent.totalTasks}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// Token使用趋势图
+function renderTokenTrendChart() {
+  const canvas = document.getElementById('tokenTrendChart');
+  if (!canvas) return;
+
+  const ctx = canvas.getContext('2d');
+  const width = canvas.width;
+  const height = canvas.height;
+
+  // 模拟7天数据（实际应从API获取）
+  const trendData = generateMockTrendData();
+
+  // 清空画布
+  ctx.clearRect(0, 0, width, height);
+
+  if (trendData.length === 0) {
+    ctx.fillStyle = '#8896aa';
+    ctx.font = '12px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('暂无数据', width / 2, height / 2);
+    return;
+  }
+
+  const padding = { top: 10, right: 10, bottom: 20, left: 40 };
+  const chartWidth = width - padding.left - padding.right;
+  const chartHeight = height - padding.top - padding.bottom;
+
+  const maxValue = Math.max(...trendData.map(d => d.value));
+  const minValue = 0;
+
+  // 绘制网格线
+  ctx.strokeStyle = 'rgba(100, 120, 160, 0.1)';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    const y = padding.top + (chartHeight / 4) * i;
+    ctx.beginPath();
+    ctx.moveTo(padding.left, y);
+    ctx.lineTo(width - padding.right, y);
+    ctx.stroke();
+  }
+
+  // 绘制趋势线
+  ctx.beginPath();
+  ctx.strokeStyle = '#a78bfa';
+  ctx.lineWidth = 2;
+
+  trendData.forEach((point, index) => {
+    const x = padding.left + (chartWidth / (trendData.length - 1)) * index;
+    const y = padding.top + chartHeight - ((point.value - minValue) / (maxValue - minValue)) * chartHeight;
+
+    if (index === 0) {
+      ctx.moveTo(x, y);
+    } else {
+      ctx.lineTo(x, y);
+    }
+  });
+  ctx.stroke();
+
+  // 绘制渐变填充
+  const gradient = ctx.createLinearGradient(0, padding.top, 0, height - padding.bottom);
+  gradient.addColorStop(0, 'rgba(167, 139, 250, 0.3)');
+  gradient.addColorStop(1, 'rgba(167, 139, 250, 0)');
+
+  ctx.lineTo(width - padding.right, height - padding.bottom);
+  ctx.lineTo(padding.left, height - padding.bottom);
+  ctx.closePath();
+  ctx.fillStyle = gradient;
+  ctx.fill();
+
+  // 绘制数据点
+  trendData.forEach((point, index) => {
+    const x = padding.left + (chartWidth / (trendData.length - 1)) * index;
+    const y = padding.top + chartHeight - ((point.value - minValue) / (maxValue - minValue)) * chartHeight;
+
+    ctx.beginPath();
+    ctx.arc(x, y, 4, 0, 2 * Math.PI);
+    ctx.fillStyle = '#a78bfa';
+    ctx.fill();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  });
+
+  // 更新统计
+  const todayValue = trendData[trendData.length - 1]?.value || 0;
+  const avgValue = trendData.reduce((sum, d) => sum + d.value, 0) / trendData.length;
+
+  document.getElementById('todayTokens').textContent = formatTokenValue(todayValue);
+  document.getElementById('avgTokens').textContent = formatTokenValue(avgValue);
+}
+
+function formatTokenValue(value) {
+  if (value >= 1000000) return (value / 1000000).toFixed(1) + 'M';
+  if (value >= 1000) return (value / 1000).toFixed(1) + 'K';
+  return value.toString();
+}
+
+function generateMockTrendData() {
+  // 生成模拟的7天数据
+  const data = [];
+  const baseValue = 50000;
+  for (let i = 0; i < 7; i++) {
+    data.push({
+      day: i,
+      value: baseValue + Math.random() * 30000
+    });
+  }
+  return data;
+}
+
 // ============ 粒子背景效果 ============
 class ParticleNetwork {
   constructor(canvas) {
