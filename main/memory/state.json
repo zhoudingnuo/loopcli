@@ -1,13 +1,12 @@
 {
   "agent": "main",
   "status": "idle",
-  "last_run": "2026-05-23 04:31:12",
-  "run_count": 360,
-  "last_action": "dispatched_douyin_steam_game_research",
+  "last_run": "2026-05-23 04:41:04",
+  "run_count": 362,
+  "last_action": "dispatched_webui_quota_bug_fix",
   "active_agents": [
-    "game-designer",
-    "market-analyst"
+    "engineering-frontend-developer"
   ],
   "pending_user_requests": [],
-  "current_iteration": 3
+  "current_iteration": 4
 }

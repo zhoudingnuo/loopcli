@@ -265,12 +265,14 @@ def query_usage_summary():
         # 配额
         quota_data, _ = _query_api("/api/monitor/usage/quota/limit", "")
         quotas = []
+        seen_token = False
         for item in quota_data.get("limits", []):
             t = item.get("type", "?")
             pct = item.get("percentage", 0)
             cur = item.get("currentValue", 0)
             total = item.get("usage", "?")
-            if "TOKEN" in t:
+            if "TOKEN" in t and not seen_token:
+                seen_token = True
                 quotas.append({"type": "token_5h", "percentage": round(pct, 1), "current": cur, "total": total, "label": "Token 配额 (5h)"})
             elif "TIME" in t:
                 quotas.append({"type": "mcp_month", "percentage": round(pct, 1), "current": cur, "total": total, "label": f"MCP 配额 (月)"})
