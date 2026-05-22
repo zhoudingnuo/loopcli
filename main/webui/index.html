@@ -869,6 +869,16 @@ body {
 .metric-change.positive { color: var(--green); }
 .metric-change.negative { color: var(--red); }
 
+/* 圆环图自适应 */
+.donut-chart-wrapper { flex-wrap: wrap; }
+.donut-chart-wrapper svg { max-width: 220px; }
+.donut-legend { flex: 1; min-width: 130px; }
+@media (max-width: 480px) {
+  .donut-chart-wrapper { flex-direction: column; gap: 16px !important; }
+  .donut-chart-wrapper svg { max-width: 160px; }
+  .donut-legend { min-width: 100%; }
+}
+
 /* 响应式 */
 @media (max-width: 1024px) {
   .sidebar { width: 220px; }
@@ -1810,7 +1820,7 @@ async function refreshAgents() {
   showNotification('刷新成功', 'success');
 }
 
-// SVG 圆环图（美化版）
+// SVG 圆环图（自适应版）
 function drawDonutChart(containerId, data, colors) {
   const container = document.getElementById(containerId);
   if (!container) return;
@@ -1833,13 +1843,13 @@ function drawDonutChart(containerId, data, colors) {
     return html;
   }).join('');
 
-  const svg = `<svg viewBox="0 0 ${size} ${size}" style="width:100%;max-width:180px;height:auto;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.15));">${arcs}<text x="${cx}" y="${cy - 8}" text-anchor="middle" fill="var(--text)" font-size="28" font-weight="800" font-family="system-ui,sans-serif">${total}</text><text x="${cx}" y="${cy + 14}" text-anchor="middle" fill="var(--text3)" font-size="11" font-family="system-ui,sans-serif">总计</text></svg>`;
+  const svg = `<svg viewBox="0 0 ${size} ${size}" style="width:100%;height:auto;max-width:220px;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.15));">${arcs}<text x="${cx}" y="${cy - 8}" text-anchor="middle" fill="var(--text)" font-size="28" font-weight="800" font-family="system-ui,sans-serif">${total}</text><text x="${cx}" y="${cy + 14}" text-anchor="middle" fill="var(--text3)" font-size="11" font-family="system-ui,sans-serif">总计</text></svg>`;
 
   const legend = data.filter(d => d.value > 0).map((item, i) => {
     const origIdx = data.indexOf(item);
     const color = colors[origIdx % colors.length];
     const pct = Math.round(item.value / total * 100);
-    return `<div style="display:flex;align-items:center;gap:10px;padding:6px 0;">
+    return `<div class="donut-legend-item" style="display:flex;align-items:center;gap:10px;padding:6px 0;">
       <span style="width:12px;height:12px;border-radius:3px;background:${color};flex-shrink:0;box-shadow:0 2px 6px ${color}40;"></span>
       <span style="font-size:14px;color:var(--text2);min-width:50px;">${item.label}</span>
       <span style="font-size:14px;font-weight:700;color:var(--text);margin-left:auto;">${item.value}</span>
@@ -1847,7 +1857,7 @@ function drawDonutChart(containerId, data, colors) {
     </div>`;
   }).join('');
 
-  container.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;gap:28px;">${svg}<div style="min-width:130px;">${legend}</div></div>`;
+  container.innerHTML = `<div class="donut-chart-wrapper" style="display:flex;align-items:center;justify-content:center;gap:28px;flex-wrap:wrap;">${svg}<div class="donut-legend" style="min-width:130px;">${legend}</div></div>`;
 }
 
 // 进度条列表（美化版）

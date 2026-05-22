@@ -124,5 +124,14 @@
     "created": "2026-05-21",
     "assignee": "engineering-frontend-developer",
     "completed": "2026-05-21 13:01:14"
+  },
+  {
+    "id": 15,
+    "status": "done",
+    "title": "Agent状态分布圆环图自适应",
+    "description": "修复webui/index.html中drawDonutChart函数，当前SVG使用固定size=160和max-width:180px，不随容器大小变化。需要：1)SVG改为使用viewBox自适应，去掉固定max-width限制 2)圆环图尺寸根据容器宽度自适应缩放 3)图例部分也要响应式（小屏时改为上下布局）。文件位置：D:/loopcli/main/webui/index.html 第1814-1851行 drawDonutChart函数。容器在index.html第1132行。禁止AskUserQuestion。",
+    "created": "2026-05-23",
+    "assignee": "engineering-frontend-developer",
+    "completed": "2026-05-23 04:18:04"
   }
 ]

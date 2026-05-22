@@ -1,12 +1,17 @@
 import shutil
 import sys
 import threading
+import time
 
 from .colors import C
 
 _ob = [0]
 _buf = [""]
 _lock = threading.Lock()
+
+
+def _bj_time_str():
+    return time.strftime("%H:%M:%S", time.gmtime(time.time() + 8 * 3600))
 
 
 def out(text=""):
@@ -22,8 +27,10 @@ def draw_input():
     with _lock:
         cols = shutil.get_terminal_size().columns
         ob = _ob[0]
-        buf = _buf[0][:cols - 25]
+        buf = _buf[0][:cols - 30]
+        clock = _bj_time_str()
         sys.stdout.write(f"\033[{ob+1};1H\033[K{C.CYAN}{'─'*cols}{C.RST}")
+        sys.stdout.write(f"\033[{ob+1};{cols - len(clock) - 1}H{C.DIM}{clock}{C.RST}")
         sys.stdout.write(f"\033[{ob+2};1H\033[K{C.CYAN} > {C.RST}{buf}{C.DIM}█{C.RST} {C.DIM}(Enter发送, exit退出){C.RST}")
         sys.stdout.write(f"\033[{ob+2};{4 + len(buf)}H")
         sys.stdout.flush()
@@ -54,3 +61,18 @@ def _agent_tag(name):
     c = _agent_color_map[name]
     short = name[:16]
     return f"{c}[{short}]{C.RST}"
+
+
+_clock_running = [False]
+
+def start_clock():
+    """后台每秒刷新输入行右侧的北京时间"""
+    _clock_running[0] = True
+    def _tick():
+        while _clock_running[0]:
+            draw_input()
+            time.sleep(1)
+    threading.Thread(target=_tick, daemon=True).start()
+
+def stop_clock():
+    _clock_running[0] = False

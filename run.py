@@ -30,7 +30,7 @@ except ImportError:
     WECHAT_AVAILABLE = False
 
 from lib.colors import C
-from lib.terminal import out, draw_input, p_agent_header, _ob, _buf
+from lib.terminal import out, draw_input, p_agent_header, _ob, _buf, start_clock, stop_clock
 from lib.runner import run_agent
 from lib.usage import load_pricing, query_model_usage, load_last_usage, save_last_usage, calc_cost
 from lib.git_sync import git_push
@@ -109,6 +109,7 @@ def cmd_run(args):
     stop_event = threading.Event()
 
     draw_input()
+    start_clock()
 
     def input_listener():
         while not stop_event.is_set():
@@ -159,7 +160,7 @@ def cmd_run(args):
     count = 0
     while args.iterations == 0 or count < args.iterations:
         # 北京时间 14:00-18:00 高峰期暂停
-        bj_hour = (datetime.utcnow().hour + 8) % 24
+        bj_hour = int(time.strftime("%H", time.gmtime(time.time() + 8 * 3600)))
         if 14 <= bj_hour < 18:
             out(f"{C.YELLOW}⏸ 北京时间 {bj_hour}:00，高峰期暂停迭代（14:00-18:00）{C.RST}")
             if not process_queue():
@@ -251,6 +252,7 @@ def cmd_run(args):
                 time.sleep(1)
 
     stop_event.set()
+    stop_clock()
     if wechat_handler:
         wechat_handler.bridge.stop()
     sys.stdout.write("\033[?25h")
