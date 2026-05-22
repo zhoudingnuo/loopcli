@@ -1,5 +1,15 @@
 # LoopCLI 记忆
 
+## 2026-05-22 轮次333
+
+**WebUI v8.6 深度优化**：
+- 修复搜索框与导出按钮重叠（改为flex布局并列）
+- 修复设置页长期任务编辑区结构错位（longtask-edit移入settings-section内）
+- 自动刷新指示器移至右下角（避免与通知冲突）
+- 移动端sidebar品牌文字缩小防截断
+- 性能页面硬编码变化值改为动态ID
+- Playwright 64/64全通过，零JS错误
+
 ## 2026-05-22 轮次331
 
 **WebUI v8.5 图表美化**：
@@ -8,12 +18,3 @@
 - 用量面板：grid卡片统计(居中大字)、额度左border色条卡片、模型明细flex-wrap
 - 容器：border-radius:16px、box-shadow、标题前加色条装饰
 - Playwright 14/14全通过，零JS错误
-
-**用户未处理反馈**：微信通知坏了，正在排查
-
-## 2026-05-22 轮次329
-
-**WebUI 关键Bug修复**：
-- 图表区域越界修复（widgets移入page-agents内）
-- Agent状态标签汉化
-- 经验：HTML中div嵌套错误会导致内容在多个页面重复显示

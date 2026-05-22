@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LoopCLI - Agent 控制台 v8.4</title>
+<title>LoopCLI - Agent 控制台 v8.6</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -212,7 +212,7 @@ body {
 /* 自动刷新指示器 */
 .auto-refresh-indicator {
   position: fixed;
-  top: 20px;
+  bottom: 20px;
   right: 20px;
   display: flex;
   align-items: center;
@@ -223,6 +223,8 @@ body {
   border-radius: 20px;
   font-size: 12px;
   z-index: 1000;
+  opacity: 0.7;
+  transition: opacity 0.3s;
 }
 .auto-refresh-indicator.active {
   border-color: var(--green);
@@ -623,14 +625,15 @@ body {
 /* 通知系统 */
 #notification-container {
   position: fixed;
-  top: 20px;
-  right: 20px;
+  top: 24px;
+  right: 24px;
   z-index: 1000;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   max-height: 40vh;
   overflow: hidden;
+  max-width: 400px;
 }
 .notification {
   display: flex;
@@ -873,7 +876,8 @@ body {
     flex-direction: row;
     overflow-x: auto;
   }
-  .brand { padding: 16px; }
+  .brand { padding: 12px 16px; }
+  .brand h1 { font-size: 16px; }
   .nav {
     display: flex;
     padding: 8px;
@@ -915,8 +919,16 @@ body {
 
   /* 通知优化 */
   .notification {
-    min-width: 280px;
+    min-width: 260px;
     max-width: calc(100vw - 40px);
+  }
+
+  /* 自动刷新指示器移动端 */
+  .auto-refresh-indicator {
+    bottom: 12px;
+    right: 12px;
+    font-size: 11px;
+    padding: 6px 12px;
   }
 
   /* 模态框优化 */
@@ -1057,10 +1069,10 @@ body {
           </button>
         </div>
 
-        <div class="search-bar">
-          <input type="text" class="search-input" id="agent-search" placeholder="搜索 Agent (按名称、ID 或状态)...">
-          <button class="btn btn-secondary" id="export-btn" onclick="exportAgentsData()" style="position: absolute; right: 8px; top: 8px; padding: 8px 16px;">
-            📥 导出数据
+        <div class="search-bar" style="display: flex; gap: 8px;">
+          <input type="text" class="search-input" id="agent-search" placeholder="搜索 Agent (按名称、ID 或状态)..." style="flex: 1;">
+          <button class="btn btn-secondary" id="export-btn" onclick="exportAgentsData()" style="flex-shrink: 0;">
+            📥 导出
           </button>
         </div>
 
@@ -1180,22 +1192,22 @@ body {
           <div class="performance-card">
             <h4>CPU 使用率</h4>
             <div class="metric-value" id="cpu-usage">-%</div>
-            <div class="metric-change positive">↓ 2.3%</div>
+            <div class="metric-change" id="cpu-change">-</div>
           </div>
           <div class="performance-card">
             <h4>内存使用</h4>
             <div class="metric-value" id="memory-usage">- MB</div>
-            <div class="metric-change negative">↑ 5.1%</div>
+            <div class="metric-change" id="mem-change">-</div>
           </div>
           <div class="performance-card">
             <h4>响应时间</h4>
             <div class="metric-value" id="response-time">- ms</div>
-            <div class="metric-change positive">↓ 12ms</div>
+            <div class="metric-change" id="resp-change">-</div>
           </div>
           <div class="performance-card">
             <h4>Token 消耗</h4>
             <div class="metric-value" id="token-usage">-</div>
-            <div class="metric-change">本月累计</div>
+            <div class="metric-change" id="token-change">本月累计</div>
           </div>
         </div>
 
@@ -1355,7 +1367,7 @@ body {
           <div class="setting-item">
             <div class="setting-label">
               <div class="title">WebUI 版本</div>
-              <div class="description">v8.5 - 美化图表、用量面板重构、额度卡片</div>
+              <div class="description">v8.6 - 深度优化：搜索栏修复、响应式改进、通知位置优化、结构修复</div>
             </div>
           </div>
           <div class="setting-item">
@@ -1403,7 +1415,6 @@ body {
           <div id="longtask-content" style="display: none; margin-top: 16px;">
             <div style="background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 16px; font-family: monospace; font-size: 13px; white-space: pre-wrap; color: var(--text2); max-height: 200px; overflow-y: auto;" id="longtask-text"></div>
           </div>
-        </div>
           <div id="longtask-edit" style="display: none; margin-top: 16px;">
             <textarea id="longtask-editor" style="width: 100%; min-height: 120px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-family: monospace; font-size: 13px; color: var(--text); resize: vertical;" placeholder="输入长期任务内容..."></textarea>
             <div style="display: flex; gap: 8px; margin-top: 8px;">
@@ -1411,6 +1422,7 @@ body {
               <button class="btn btn-secondary" onclick="cancelEditLongTask()">取消</button>
             </div>
           </div>
+        </div>
       </div>
     </div>
   </main>
