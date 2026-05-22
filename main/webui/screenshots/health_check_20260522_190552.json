@@ -1,0 +1,53 @@
+{
+  "timestamp": "2026-05-22T11:05:52.130395+00:00",
+  "webui": {
+    "status": "running",
+    "response_code": 200
+  },
+  "apis": {
+    "/api/agents": {
+      "status": "ok",
+      "code": 200
+    },
+    "/api/tasks": {
+      "status": "ok",
+      "code": 200
+    },
+    "/api/messages": {
+      "status": "ok",
+      "code": 200
+    },
+    "/api/longtask": {
+      "status": "ok",
+      "code": 200
+    },
+    "/api/stats": {
+      "status": "ok",
+      "code": 200
+    }
+  },
+  "agents": {
+    "total": 8,
+    "active": 8,
+    "disabled": 0,
+    "active_agents": [
+      "content-generator",
+      "engineering-autonomous-optimization-architect",
+      "engineering-code-reviewer",
+      "engineering-frontend-developer",
+      "engineering-security-engineer",
+      "financial-monitor",
+      "market-analyst",
+      "main"
+    ]
+  },
+  "system": {
+    "timestamp": "2026-05-22T11:05:52.130395+00:00"
+  },
+  "logs": {
+    "exists": true,
+    "size_bytes": 11854,
+    "size_kb": 11.58,
+    "modified": "2026-05-22T11:04:11.033914+00:00"
+  }
+}

@@ -1,0 +1,50 @@
+[
+  {
+    "test": "Home Page",
+    "status": "pass",
+    "title": "LoopCLI - Agent 控制台 v8.0",
+    "has_longtask": true,
+    "longtask_visible": true
+  },
+  {
+    "test": "Theme Switch",
+    "status": "pass",
+    "method": "cycle button"
+  },
+  {
+    "test": "Agents Page",
+    "status": "pass",
+    "agent_count": 8,
+    "has_create_btn": true
+  },
+  {
+    "test": "Tasks Page",
+    "status": "pass",
+    "has_content": false
+  },
+  {
+    "test": "Performance Page",
+    "status": "pass",
+    "has_charts": true
+  },
+  {
+    "test": "Logs Page",
+    "status": "pass",
+    "has_logs": true
+  },
+  {
+    "test": "Screenshots Page",
+    "status": "pass",
+    "has_screenshots": false
+  },
+  {
+    "test": "Settings Page",
+    "status": "pass",
+    "has_settings": true
+  },
+  {
+    "test": "Mobile Responsive",
+    "status": "pass",
+    "sidebar_hidden": false
+  }
+]

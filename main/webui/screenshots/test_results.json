@@ -1,0 +1,32 @@
+[
+  {
+    "test": "Home Page",
+    "status": "pass",
+    "title": "LoopCLI - Agent 控制台 v8.0",
+    "has_longtask": true
+  },
+  {
+    "test": "Theme Switch",
+    "status": "fail",
+    "error": "Page.wait_for_selector: Timeout 3000ms exceeded.\nCall log:\n  - waiting for locator(\"button[onclick=\\\"toggleTheme()\\\"]\") to be visible\n"
+  },
+  {
+    "test": "Agents Page",
+    "status": "pass",
+    "agent_count": 8
+  },
+  {
+    "test": "Control Panel",
+    "status": "fail",
+    "error": "Page.click: Timeout 3000ms exceeded.\nCall log:\n  - waiting for locator(\"[data-page=\\\"control\\\"]\")\n"
+  },
+  {
+    "test": "Logs Page",
+    "status": "pass",
+    "has_logs": true
+  },
+  {
+    "test": "Mobile Responsive",
+    "status": "pass"
+  }
+]
