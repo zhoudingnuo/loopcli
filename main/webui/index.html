@@ -159,6 +159,224 @@ body {
   z-index: 1;
 }
 
+/* 侧边栏底部按钮 */
+.sidebar-footer {
+  margin-top: auto;
+  padding: 16px;
+  display: flex;
+  gap: 8px;
+  border-top: 1px solid var(--border);
+}
+.theme-toggle, .help-toggle {
+  flex: 1;
+  padding: 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.theme-toggle:hover, .help-toggle:hover {
+  background: var(--accent-gradient);
+  transform: scale(1.05);
+}
+
+/* 搜索框 */
+.search-bar {
+  margin-bottom: 24px;
+  position: relative;
+}
+.search-input {
+  width: 100%;
+  padding: 14px 20px;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 14px;
+  transition: all 0.3s;
+}
+.search-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--blue-bg);
+}
+.search-input::placeholder {
+  color: var(--text3);
+}
+
+/* 自动刷新指示器 */
+.auto-refresh-indicator {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 12px;
+  z-index: 1000;
+}
+.auto-refresh-indicator.active {
+  border-color: var(--green);
+  background: var(--green-bg);
+}
+.refresh-icon {
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+.auto-refresh-indicator:not(.active) .refresh-icon {
+  animation: none;
+  border-top-color: currentColor;
+}
+
+/* 快捷键帮助面板 */
+.shortcuts-panel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px;
+  z-index: 2000;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: var(--shadow);
+  display: none;
+}
+.shortcuts-panel.active { display: block; }
+.shortcuts-panel h3 {
+  margin-bottom: 20px;
+  font-size: 20px;
+}
+.shortcut-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.shortcut-item:last-child {
+  border-bottom: none;
+}
+.shortcut-key {
+  display: inline-block;
+  padding: 4px 10px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: monospace;
+  font-size: 12px;
+  font-weight: 600;
+}
+.panel-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1999;
+  display: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.panel-overlay.active {
+  display: block;
+  opacity: 1;
+}
+
+/* 快捷键面板动画 */
+.shortcuts-panel {
+  transition: all 0.3s ease;
+  transform: translate(-50%, -50%) scale(0.9);
+  opacity: 0;
+}
+.shortcuts-panel.active {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+}
+
+/* 通知系统 */
+.notification-container {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  z-index: 3000;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  pointer-events: none;
+}
+.notification {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 20px;
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 300px;
+  max-width: 400px;
+  pointer-events: auto;
+  animation: slideIn 0.3s ease, fadeOut 0.3s ease 4.7s forwards;
+  position: relative;
+  overflow: hidden;
+}
+.notification::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+}
+.notification.success::before { background: var(--green); }
+.notification.info::before { background: var(--blue); }
+.notification.warning::before { background: var(--yellow); }
+.notification.error::before { background: var(--red); }
+.notification-icon {
+  font-size: 20px;
+}
+.notification-message {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+}
+.notification-close {
+  cursor: pointer;
+  color: var(--text3);
+  font-size: 18px;
+  line-height: 1;
+  padding: 4px;
+}
+.notification-close:hover { color: var(--text); }
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
 /* 主内容 */
 .content {
   flex: 1;
@@ -672,6 +890,43 @@ body {
 </style>
 </head>
 <body>
+
+<!-- 通知容器 -->
+<div class="notification-container" id="notification-container"></div>
+
+<!-- 自动刷新指示器 -->
+<div class="auto-refresh-indicator" id="auto-refresh-indicator">
+  <div class="refresh-icon"></div>
+  <span id="refresh-status">自动刷新: 10s</span>
+</div>
+
+<!-- 快捷键面板遮罩 -->
+<div class="panel-overlay" id="shortcuts-overlay"></div>
+
+<!-- 快捷键面板 -->
+<div class="shortcuts-panel" id="shortcuts-panel">
+  <h3>⌨️ 键盘快捷键</h3>
+  <div class="shortcut-item">
+    <span class="shortcut-key">1-5</span>
+    <span>切换页面</span>
+  </div>
+  <div class="shortcut-item">
+    <span class="shortcut-key">R</span>
+    <span>刷新当前页</span>
+  </div>
+  <div class="shortcut-item">
+    <span class="shortcut-key">H</span>
+    <span>显示/隐藏帮助</span>
+  </div>
+  <div class="shortcut-item">
+    <span class="shortcut-key">ESC</span>
+    <span>关闭面板</span>
+  </div>
+  <div style="margin-top: 20px; text-align: center;">
+    <button class="btn btn-primary" onclick="closeShortcutsPanel()">关闭</button>
+  </div>
+</div>
+
 <div class="app">
   <!-- 侧边栏 -->
   <aside class="sidebar">
@@ -700,6 +955,14 @@ body {
         <span>Settings</span>
       </div>
     </nav>
+    <div class="sidebar-footer">
+      <button class="theme-toggle" id="theme-toggle" title="切换主题">
+        <span id="theme-icon">🌙</span>
+      </button>
+      <button class="help-toggle" id="help-toggle" title="快捷键帮助">
+        <span>?</span>
+      </button>
+    </div>
   </aside>
 
   <!-- 主内容 -->
@@ -710,6 +973,13 @@ body {
         <div class="page-header">
           <h2>Agent 控制台</h2>
           <p>管理和监控所有 Agent 的运行状态</p>
+        </div>
+
+        <div class="search-bar">
+          <input type="text" class="search-input" id="agent-search" placeholder="搜索 Agent (按名称、ID 或状态)...">
+          <button class="btn btn-secondary" onclick="exportAgentsData()" style="position: absolute; right: 8px; top: 8px; padding: 8px 16px;">
+            📥 导出数据
+          </button>
         </div>
 
         <div class="stats-grid">
@@ -933,7 +1203,7 @@ body {
           <div class="setting-item">
             <div class="setting-label">
               <div class="title">WebUI 版本</div>
-              <div class="description">v8.0 - 统一单页应用架构</div>
+              <div class="description">v8.2 - 增强交互体验（主题切换、搜索、通知、快捷键）</div>
             </div>
           </div>
           <div class="setting-item">
@@ -948,12 +1218,109 @@ body {
   </main>
 </div>
 
-<!-- 通知容器 -->
-<div id="notification-container"></div>
-
 <script>
 // API 基础 URL
 const API_BASE = '/api';
+
+// 通知系统
+function showNotification(message, type = 'info', duration = 5000) {
+  const container = document.getElementById('notification-container');
+  if (!container) return;
+
+  const icons = {
+    success: '✓',
+    info: 'ℹ',
+    warning: '⚠',
+    error: '✕'
+  };
+
+  const notification = document.createElement('div');
+  notification.className = `notification ${type}`;
+  notification.innerHTML = `
+    <span class="notification-icon">${icons[type] || icons.info}</span>
+    <span class="notification-message">${message}</span>
+    <span class="notification-close" onclick="this.parentElement.remove()">×</span>
+  `;
+
+  container.appendChild(notification);
+
+  setTimeout(() => {
+    if (notification.parentElement) {
+      notification.remove();
+    }
+  }, duration);
+}
+
+// 主题管理
+const themes = ['dark', 'light', 'cyberpunk'];
+let currentThemeIndex = 0;
+
+function initTheme() {
+  const savedTheme = localStorage.getItem('webui_theme') || 'dark';
+  currentThemeIndex = themes.indexOf(savedTheme);
+  if (currentThemeIndex === -1) currentThemeIndex = 0;
+  applyTheme(themes[currentThemeIndex]);
+}
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('webui_theme', theme);
+  updateThemeIcon(theme);
+}
+
+function cycleTheme() {
+  currentThemeIndex = (currentThemeIndex + 1) % themes.length;
+  applyTheme(themes[currentThemeIndex]);
+}
+
+function updateThemeIcon(theme) {
+  const icon = document.getElementById('theme-icon');
+  if (icon) {
+    const icons = { dark: '🌙', light: '☀️', cyberpunk: '🌈' };
+    icon.textContent = icons[theme] || '🌙';
+  }
+}
+
+// 快捷键面板
+function openShortcutsPanel() {
+  document.getElementById('shortcuts-panel').classList.add('active');
+  document.getElementById('shortcuts-overlay').classList.add('active');
+}
+
+function closeShortcutsPanel() {
+  document.getElementById('shortcuts-panel').classList.remove('active');
+  document.getElementById('shortcuts-overlay').classList.remove('active');
+}
+
+// 搜索功能
+function initSearch() {
+  const searchInput = document.getElementById('agent-search');
+  if (!searchInput) return;
+
+  searchInput.addEventListener('input', (e) => {
+    const query = e.target.value.toLowerCase();
+    const cards = document.querySelectorAll('.agent-card');
+
+    cards.forEach(card => {
+      const name = card.querySelector('.agent-name')?.textContent.toLowerCase() || '';
+      const id = card.querySelector('.agent-id')?.textContent.toLowerCase() || '';
+      const status = card.querySelector('.status-badge')?.textContent.toLowerCase() || '';
+
+      const matches = name.includes(query) || id.includes(query) || status.includes(query);
+      card.style.display = matches ? '' : 'none';
+    });
+  });
+}
+
+// 自动刷新指示器
+function updateRefreshIndicator(active, interval) {
+  const indicator = document.getElementById('auto-refresh-indicator');
+  const status = document.getElementById('refresh-status');
+  if (indicator && status) {
+    indicator.classList.toggle('active', active);
+    status.textContent = active ? `自动刷新: ${interval/1000}s` : '已暂停';
+  }
+}
 
 // 页面导航
 function navigateTo(pageId) {
@@ -1008,6 +1375,27 @@ async function fetchAgents() {
   } catch (error) {
     console.error('获取 agents 失败:', error);
     return [];
+  }
+}
+
+// 导出 Agents 数据
+async function exportAgentsData() {
+  try {
+    const agents = await fetchAgents();
+    const dataStr = JSON.stringify(agents, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `loopcli_agents_${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showNotification('数据导出成功', 'success');
+  } catch (error) {
+    console.error('导出失败:', error);
+    showNotification('导出失败', 'error');
   }
 }
 
@@ -1393,6 +1781,7 @@ function startAutoRefresh(interval = 10000) {
       await loadPageData(pageId);
     }
   }, interval);
+  updateRefreshIndicator(true, interval);
   console.log(`自动刷新已启动 (${interval}ms)`);
 }
 
@@ -1400,6 +1789,7 @@ function stopAutoRefresh() {
   if (autoRefreshTimer) {
     clearInterval(autoRefreshTimer);
     autoRefreshTimer = null;
+    updateRefreshIndicator(false, 0);
     console.log('自动刷新已停止');
   }
 }
@@ -1469,6 +1859,7 @@ document.addEventListener('keydown', (e) => {
 
   // ESC 关闭弹窗
   if (key === 'escape') {
+    closeShortcutsPanel();
     const help = document.querySelector('[data-keyboard-help]');
     if (help) help.remove();
     return;
@@ -1487,7 +1878,7 @@ document.addEventListener('keydown', (e) => {
         showNotification('页面已刷新', 'success');
       }
     } else if (action === 'help') {
-      showKeyboardHelp();
+      openShortcutsPanel();
     } else {
       navigateTo(action);
     }
@@ -1496,8 +1887,14 @@ document.addEventListener('keydown', (e) => {
 
 // 初始化
 async function init() {
+  // 初始化主题
+  initTheme();
+
   // 加载初始页面
   await loadAgents();
+
+  // 初始化搜索功能
+  initSearch();
 
   // 启动自动刷新（10秒）
   startAutoRefresh(10000);
@@ -1508,6 +1905,16 @@ async function init() {
     startAutoRefresh(interval);
     showNotification(`刷新间隔已更新为 ${e.target.value} 秒`, 'success');
   });
+
+  // 主题切换按钮
+  document.getElementById('theme-toggle')?.addEventListener('click', () => {
+    cycleTheme();
+    showNotification(`已切换到 ${themes[currentThemeIndex]} 主题`, 'success');
+  });
+
+  // 帮助按钮
+  document.getElementById('help-toggle')?.addEventListener('click', openShortcutsPanel);
+  document.getElementById('shortcuts-overlay')?.addEventListener('click', closeShortcutsPanel);
 
   // 显示快捷键提示（首次访问）
   if (!localStorage.getItem('webui_keyboard_help_shown')) {
