@@ -1,13 +1,11 @@
 # LoopCLI 记忆
 
-## 2026-05-22 轮次317
+## 2026-05-22 轮次318
 
-**WebUI v8.3优化**：
-- 修复`SERVER_START_TIME`未定义bug，/api/health端点正常工作
-- 安装psutil，Settings页显示真实系统资源（CPU/内存/磁盘）
-- 清理7个旧HTML文件（index_v2~v7, enhanced等），省300KB
-- 清理6个僵尸server.py进程
-- Playwright测试：6/6页面导航通过，7/7按钮交互通过，零console错误
-- 端口注意：WebUI端口是8080不是5000
+**WebUI v8.4升级**：
+- 图表美化：canvas饼图→SVG圆环图，canvas柱状图→渐变进度条
+- Agent排序：按run_count降序排列
+- 用量统计面板：5分钟自动刷新，显示5h Token配额、MCP月度配额、模型明细
+- server.py新增通用_query_api辅助函数，usage API返回配额+模型+工具数据
 
-**成本控制**：所有agent保持disabled，仅webui/server.py运行
+**用户3条微信指令已处理**，全部关于WebUI优化

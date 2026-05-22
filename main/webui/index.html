@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LoopCLI - Agent 控制台 v8.0</title>
+<title>LoopCLI - Agent 控制台 v8.4</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -1110,16 +1110,25 @@ body {
           </div>
         </div>
 
-        <!-- 可视化图表区域 -->
+        <!-- 可视化图表区域（SVG 美化版） -->
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-bottom: 32px;">
           <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px;">
             <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--text2);">Agent 状态分布</h3>
-            <canvas id="agent-status-chart" width="300" height="200"></canvas>
+            <div id="agent-status-chart" style="display:flex;align-items:center;justify-content:center;gap:24px;min-height:180px;"></div>
           </div>
           <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px;">
             <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--text2);">任务完成进度</h3>
-            <canvas id="task-progress-chart" width="300" height="200"></canvas>
+            <div id="task-progress-chart" style="min-height:180px;"></div>
           </div>
+        </div>
+
+        <!-- 用量统计面板 -->
+        <div id="usage-panel" style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 32px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h3 style="font-size: 16px; font-weight: 600; color: var(--text2);">用量统计</h3>
+            <span id="usage-refresh-time" style="font-size: 12px; color: var(--text3);">每5分钟刷新</span>
+          </div>
+          <div id="usage-content" style="color: var(--text2); font-size: 14px;">加载中...</div>
         </div>
 
         <div class="agents-grid" id="agents-grid">
@@ -1343,7 +1352,7 @@ body {
           <div class="setting-item">
             <div class="setting-label">
               <div class="title">WebUI 版本</div>
-              <div class="description">v8.3 - 深度优化版（健康监控、系统信息、性能增强）</div>
+              <div class="description">v8.4 - 用量统计、美化图表、Agent排序</div>
             </div>
           </div>
           <div class="setting-item">
@@ -1756,107 +1765,52 @@ async function refreshAgents() {
   showNotification('刷新成功', 'success');
 }
 
-// 绘制饼图
-function drawPieChart(canvasId, data, colors) {
-  const canvas = document.getElementById(canvasId);
-  if (!canvas) return;
+// SVG 圆环图
+function drawDonutChart(containerId, data, colors) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  const total = data.reduce((s, d) => s + d.value, 0);
+  if (total === 0) { container.innerHTML = '<span style="color:var(--text3)">暂无数据</span>'; return; }
 
-  const ctx = canvas.getContext('2d');
-  const centerX = canvas.width / 2;
-  const centerY = canvas.height / 2;
-  const radius = Math.min(centerX, centerY) - 20;
+  const size = 140, cx = 70, cy = 70, r = 54, stroke = 14;
+  const circumference = 2 * Math.PI * r;
+  let offset = 0;
 
-  const total = data.reduce((sum, item) => sum + item.value, 0);
-  let startAngle = -Math.PI / 2;
+  let arcs = data.map((item, i) => {
+    if (item.value === 0) return '';
+    const pct = item.value / total;
+    const dash = circumference * pct;
+    const gap = circumference - dash;
+    const html = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${colors[i % colors.length]}" stroke-width="${stroke}" stroke-dasharray="${dash} ${gap}" stroke-dashoffset="${-offset}" transform="rotate(-90 ${cx} ${cy})" style="transition:all .5s ease"/>`;
+    offset += dash;
+    return html;
+  }).join('');
 
-  // 清空画布
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const svg = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">${arcs}<text x="${cx}" y="${cy - 6}" text-anchor="middle" fill="var(--text)" font-size="22" font-weight="800">${total}</text><text x="${cx}" y="${cy + 12}" text-anchor="middle" fill="var(--text3)" font-size="10">总计</text></svg>`;
 
-  data.forEach((item, index) => {
-    if (item.value === 0) return;
+  const legend = data.map((item, i) => `<div style="display:flex;align-items:center;gap:8px;margin:4px 0;"><span style="width:10px;height:10px;border-radius:50%;background:${colors[i % colors.length]};flex-shrink:0;"></span><span style="font-size:13px;color:var(--text2)">${item.label}</span><span style="font-size:13px;font-weight:700;color:var(--text);margin-left:auto;">${item.value}</span></div>`).join('');
 
-    const sliceAngle = (item.value / total) * 2 * Math.PI;
-    const endAngle = startAngle + sliceAngle;
-
-    // 绘制扇形
-    ctx.beginPath();
-    ctx.moveTo(centerX, centerY);
-    ctx.arc(centerX, centerY, radius, startAngle, endAngle);
-    ctx.closePath();
-    ctx.fillStyle = colors[index % colors.length];
-    ctx.fill();
-
-    // 绘制标签
-    if (item.value > 0) {
-      const labelAngle = startAngle + sliceAngle / 2;
-      const labelX = centerX + Math.cos(labelAngle) * (radius * 0.7);
-      const labelY = centerY + Math.sin(labelAngle) * (radius * 0.7);
-
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 12px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(`${item.label}: ${item.value}`, labelX, labelY);
-    }
-
-    startAngle = endAngle;
-  });
-
-  // 绘制中心圆（制作成环形图）
-  ctx.beginPath();
-  ctx.arc(centerX, centerY, radius * 0.4, 0, 2 * Math.PI);
-  ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--surface').trim() || '#111827';
-  ctx.fill();
+  container.innerHTML = svg + `<div style="min-width:100px;">${legend}</div>`;
 }
 
-// 绘制柱状图
-function drawBarChart(canvasId, data, color) {
-  const canvas = document.getElementById(canvasId);
-  if (!canvas) return;
-
-  const ctx = canvas.getContext('2d');
-  const padding = 40;
-  const chartWidth = canvas.width - padding * 2;
-  const chartHeight = canvas.height - padding * 2;
-
-  const maxValue = Math.max(...data.map(d => d.value), 1);
-  const barWidth = chartWidth / data.length - 10;
-
-  // 清空画布
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  // 绘制坐标轴
-  ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--border').trim() || '#374151';
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(padding, padding);
-  ctx.lineTo(padding, canvas.height - padding);
-  ctx.lineTo(canvas.width - padding, canvas.height - padding);
-  ctx.stroke();
-
-  // 绘制柱状图
-  data.forEach((item, index) => {
-    const barHeight = (item.value / maxValue) * chartHeight;
-    const x = padding + 10 + index * (barWidth + 10);
-    const y = canvas.height - padding - barHeight;
-
-    // 绘制柱子
-    const gradient = ctx.createLinearGradient(x, y, x, canvas.height - padding);
-    gradient.addColorStop(0, color);
-    gradient.addColorStop(1, color + '40');
-    ctx.fillStyle = gradient;
-    ctx.fillRect(x, y, barWidth, barHeight);
-
-    // 绘制数值
-    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text').trim() || '#f3f4f6';
-    ctx.font = '11px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(item.value, x + barWidth / 2, y - 5);
-
-    // 绘制标签
-    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text2').trim() || '#9ca3af';
-    ctx.fillText(item.label, x + barWidth / 2, canvas.height - padding + 15);
-  });
+// 进度条列表
+function drawProgressBars(containerId, data, maxBar) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  if (!data || data.length === 0) { container.innerHTML = '<span style="color:var(--text3)">暂无数据</span>'; return; }
+  const maxVal = maxBar || Math.max(...data.map(d => d.value), 1);
+  container.innerHTML = data.map(item => {
+    const pct = Math.round((item.value / maxVal) * 100);
+    return `<div style="margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
+        <span style="color:var(--text2)">${item.label}</span>
+        <span style="color:var(--text);font-weight:600">${item.value}</span>
+      </div>
+      <div style="height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;">
+        <div style="height:100%;width:${pct}%;background:var(--accent-gradient);border-radius:4px;transition:width .5s ease;"></div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 // 绘制折线趋势图
@@ -1951,6 +1905,9 @@ function drawLineChart(canvasId, data, color) {
 async function loadAgents() {
   const agents = await fetchAgents();
 
+  // 按 run_count 降序排序
+  agents.sort((a, b) => (b.run_count || 0) - (a.run_count || 0));
+
   // 更新统计
   const total = agents.length;
   const active = agents.filter(a => a.status !== 'disabled').length;
@@ -1963,7 +1920,7 @@ async function loadAgents() {
   document.getElementById('done-tasks').textContent = doneTasks;
 
   // 绘制图表
-  // Agent 状态分布
+  // Agent 状态分布（SVG圆环图）
   const statusCounts = {};
   agents.forEach(a => {
     statusCounts[a.status] = (statusCounts[a.status] || 0) + 1;
@@ -1975,19 +1932,18 @@ async function loadAgents() {
   }));
 
   const statusColors = ['#10b981', '#f59e0b', '#ef4444', '#3b82f6'];
-  drawPieChart('agent-status-chart', statusData, statusColors);
+  drawDonutChart('agent-status-chart', statusData, statusColors);
 
-  // 任务进度
+  // 任务进度（进度条列表）
   const taskData = agents
     .filter(a => a.task_count > 0)
     .map(a => ({
-      label: a.name.substring(0, 8),
-      value: a.task_done
+      label: a.name.substring(0, 12),
+      value: a.task_done,
+      max: a.task_count
     }));
 
-  if (taskData.length > 0) {
-    drawBarChart('task-progress-chart', taskData, '#3b82f6');
-  }
+  drawProgressBars('task-progress-chart', taskData.map(d => ({label: `${d.label} (${d.value}/${d.max})`, value: d.value})));
 
   // 渲染 agents
   const grid = document.getElementById('agents-grid');
@@ -2585,6 +2541,42 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
+// 用量统计
+async function loadUsageStats() {
+  const el = document.getElementById('usage-content');
+  const timeEl = document.getElementById('usage-refresh-time');
+  try {
+    const resp = await fetch(`${API_BASE}/usage`);
+    const data = await resp.json();
+    if (data.error) { el.innerHTML = `<span style="color:var(--red)">加载失败: ${data.error}</span>`; return; }
+
+    const fmt = n => typeof n === 'number' ? n.toLocaleString() : n;
+    const pctColor = p => p > 80 ? 'var(--red)' : p > 50 ? 'var(--yellow)' : 'var(--green)';
+    const pctBadge = (label, pct) => `<span style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:var(--surface2);border-radius:8px;font-size:13px;"><span style="color:var(--text2)">${label}</span><span style="font-weight:700;color:${pctColor(pct)}">${pct}%</span></span>`;
+
+    let html = `<div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;margin-bottom:16px;">
+      <div style="padding:6px 14px;background:var(--surface2);border-radius:8px;font-size:13px;"><span style="color:var(--text2)">调用</span> <strong style="color:var(--text)">${fmt(data.call_count)}</strong></div>
+      <div style="padding:6px 14px;background:var(--surface2);border-radius:8px;font-size:13px;"><span style="color:var(--text2)">Token</span> <strong style="color:var(--text)">${fmt(data.total_tokens)}</strong></div>`;
+
+    // 配额
+    (data.quotas || []).forEach(q => {
+      html += pctBadge(q.label, q.percentage);
+    });
+    html += `</div>`;
+
+    // 模型明细
+    if (data.models && data.models.length > 0) {
+      html += `<div style="font-size:13px;color:var(--text3);margin-bottom:8px;">模型用量</div>`;
+      html += data.models.map(m => `<div style="display:flex;align-items:center;gap:8px;margin:4px 0;font-size:13px;"><span style="color:var(--accent);font-weight:600;">${m.name}</span><span style="color:var(--text2)">${fmt(m.tokens)} tokens</span></div>`).join('');
+    }
+
+    el.innerHTML = html;
+    timeEl.textContent = `更新于 ${new Date().toLocaleTimeString('zh-CN')} (每5分钟刷新)`;
+  } catch (e) {
+    el.innerHTML = `<span style="color:var(--red)">加载失败</span>`;
+  }
+}
+
 // 初始化
 async function init() {
   // 初始化主题
@@ -2598,6 +2590,10 @@ async function init() {
 
   // 初始化搜索功能
   initSearch();
+
+  // 加载用量统计
+  loadUsageStats();
+  setInterval(loadUsageStats, 5 * 60 * 1000);
 
   // 启动自动刷新（10秒）
   startAutoRefresh(10000);

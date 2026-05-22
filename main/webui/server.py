@@ -221,42 +221,68 @@ def _get_api_creds():
     return "", ""
 
 
+def _query_api(path, params_str=""):
+    """通用 API 查询辅助"""
+    base_url, token = _get_api_creds()
+    if not base_url or not token:
+        return None, "Missing credentials"
+    parsed = urlparse(base_url)
+    domain = f"{parsed.scheme}://{parsed.netloc}"
+    url = domain + path + params_str
+    req = urllib.request.Request(url, headers={"Authorization": token, "Content-Type": "application/json"})
+    with urllib.request.urlopen(req, timeout=15) as resp:
+        return json.loads(resp.read().decode()).get("data", {}), None
+
+
 def query_usage_summary():
-    """查询 token 使用摘要（从 GLM API）"""
+    """查询 token 使用摘要（24h模型用量 + 配额）"""
     try:
-        base_url, token = _get_api_creds()
-        if not base_url or not token:
-            return {"error": "Missing ANTHROPIC_BASE_URL or ANTHROPIC_AUTH_TOKEN"}
-
-        parsed = urlparse(base_url)
-        domain = f"{parsed.scheme}://{parsed.netloc}"
-
         now = datetime.now()
         start = (now - timedelta(hours=24)).strftime("%Y-%m-%d %H:00:00")
         end = now.strftime("%Y-%m-%d %H:%M:%S")
         params = f"?startTime={urllib.parse.quote(start)}&endTime={urllib.parse.quote(end)}"
 
-        headers = {"Authorization": token, "Content-Type": "application/json"}
+        # 模型用量
+        model_data, err = _query_api("/api/monitor/usage/model-usage", params)
+        if err:
+            return {"error": err}
+        summary = model_data.get("totalUsage", {})
+        total_tokens = summary.get("totalTokensUsage", 0)
+        call_count = summary.get("totalModelCallCount", 0)
+        models = [
+            {"name": m.get("modelName", "?"), "tokens": m.get("totalTokens", 0)}
+            for m in summary.get("modelSummaryList", [])
+        ]
 
-        req = urllib.request.Request(
-            domain + "/api/monitor/usage/model-usage" + params,
-            headers=headers
-        )
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            data = json.loads(resp.read().decode())
-            summary = data.get("data", {}).get("totalUsage", {})
-            total_tokens = summary.get("totalTokensUsage", 0)
-            call_count = summary.get("totalModelCallCount", 0)
+        # 工具用量
+        tool_data, _ = _query_api("/api/monitor/usage/tool-usage", params)
+        tool_summary = tool_data.get("totalUsage", {})
+        tools = [
+            {"name": t.get("toolCode", "?"), "count": t.get("totalUsageCount", 0)}
+            for t in tool_summary.get("toolSummaryList", [])
+        ]
 
-            # 简单成本估算（基于 GLM-4.7 定价）
-            estimated_cost_usd = (total_tokens / 1_000_000) * 0.40
+        # 配额
+        quota_data, _ = _query_api("/api/monitor/usage/quota/limit", "")
+        quotas = []
+        for item in quota_data.get("limits", []):
+            t = item.get("type", "?")
+            pct = item.get("percentage", 0)
+            cur = item.get("currentValue", 0)
+            total = item.get("usage", "?")
+            if "TOKEN" in t:
+                quotas.append({"type": "token_5h", "percentage": round(pct, 1), "label": "Token 配额 (5h)"})
+            elif "TIME" in t:
+                quotas.append({"type": "mcp_month", "percentage": round(pct, 1), "current": cur, "total": total, "label": f"MCP 配额 (月) {cur}/{total} 分钟"})
 
-            return {
-                "total_tokens": total_tokens,
-                "call_count": call_count,
-                "estimated_cost_usd": estimated_cost_usd,
-                "time_range": f"{start} ~ {end}"
-            }
+        return {
+            "total_tokens": total_tokens,
+            "call_count": call_count,
+            "models": models,
+            "tools": tools,
+            "quotas": quotas,
+            "time_range": f"{start} ~ {end}"
+        }
     except Exception as e:
         return {"error": str(e)}
 
