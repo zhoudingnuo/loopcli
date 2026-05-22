@@ -2550,6 +2550,9 @@ async function init() {
   // 加载初始页面
   await loadAgents();
 
+  // 加载长期任务（修复：主页卡片需要显示）
+  loadLongTask();
+
   // 初始化搜索功能
   initSearch();
 
