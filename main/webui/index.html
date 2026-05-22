@@ -1343,13 +1343,31 @@ body {
           <div class="setting-item">
             <div class="setting-label">
               <div class="title">WebUI 版本</div>
-              <div class="description">v8.2 - 增强交互体验（主题切换、搜索、通知、快捷键）</div>
+              <div class="description">v8.3 - 深度优化版（健康监控、系统信息、性能增强）</div>
             </div>
           </div>
           <div class="setting-item">
             <div class="setting-label">
-              <div class="title">运行时间</div>
-              <div class="description" id="uptime">-</div>
+              <div class="title">服务器状态</div>
+              <div class="description" id="server-status">检测中...</div>
+            </div>
+          </div>
+          <div class="setting-item">
+            <div class="setting-label">
+              <div class="title">服务器运行时间</div>
+              <div class="description" id="server-uptime">-</div>
+            </div>
+          </div>
+          <div class="setting-item">
+            <div class="setting-label">
+              <div class="title">Agent 统计</div>
+              <div class="description" id="agent-stats">-</div>
+            </div>
+          </div>
+          <div class="setting-item" id="sys-resource-item" style="display:none">
+            <div class="setting-label">
+              <div class="title">系统资源</div>
+              <div class="description" id="sys-resource">-</div>
             </div>
           </div>
         </div>
@@ -2195,18 +2213,44 @@ function initThemeSelector() {
 }
 
 // 加载 Settings 页面
-function loadSettings() {
-  // 初始化主题选择器
+async function loadSettings() {
   initThemeSelector();
-
-  // 更新运行时间
-  const uptime = Math.floor(performance.now() / 1000);
-  const hours = Math.floor(uptime / 3600);
-  const minutes = Math.floor((uptime % 3600) / 60);
-  document.getElementById('uptime').textContent = `${hours}小时 ${minutes}分钟`;
-
-  // 加载长期任务
+  await loadSystemInfo();
   loadLongTask();
+}
+
+async function loadSystemInfo() {
+  try {
+    const resp = await fetch(`${API_BASE}/health`);
+    if (!resp.ok) throw new Error('health API failed');
+    const data = await resp.json();
+
+    document.getElementById('server-status').textContent =
+      data.status === 'healthy' ? '运行中' : data.status;
+
+    if (data.uptime_seconds != null) {
+      const s = Math.floor(data.uptime_seconds);
+      const h = Math.floor(s / 3600);
+      const m = Math.floor((s % 3600) / 60);
+      const sec = s % 60;
+      document.getElementById('server-uptime').textContent = `${h}小时 ${m}分钟 ${sec}秒`;
+    }
+
+    if (data.agents) {
+      document.getElementById('agent-stats').textContent =
+        `总计 ${data.agents.total} 个，活跃 ${data.agents.active} 个，禁用 ${data.agents.disabled} 个`;
+    }
+
+    if (data.system) {
+      const sys = data.system;
+      const item = document.getElementById('sys-resource-item');
+      const desc = document.getElementById('sys-resource');
+      item.style.display = '';
+      desc.textContent = `CPU ${sys.cpu_percent}% | 内存 ${sys.memory_percent}% (可用 ${sys.memory_available_gb}GB) | 磁盘 ${sys.disk_percent}% (剩余 ${sys.disk_free_gb}GB)`;
+    }
+  } catch (e) {
+    document.getElementById('server-status').textContent = '连接失败';
+  }
 }
 
 // 启用 agent

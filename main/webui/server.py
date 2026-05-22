@@ -107,6 +107,7 @@ def list_templates():
 
 WEBUI_DIR = Path(__file__).parent.resolve()
 MAIN_DIR = LOOPCLI_ROOT / "main"
+SERVER_START_TIME = time.time()
 LOOP_STATE_FILE = WEBUI_DIR / "loop_state.json"
 
 _loop_proc = None

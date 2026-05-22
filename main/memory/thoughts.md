@@ -1,13 +1,13 @@
 # LoopCLI 记忆
 
-## 2026-05-22 轮次315
+## 2026-05-22 轮次317
 
-**WebUI深度优化**：
-- 修复Logs页面关键bug：API返回`{lines:[...]}`对象但JS当数组用，导致`logs.slice is not a function`
-- Playwright 6/6页面全部通过，零console错误
-- 所有按钮功能正常：搜索、创建任务、长期任务编辑/取消、主题切换、刷新
-- 5个API端点全部200 OK
+**WebUI v8.3优化**：
+- 修复`SERVER_START_TIME`未定义bug，/api/health端点正常工作
+- 安装psutil，Settings页显示真实系统资源（CPU/内存/磁盘）
+- 清理7个旧HTML文件（index_v2~v7, enhanced等），省300KB
+- 清理6个僵尸server.py进程
+- Playwright测试：6/6页面导航通过，7/7按钮交互通过，零console错误
+- 端口注意：WebUI端口是8080不是5000
 
-**技术要点**：Logs API返回`{agent:null, lines:["|time|status|task|msg|"]}`格式，需要提取lines并解析表格行
-
-**成本控制**：所有agent保持disabled，无空闲agent浪费
+**成本控制**：所有agent保持disabled，仅webui/server.py运行
