@@ -1,7 +1,13 @@
 {
   "agent": "main",
   "status": "idle",
-  "last_run": "2026-05-22 19:20:07",
-  "run_count": 310,
-  "last_action": "webui_deep_optimization_backup_archived"
+  "last_run": "2026-05-22 19:26:28",
+  "run_count": 312,
+  "last_action": "dispatched_webui_improvement_task",
+  "active_agents": [
+    "engineering-frontend-developer"
+  ],
+  "pending_user_requests": [
+    "wechat_image_support"
+  ]
 }
