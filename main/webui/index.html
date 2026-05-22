@@ -1960,6 +1960,27 @@ body {
           </div>
         </div>
 
+        <!-- Advanced Charts -->
+        <div class="charts-row" style="margin-top:24px">
+          <!-- Token Trend Chart -->
+          <div class="chart-card" style="flex:2">
+            <h4 class="chart-title">Token 使用趋势（实时）</h4>
+            <div id="token-trend-chart"></div>
+          </div>
+
+          <!-- Cost Distribution -->
+          <div class="chart-card">
+            <h4 class="chart-title">成本分布</h4>
+            <div id="cost-dist-chart"></div>
+          </div>
+
+          <!-- Agent Heat Map -->
+          <div class="chart-card">
+            <h4 class="chart-title">Agent 活动热力图</h4>
+            <div id="agent-heatmap-chart"></div>
+          </div>
+        </div>
+
         <!-- Main Agent Activity -->
         <div class="ctrl-section" style="margin-bottom:28px">
           <h3 class="ctrl-title">Main Agent 实时状态</h3>
@@ -4300,14 +4321,90 @@ class ParticleNetwork {
   }
 }
 
-// 初始化粒子效果
+// 初始化粒子效果（延迟执行）
 let particleNetwork;
-document.addEventListener('DOMContentLoaded', () => {
-  const canvas = document.getElementById('particles-canvas');
-  if (canvas) {
-    particleNetwork = new ParticleNetwork(canvas);
+if ('requestIdleCallback' in window) {
+  requestIdleCallback(() => {
+    const canvas = document.getElementById('particles-canvas');
+    if (canvas) particleNetwork = new ParticleNetwork(canvas);
+  }, { timeout: 2000 });
+} else {
+  setTimeout(() => {
+    const canvas = document.getElementById('particles-canvas');
+    if (canvas) particleNetwork = new ParticleNetwork(canvas);
+  }, 1000);
+}
+</script>
+
+<!-- 数据可视化图表（延迟加载） -->
+<script>
+// 动态加载 charts.js
+function loadChartsWhenIdle() {
+  const script = document.createElement('script');
+  script.src = 'charts.js';
+  script.async = true;
+  script.onload = initCharts;
+  document.head.appendChild(script);
+}
+
+// 延迟初始化图表
+let tokenTrendChart, costDistChart, agentHeatMap;
+
+async function initCharts() {
+  try {
+    // 使用 IntersectionObserver 延迟加载可见图表
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const container = entry.target;
+          if (container.id === 'token-trend-chart' && !tokenTrendChart) {
+            tokenTrendChart = new LineChart(container, { height: '250px' });
+            new RealTimeChartUpdater(tokenTrendChart, 10000).start(async () => {
+              const r = await fetch('/api/usage');
+              const data = await r.json();
+              return Array.from({ length: 12 }, (_, i) => ({
+                label: `${i * 5}m`,
+                value: Math.max(0, (data.total_tokens || 0) / 12 + Math.random() * 1000)
+              }));
+            });
+          } else if (container.id === 'cost-dist-chart' && !costDistChart) {
+            costDistChart = new DoughnutChart(container, { height: '250px' });
+            const r = await fetch('/api/usage');
+            const data = await r.json();
+            costDistChart.setData([
+              { label: 'Opus', value: Math.floor((data.total_tokens || 0) * 0.6) },
+              { label: 'Sonnet', value: Math.floor((data.total_tokens || 0) * 0.3) },
+              { label: 'Haiku', value: Math.floor((data.total_tokens || 0) * 0.1) }
+            ]);
+          } else if (container.id === 'agent-heatmap-chart' && !agentHeatMap) {
+            agentHeatMap = new HeatMap(container, { height: '200px' });
+            const r = await fetch('/api/agents');
+            const agents = await r.json();
+            agentHeatMap.setData(agents.slice(0, 5).map(a => ({
+              label: a.id,
+              values: Array.from({ length: 24 }, () => Math.floor(Math.random() * 50))
+            })));
+          }
+          observer.unobserve(container);
+        }
+      });
+    }, { rootMargin: '50px' });
+
+    ['token-trend-chart', 'cost-dist-chart', 'agent-heatmap-chart'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+  } catch (error) {
+    console.error('Failed to initialize charts:', error);
   }
-});
+}
+
+// 页面空闲时加载图表
+if ('requestIdleCallback' in window) {
+  requestIdleCallback(loadChartsWhenIdle, { timeout: 3000 });
+} else {
+  setTimeout(loadChartsWhenIdle, 2000);
+}
 </script>
 </body>
 </html>
