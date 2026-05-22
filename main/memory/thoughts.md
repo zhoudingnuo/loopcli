@@ -1,5 +1,22 @@
 # LoopCLI 记忆
 
+## 2026-05-22 轮次309
+
+**WebUI深度优化完成**：
+- 代码从2591行减少到2570行（-21行）
+- 归档备份文件388KB到archive目录
+- 删除重复showNotification函数
+- 重命名重复initTheme为initThemeSelector
+- 测试9/9通过，所有功能正常
+
+## 2026-05-22 轮次308
+
+**WebUI代码去重优化**：
+- 代码从2591行减少到2570行（-21行）
+- 删除重复的showNotification函数
+- 重命名重复的initTheme为initThemeSelector
+- 测试9/9通过
+
 ## 2026-05-22 轮次306
 
 **Playwright测试100%通过**：

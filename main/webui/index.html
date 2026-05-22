@@ -2159,11 +2159,9 @@ async function loadScreenshots() {
   }
 }
 
-// 主题管理
-function initTheme() {
+// 主题选择器初始化（Settings页面专用）
+function initThemeSelector() {
   const savedTheme = localStorage.getItem('webui_theme') || 'dark';
-  document.documentElement.setAttribute('data-theme', savedTheme);
-
   const themeSelector = document.getElementById('theme-selector');
   if (themeSelector) {
     themeSelector.value = savedTheme;
@@ -2178,8 +2176,8 @@ function initTheme() {
 
 // 加载 Settings 页面
 function loadSettings() {
-  // 初始化主题
-  initTheme();
+  // 初始化主题选择器
+  initThemeSelector();
 
   // 更新运行时间
   const uptime = Math.floor(performance.now() / 1000);
@@ -2394,25 +2392,6 @@ async function cancelLongTaskMain() {
     console.error('取消长期任务失败:', error);
     showNotification('取消失败: ' + error.message, 'error');
   }
-}
-function showNotification(message, type = 'info', duration = 3000) {
-  const container = document.getElementById('notification-container');
-  const notification = document.createElement('div');
-  notification.className = `notification ${type}`;
-
-  const icons = { info: 'ℹ', success: '✓', warning: '⚠', error: '✕' };
-  notification.innerHTML = `
-    <span style="font-size: 18px;">${icons[type] || icons.info}</span>
-    <span style="flex: 1; font-size: 13px;">${message}</span>
-  `;
-
-  container.appendChild(notification);
-
-  setTimeout(() => {
-    notification.style.animation = 'slideOut 0.3s ease';
-    notification.style.animationFillMode = 'forwards';
-    setTimeout(() => notification.remove(), 300);
-  }, duration);
 }
 
 // 导航切换事件
