@@ -57,6 +57,18 @@
   --transition-bounce: 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
+/* 粒子背景 */
+#particles-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
 /* 滚动条美化 */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -1713,6 +1725,7 @@ body {
 </style>
 </head>
 <body>
+<canvas id="particles-canvas"></canvas>
 <div class="toast-container" id="toast-container"></div>
 <div class="sidebar-overlay" id="sidebar-overlay"></div>
 <div class="app">
@@ -3199,6 +3212,152 @@ function renderMsgHistory() {
     ).join('') +
     '</tbody></table>';
 }
+
+// ============ 粒子背景效果 ============
+class ParticleNetwork {
+  constructor(canvas) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.particles = [];
+    this.mouse = { x: null, y: null, radius: 150 };
+    this.colors = ['#a78bfa', '#f472b6', '#38bdf8']; // 赛博朋克配色
+    this.particleCount = Math.min(100, Math.floor((window.innerWidth * window.innerHeight) / 15000));
+    this.animationId = null;
+    this.lastTime = 0;
+    this.targetFPS = 30;
+    this.frameInterval = 1000 / this.targetFPS;
+
+    this.init();
+    this.bindEvents();
+    this.animate();
+  }
+
+  init() {
+    this.resize();
+    this.createParticles();
+  }
+
+  resize() {
+    this.canvas.width = window.innerWidth;
+    this.canvas.height = window.innerHeight;
+  }
+
+  createParticles() {
+    this.particles = [];
+    for (let i = 0; i < this.particleCount; i++) {
+      this.particles.push({
+        x: Math.random() * this.canvas.width,
+        y: Math.random() * this.canvas.height,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: (Math.random() - 0.5) * 0.5,
+        radius: Math.random() * 2 + 1,
+        color: this.colors[Math.floor(Math.random() * this.colors.length)],
+        opacity: Math.random() * 0.5 + 0.2
+      });
+    }
+  }
+
+  bindEvents() {
+    window.addEventListener('resize', () => {
+      this.resize();
+      this.createParticles();
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      this.mouse.x = e.x;
+      this.mouse.y = e.y;
+    });
+
+    window.addEventListener('mouseout', () => {
+      this.mouse.x = null;
+      this.mouse.y = null;
+    });
+  }
+
+  drawParticle(p) {
+    this.ctx.beginPath();
+    this.ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+    this.ctx.fillStyle = p.color;
+    this.ctx.globalAlpha = p.opacity;
+    this.ctx.fill();
+  }
+
+  drawConnection(p1, p2, distance) {
+    const maxDistance = 120;
+    if (distance < maxDistance) {
+      this.ctx.beginPath();
+      this.ctx.strokeStyle = `rgba(167, 139, 250, ${0.15 * (1 - distance / maxDistance)})`;
+      this.ctx.lineWidth = 0.5;
+      this.ctx.moveTo(p1.x, p1.y);
+      this.ctx.lineTo(p2.x, p2.y);
+      this.ctx.stroke();
+    }
+  }
+
+  updateParticle(p) {
+    // 移动
+    p.x += p.vx;
+    p.y += p.vy;
+
+    // 边界反弹
+    if (p.x < 0 || p.x > this.canvas.width) p.vx *= -1;
+    if (p.y < 0 || p.y > this.canvas.height) p.vy *= -1;
+
+    // 鼠标交互
+    if (this.mouse.x !== null) {
+      const dx = this.mouse.x - p.x;
+      const dy = this.mouse.y - p.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      if (distance < this.mouse.radius) {
+        const force = (this.mouse.radius - distance) / this.mouse.radius;
+        const angle = Math.atan2(dy, dx);
+        p.x -= Math.cos(angle) * force * 0.5;
+        p.y -= Math.sin(angle) * force * 0.5;
+      }
+    }
+  }
+
+  animate(currentTime = 0) {
+    this.animationId = requestAnimationFrame((time) => this.animate(time));
+
+    const deltaTime = currentTime - this.lastTime;
+    if (deltaTime < this.frameInterval) return;
+    this.lastTime = currentTime - (deltaTime % this.frameInterval);
+
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    // 更新和绘制粒子
+    for (let i = 0; i < this.particles.length; i++) {
+      const p1 = this.particles[i];
+      this.updateParticle(p1);
+      this.drawParticle(p1);
+
+      // 绘制连接线
+      for (let j = i + 1; j < this.particles.length; j++) {
+        const p2 = this.particles[j];
+        const dx = p1.x - p2.x;
+        const dy = p1.y - p2.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        this.drawConnection(p1, p2, distance);
+      }
+    }
+  }
+
+  destroy() {
+    if (this.animationId) {
+      cancelAnimationFrame(this.animationId);
+    }
+  }
+}
+
+// 初始化粒子效果
+let particleNetwork;
+document.addEventListener('DOMContentLoaded', () => {
+  const canvas = document.getElementById('particles-canvas');
+  if (canvas) {
+    particleNetwork = new ParticleNetwork(canvas);
+  }
+});
 </script>
 </body>
 </html>
