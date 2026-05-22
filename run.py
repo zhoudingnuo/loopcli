@@ -158,6 +158,15 @@ def cmd_run(args):
     pricing = load_pricing()
     count = 0
     while args.iterations == 0 or count < args.iterations:
+        # 北京时间 14:00-18:00 高峰期暂停
+        bj_hour = (datetime.utcnow().hour + 8) % 24
+        if 14 <= bj_hour < 18:
+            out(f"{C.YELLOW}⏸ 北京时间 {bj_hour}:00，高峰期暂停迭代（14:00-18:00）{C.RST}")
+            if not process_queue():
+                break
+            time.sleep(300)
+            continue
+
         count += 1
         agents = discover_agents()
         ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
