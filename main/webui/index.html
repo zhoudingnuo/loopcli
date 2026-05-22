@@ -1001,6 +1001,35 @@ body {
           </div>
         </div>
 
+        <!-- 长期任务卡片 - 醒目位置 -->
+        <div id="longtask-card" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 50%, rgba(16, 185, 129, 0.1) 100%); border: 2px solid var(--accent); border-radius: var(--radius); padding: 24px; margin-bottom: 32px; position: relative; overflow: hidden;">
+          <div style="position: absolute; top: -50%; right: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 70%); pointer-events: none;"></div>
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; position: relative; z-index: 1;">
+            <div style="flex: 1;">
+              <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                <span style="font-size: 24px;">🎯</span>
+                <h3 style="font-size: 20px; font-weight: 700; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">长期任务</h3>
+                <span id="longtask-badge" style="display: none; background: var(--accent); color: white; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 600;">进行中</span>
+              </div>
+              <div id="longtask-display" style="color: var(--text); line-height: 1.7;">
+                <div id="longtask-status-main" style="font-size: 14px; color: var(--text2);">加载中...</div>
+                <div id="longtask-content-main" style="display: none; margin-top: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; font-family: monospace; font-size: 13px; white-space: pre-wrap; color: var(--text2); max-height: 200px; overflow-y: auto;"></div>
+                <div id="longtask-edit-main" style="display: none; margin-top: 12px;">
+                  <textarea id="longtask-editor-main" style="width: 100%; min-height: 120px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-family: monospace; font-size: 13px; color: var(--text); resize: vertical;" placeholder="输入长期任务内容..."></textarea>
+                  <div style="display: flex; gap: 8px; margin-top: 8px;">
+                    <button class="btn btn-primary" onclick="saveLongTaskMain()">💾 保存</button>
+                    <button class="btn btn-secondary" onclick="cancelEditLongTaskMain()">取消</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-primary" id="edit-longtask-btn-main" onclick="startEditLongTaskMain()" style="display: none;">✎ 编辑</button>
+              <button class="btn btn-secondary" id="cancel-longtask-btn-main" onclick="cancelLongTaskMain()" style="display: none;">✕ 取消</button>
+            </div>
+          </div>
+        </div>
+
         <!-- 可视化图表区域 -->
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-bottom: 32px;">
           <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px;">
@@ -1886,25 +1915,55 @@ async function loadLongTask() {
     if (!response.ok) throw new Error('API 请求失败');
     const data = await response.json();
 
+    // 更新主页卡片
+    const mainStatusEl = document.getElementById('longtask-status-main');
+    const mainContentEl = document.getElementById('longtask-content-main');
+    const mainTextEl = document.getElementById('longtask-content-main');
+    const mainBadgeEl = document.getElementById('longtask-badge');
+    const mainEditBtn = document.getElementById('edit-longtask-btn-main');
+    const mainCancelBtn = document.getElementById('cancel-longtask-btn-main');
+
+    if (data.exists) {
+      // 主页更新
+      if (mainStatusEl) mainStatusEl.innerHTML = `<strong style="color: var(--accent);">进行中</strong>`;
+      if (mainTextEl) mainTextEl.textContent = data.content;
+      if (mainContentEl) mainContentEl.style.display = 'block';
+      if (mainBadgeEl) mainBadgeEl.style.display = 'inline-block';
+      if (mainEditBtn) mainEditBtn.style.display = 'block';
+      if (mainCancelBtn) mainCancelBtn.style.display = 'block';
+    } else {
+      // 主页更新 - 无任务
+      if (mainStatusEl) mainStatusEl.textContent = '暂无长期任务';
+      if (mainContentEl) mainContentEl.style.display = 'none';
+      if (mainBadgeEl) mainBadgeEl.style.display = 'none';
+      if (mainEditBtn) mainEditBtn.style.display = 'none';
+      if (mainCancelBtn) mainCancelBtn.style.display = 'none';
+    }
+
+    // 更新设置页面（保持兼容）
     const statusEl = document.getElementById('longtask-status');
     const contentEl = document.getElementById('longtask-content');
     const textEl = document.getElementById('longtask-text');
     const cancelBtn = document.getElementById('cancel-longtask-btn');
 
     if (data.exists) {
-      statusEl.textContent = '有活动任务';
-      textEl.textContent = data.content;
-      contentEl.style.display = 'block';
-      cancelBtn.style.display = 'block';
-      document.getElementById('edit-longtask-btn').style.display = 'block';
+      if (statusEl) statusEl.textContent = '有活动任务';
+      if (textEl) textEl.textContent = data.content;
+      if (contentEl) contentEl.style.display = 'block';
+      if (cancelBtn) cancelBtn.style.display = 'block';
+      const editBtn = document.getElementById('edit-longtask-btn');
+      if (editBtn) editBtn.style.display = 'block';
     } else {
-      statusEl.textContent = '无长期任务';
-      contentEl.style.display = 'none';
-      cancelBtn.style.display = 'none';
+      if (statusEl) statusEl.textContent = '无长期任务';
+      if (contentEl) contentEl.style.display = 'none';
+      if (cancelBtn) cancelBtn.style.display = 'none';
     }
   } catch (error) {
     console.error('加载长期任务失败:', error);
-    document.getElementById('longtask-status').textContent = '加载失败';
+    const mainStatusEl = document.getElementById('longtask-status-main');
+    const statusEl = document.getElementById('longtask-status');
+    if (mainStatusEl) mainStatusEl.textContent = '加载失败';
+    if (statusEl) statusEl.textContent = '加载失败';
   }
 }
 
@@ -1964,6 +2023,62 @@ function cancelEditLongTask() {
   document.getElementById('longtask-edit').style.display = 'none';
   document.getElementById('longtask-content').style.display = 'block';
   showNotification('已取消编辑', 'info');
+}
+
+// 主页长期任务编辑函数
+async function startEditLongTaskMain() {
+  const contentEl = document.getElementById('longtask-content-main');
+  const editEl = document.getElementById('longtask-edit-main');
+  const editorEl = document.getElementById('longtask-editor-main');
+
+  editorEl.value = contentEl.textContent || '';
+  contentEl.style.display = 'none';
+  editEl.style.display = 'block';
+  showNotification('进入编辑模式', 'info');
+}
+
+async function saveLongTaskMain() {
+  const editorEl = document.getElementById('longtask-editor-main');
+  const content = editorEl.value;
+
+  try {
+    const response = await fetch(`${API_BASE}/longtask/update`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content })
+    });
+    if (!response.ok) throw new Error('API 请求失败');
+    const data = await response.json();
+
+    showNotification(data.message || '长期任务已更新', 'success');
+    document.getElementById('longtask-edit-main').style.display = 'none';
+    await loadLongTask();
+  } catch (error) {
+    console.error('保存长期任务失败:', error);
+    showNotification('保存失败: ' + error.message, 'error');
+  }
+}
+
+function cancelEditLongTaskMain() {
+  document.getElementById('longtask-edit-main').style.display = 'none';
+  document.getElementById('longtask-content-main').style.display = 'block';
+  showNotification('已取消编辑', 'info');
+}
+
+async function cancelLongTaskMain() {
+  if (!confirm('确定要取消长期任务吗？此操作不可恢复。')) return;
+
+  try {
+    const response = await fetch(`${API_BASE}/longtask/clear`, { method: 'POST' });
+    if (!response.ok) throw new Error('API 请求失败');
+    const data = await response.json();
+
+    showNotification(data.message || '长期任务已取消', 'success');
+    await loadLongTask();
+  } catch (error) {
+    console.error('取消长期任务失败:', error);
+    showNotification('取消失败: ' + error.message, 'error');
+  }
 }
 function showNotification(message, type = 'info', duration = 3000) {
   const container = document.getElementById('notification-container');
