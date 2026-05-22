@@ -1074,6 +1074,52 @@ body {
   background-clip: text;
   letter-spacing: -0.3px;
 }
+/* 自动化卡片 */
+.automation-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.automation-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 20px;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  text-align: left;
+}
+.automation-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-glow);
+  border-color: var(--accent);
+}
+.automation-card:active {
+  transform: translateY(-2px);
+}
+.auto-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+.auto-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.auto-desc {
+  font-size: 12px;
+  color: var(--text2);
+  line-height: 1.4;
+}
+.automation-result {
+  margin-top: 24px;
+  padding: 20px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
 .ctrl-status-card { margin-bottom: 24px; }
 .ctrl-status-row {
   display: flex;
@@ -2151,6 +2197,10 @@ body {
         <div class="icon">💬</div>
         <span>发送消息</span>
       </div>
+      <div class="nav-item" data-page="automation">
+        <div class="icon">⚡</div>
+        <span>自动化</span>
+      </div>
     </nav>
     <div class="sidebar-footer">LoopCLI v5.0</div>
   </aside>
@@ -2443,6 +2493,52 @@ body {
         <div class="ctrl-section">
           <h3 class="ctrl-title">最近发送</h3>
           <div id="msg-history" style="font-size:13px;color:var(--text2)">暂无记录</div>
+        </div>
+      </div>
+
+      <!-- Automation -->
+      <div class="page" id="page-automation">
+        <div class="ctrl-section">
+          <h3 class="ctrl-title">⚡ 自动化操作</h3>
+          <p style="color:var(--text2);margin-bottom:20px">一键执行常见的系统维护和优化任务</p>
+
+          <div class="automation-grid">
+            <button class="automation-card" onclick="runAutomation('cleanup-logs')">
+              <div class="auto-icon">🧹</div>
+              <div class="auto-title">清理日志</div>
+              <div class="auto-desc">归档超过 1MB 的日志文件</div>
+            </button>
+
+            <button class="automation-card" onclick="runAutomation('compress-memory')">
+              <div class="auto-icon">🗜️</div>
+              <div class="auto-title">压缩记忆</div>
+              <div class="auto-desc">压缩 thoughts.md 保留最近内容</div>
+            </button>
+
+            <button class="automation-card" onclick="runAutomation('disable-idle-agents')">
+              <div class="auto-icon">💤</div>
+              <div class="auto-title">禁用空闲 Agent</div>
+              <div class="auto-desc">自动禁用无任务的空闲 Agent</div>
+            </button>
+
+            <button class="automation-card" onclick="runAutomation('health-check')">
+              <div class="auto-icon">🏥</div>
+              <div class="auto-title">健康检查</div>
+              <div class="auto-desc">检查系统状态和资源使用</div>
+            </button>
+
+            <button class="automation-card" onclick="runAutomation('git-sync')">
+              <div class="auto-icon">🔄</div>
+              <div class="auto-title">Git 同步</div>
+              <div class="auto-desc">提交并推送更改到远程仓库</div>
+            </button>
+          </div>
+
+          <div id="automation-result" class="automation-result" style="display:none">
+            <h4 style="margin-bottom:12px">执行结果</h4>
+            <pre id="automation-output" style="background:var(--surface2);padding:16px;border-radius:8px;overflow:auto;max-height:300px;font-size:12px"></pre>
+            <button class="btn" onclick="document.getElementById('automation-result').style.display='none'" style="margin-top:12px">关闭</button>
+          </div>
         </div>
       </div>
     </div>
@@ -3628,6 +3724,35 @@ function renderMsgHistory() {
       `<tr><td>${esc(m.time)}</td><td>${esc(m.agent)}</td><td>${esc(m.content.slice(0,80))}${m.content.length > 80 ? '...' : ''}</td><td style="color:var(--text2)">${esc(m.file)}</td></tr>`
     ).join('') +
     '</tbody></table>';
+}
+
+// ============ 自动化操作功能 ============
+
+async function runAutomation(action) {
+  const resultDiv = document.getElementById('automation-result');
+  const outputEl = document.getElementById('automation-output');
+
+  resultDiv.style.display = 'block';
+  outputEl.textContent = '正在执行...';
+
+  try {
+    const resp = await fetch(`/api/automation/${action}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    const data = await resp.json();
+
+    if (resp.ok) {
+      outputEl.textContent = JSON.stringify(data, null, 2);
+      showToast('操作完成', 'success');
+    } else {
+      outputEl.textContent = `错误: ${data.error || '未知错误'}`;
+      showToast('操作失败', 'error');
+    }
+  } catch (e) {
+    outputEl.textContent = `网络错误: ${e.message}`;
+    showToast('网络错误', 'error');
+  }
 }
 
 // ============ 图表渲染功能 ============

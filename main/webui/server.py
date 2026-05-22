@@ -563,6 +563,16 @@ class WebUIHandler(SimpleHTTPRequestHandler):
             return self._handle_agent_enable("enable")
         if path == "/api/agents/disable":
             return self._handle_agent_enable("disable")
+        if path == "/api/automation/cleanup-logs":
+            return self._handle_automation_cleanup_logs()
+        if path == "/api/automation/compress-memory":
+            return self._handle_automation_compress_memory()
+        if path == "/api/automation/disable-idle-agents":
+            return self._handle_automation_disable_idle_agents()
+        if path == "/api/automation/health-check":
+            return self._handle_automation_health_check()
+        if path == "/api/automation/git-sync":
+            return self._handle_automation_git_sync()
 
         self._send_json({"error": "Not found"}, status=404)
 
@@ -850,6 +860,142 @@ class WebUIHandler(SimpleHTTPRequestHandler):
 
         set_agent_enabled(agent_dir, action == "enable")
         self._send_json({"status": "ok", "agent": agent_id, "enabled": action == "enable"})
+
+    def _handle_automation_cleanup_logs(self):
+        """清理大型日志文件（超过 1MB）"""
+        log_dir = MAIN_DIR / "log"
+        results = []
+        for log_file in log_dir.glob("*.log"):
+            try:
+                size_mb = log_file.stat().st_size / (1024 * 1024)
+                if size_mb > 1:
+                    # 重命名为 .bak
+                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                    backup_name = f"{log_file.stem}_{timestamp}.log.bak"
+                    backup_path = log_file.parent / backup_name
+                    log_file.rename(backup_path)
+                    results.append({"file": log_file.name, "size_mb": round(size_mb, 2), "action": "archived", "backup": backup_name})
+            except Exception as e:
+                results.append({"file": log_file.name, "error": str(e)})
+        self._send_json({"action": "cleanup_logs", "results": results})
+
+    def _handle_automation_compress_memory(self):
+        """压缩 thoughts.md（保留最近 5 轮）"""
+        thoughts_file = MAIN_DIR / "thoughts.md"
+        if not thoughts_file.exists():
+            return self._send_json({"action": "compress_memory", "status": "no_file"})
+        lines = thoughts_file.read_text(encoding="utf-8").split("\n")
+        if len(lines) <= 50:
+            return self._send_json({"action": "compress_memory", "status": "not_needed", "lines": len(lines)})
+        # 保留最近 5 轮（约 50 行）
+        compressed = "\n".join(lines[-50:])
+        thoughts_file.write_text(compressed, encoding="utf-8")
+        self._send_json({"action": "compress_memory", "status": "compressed", "original_lines": len(lines), "new_lines": len(compressed.split("\n"))})
+
+    def _handle_automation_disable_idle_agents(self):
+        """禁用空闲的 agents（没有任务且状态为 idle）"""
+        agents_dir = LOOPCLI_ROOT / "agents"
+        disabled = []
+        for agent_dir in agents_dir.iterdir():
+            if not agent_dir.is_dir():
+                continue
+            agent_file = agent_dir / "AGENT"
+            if not agent_file.exists():
+                continue
+            # 检查是否已禁用
+            content = agent_file.read_text(encoding="utf-8")
+            if "disabled: true" in content or "disabled" in content:
+                continue
+            # 检查状态
+            state_file = agent_dir / "memory" / "state.json"
+            if state_file.exists():
+                state = read_json(state_file, {})
+                if state.get("status") == "idle":
+                    # 禁用 agent
+                    agent_file.write_text(content + "\ndisabled: true\n", encoding="utf-8")
+                    disabled.append(agent_dir.name)
+        self._send_json({"action": "disable_idle_agents", "disabled": disabled, "count": len(disabled)})
+
+    def _handle_automation_health_check(self):
+        """系统健康检查"""
+        health = {
+            "timestamp": datetime.now().isoformat(),
+            "main_agent": {},
+            "logs": {},
+            "agents": {},
+            "disk": {}
+        }
+        # Main agent 状态
+        state = read_json(MAIN_DIR / "memory" / "state.json", {})
+        health["main_agent"] = {
+            "status": state.get("status", "unknown"),
+            "last_run": state.get("last_run", "never"),
+            "run_count": state.get("run_count", 0)
+        }
+        # 日志检查
+        log_dir = MAIN_DIR / "log"
+        for log_file in log_dir.glob("*.log"):
+            size_mb = log_file.stat().st_size / (1024 * 1024)
+            health["logs"][log_file.name] = {
+                "size_mb": round(size_mb, 2),
+                "needs_rotation": size_mb > 1
+            }
+        # Agents 统计
+        agents_dir = LOOPCLI_ROOT / "agents"
+        enabled = 0
+        disabled = 0
+        for agent_dir in agents_dir.iterdir():
+            if not agent_dir.is_dir():
+                continue
+            agent_file = agent_dir / "AGENT"
+            if agent_file.exists():
+                content = agent_file.read_text(encoding="utf-8")
+                if "disabled: true" in content or "disabled" in content:
+                    disabled += 1
+                else:
+                    enabled += 1
+        health["agents"] = {"enabled": enabled, "disabled": disabled, "total": enabled + disabled}
+        self._send_json({"action": "health_check", "health": health})
+
+    def _handle_automation_git_sync(self):
+        """执行 Git 同步"""
+        git_dir = LOOPCLI_ROOT
+        try:
+            # Git add
+            result_add = subprocess.run(
+                ["git", "add", "-A"],
+                cwd=str(git_dir),
+                capture_output=True,
+                text=True,
+                timeout=30
+            )
+            # Git commit
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            result_commit = subprocess.run(
+                ["git", "commit", "-m", f"auto: loopcli sync {timestamp}"],
+                cwd=str(git_dir),
+                capture_output=True,
+                text=True,
+                timeout=30
+            )
+            # Git push
+            result_push = subprocess.run(
+                ["git", "push"],
+                cwd=str(git_dir),
+                capture_output=True,
+                text=True,
+                timeout=60
+            )
+            self._send_json({
+                "action": "git_sync",
+                "status": "success",
+                "commit": result_commit.stdout,
+                "push": result_push.stdout
+            })
+        except subprocess.TimeoutExpired:
+            self._send_json({"action": "git_sync", "status": "timeout", "error": "命令超时"}, status=500)
+        except Exception as e:
+            self._send_json({"action": "git_sync", "status": "error", "error": str(e)}, status=500)
 
 
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
