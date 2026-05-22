@@ -200,11 +200,23 @@ def get_main_agent_activity():
     return result
 
 
+def _get_api_creds():
+    """获取 API 凭证：优先环境变量，其次 .env.json"""
+    base_url = os.environ.get("ANTHROPIC_BASE_URL", "")
+    token = os.environ.get("ANTHROPIC_AUTH_TOKEN", "")
+    if base_url and token:
+        return base_url, token
+    env_file = LOOPCLI_ROOT / ".env.json"
+    if env_file.exists():
+        cfg = read_json(env_file, {})
+        return cfg.get("ANTHROPIC_BASE_URL", ""), cfg.get("ANTHROPIC_AUTH_TOKEN", "")
+    return "", ""
+
+
 def query_usage_summary():
     """查询 token 使用摘要（从 GLM API）"""
     try:
-        base_url = os.environ.get("ANTHROPIC_BASE_URL", "")
-        token = os.environ.get("ANTHROPIC_AUTH_TOKEN", "")
+        base_url, token = _get_api_creds()
         if not base_url or not token:
             return {"error": "Missing ANTHROPIC_BASE_URL or ANTHROPIC_AUTH_TOKEN"}
 
