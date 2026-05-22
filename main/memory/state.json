@@ -1,12 +1,10 @@
 {
   "agent": "main",
   "status": "idle",
-  "last_run": "2026-05-23 04:45:13",
-  "run_count": 364,
-  "last_action": "dispatched_game_designer_gdd_task",
-  "active_agents": [
-    "game-designer"
-  ],
+  "last_run": "2026-05-23 04:54:55",
+  "run_count": 366,
+  "last_action": "gdd_completed_game_designer_disabled",
+  "active_agents": [],
   "pending_user_requests": [],
-  "current_iteration": 6
+  "current_iteration": 7
 }

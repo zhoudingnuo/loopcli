@@ -9,7 +9,10 @@
   - 推荐：三消益智（3-4周，20K DAU月收¥288K）+ 成语闯关（2-3周）
 - Steam 独立游戏调研已完成 → `D:/game-projects/research/steam-indie-market-2026-05-23.md`
   - 推荐：恐怖模拟经营、中国悬疑解谜、放置自动化
-- **下一步**：选择1-2个方向立项，创建开发 agent
+- **GDD 已完成**：「消消消大作战」抖音三消立项文档 → `D:/game-projects/douyin-match3/GDD.md`
+  - 11章+3附录，含核心玩法、50关设计、变现方案、技术方案、美术规范、4周排期
+- **抖音小游戏官方文档**：https://developer.open-douyin.com/docs/resource/zh-CN/mini-game/develop/guide/dev-guide/bytedance-mini-game
+- **下一步**：基于 GDD 创建开发 agent，开始编码
 
 ## 关键约束
 - 游戏项目放在 D 盘（`D:/game-projects/`），不放在 loopcli 根目录
