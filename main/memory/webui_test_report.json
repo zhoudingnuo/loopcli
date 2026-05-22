@@ -1,0 +1,66 @@
+{
+  "timestamp": "2026-05-22T16:57:21.481478",
+  "summary": {
+    "total": 9,
+    "passed": 8,
+    "failed": 1
+  },
+  "results": [
+    {
+      "test": "page_load",
+      "status": "pass",
+      "time": "2026-05-22T16:56:58.709820"
+    },
+    {
+      "test": "navigation",
+      "status": "pass",
+      "time": "2026-05-22T16:57:00.457143"
+    },
+    {
+      "test": "agents_page",
+      "status": "pass",
+      "data": {
+        "total_agents": "8"
+      },
+      "time": "2026-05-22T16:57:01.007832"
+    },
+    {
+      "test": "tasks_page",
+      "status": "pass",
+      "time": "2026-05-22T16:57:01.546267"
+    },
+    {
+      "test": "performance_page",
+      "status": "pass",
+      "data": {
+        "cpu": "11%",
+        "memory": "252 MB"
+      },
+      "time": "2026-05-22T16:57:02.077349"
+    },
+    {
+      "test": "logs_page",
+      "status": "pass",
+      "time": "2026-05-22T16:57:02.611717"
+    },
+    {
+      "test": "settings_page",
+      "status": "fail",
+      "error": "Page.wait_for_selector: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator(\".settings-section\") to be visible\n    14 × locator resolved to 5 elements. Proceeding with the first one: <div class=\"settings-section\">…</div>\n",
+      "time": "2026-05-22T16:57:08.646484"
+    },
+    {
+      "test": "responsive_design",
+      "status": "pass",
+      "time": "2026-05-22T16:57:09.584499"
+    },
+    {
+      "test": "auto_refresh",
+      "status": "pass",
+      "data": {
+        "initial_agents": "8"
+      },
+      "time": "2026-05-22T16:57:21.481478"
+    }
+  ]
+}
