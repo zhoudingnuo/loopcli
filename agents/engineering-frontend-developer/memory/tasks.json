@@ -187,5 +187,14 @@
     "created": "2026-05-23",
     "assignee": "engineering-frontend-developer",
     "completed": "2026-05-23 06:00:00"
+  },
+  {
+    "id": 22,
+    "status": "done",
+    "title": "Phase4: 变现系统+广告集成+包体优化+上线准备",
+    "description": "Week4 GDD要求：(1) 穿山甲SDK集成-激励视频广告，6个广告位UI（续步/开局增益/宝箱/过关奖励/翻倍/插屏），广告频率控制；(2) 数据埋点（关卡开始/结束/广告展示/社交事件）；(3) 包体优化至<4MB（资源压缩+代码瘦身）；(4) 全量测试+Bug修复。项目路径：D:/game-projects/douyin-match3/，参考GDD.md第四周章节。注意：抖音SDK用存根模式开发环境不可用真实SDK，确保接口可切换。",
+    "created": "2026-05-23",
+    "assignee": "engineering-frontend-developer",
+    "completed": "2026-05-23 06:15:00"
   }
 ]

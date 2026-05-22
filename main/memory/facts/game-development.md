@@ -15,8 +15,9 @@
 - **Phase 1 完成**（W1）：核心玩法 MVP — 7模块（Board/MatchEngine/Renderer/InputHandler/ScoreSystem/Animation/Game）
 - **Phase 2 完成**（W2）：完整单局 — 障碍物(冰块/锁链/巧克力)+Boss系统+音效+20关+5种目标类型
 - **Phase 3a 完成**：元进度系统 — 6模块1050行(DataManager/CoinSystem/Characters/MapScreen/ShopUI/Navigation)
-- **Phase 3b 进行中**：每日系统+关卡21-50+宝箱+社交UI框架
-- **下一步**：Phase 3b 完成后 → Phase 4（变现+上线）
+- **Phase 3b 完成**：DailySystem(396行)+SocialSystem(363行)+关卡21-50
+- **Phase 4 已派发(task#22)**：穿山甲SDK+6广告位+数据埋点+包体优化+上线准备
+- **下一步**：Phase 4 完成 → 全量测试+抖音提审
 
 ## 关键约束
 - 游戏项目放在 D 盘（`D:/game-projects/`），不放在 loopcli 根目录
