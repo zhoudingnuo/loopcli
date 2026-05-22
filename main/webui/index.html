@@ -1119,7 +1119,6 @@ body {
             <div>加载 Agents...</div>
           </div>
         </div>
-      </div>
 
         <!-- 可视化图表区域（SVG 美化版） -->
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-bottom: 32px;">
@@ -1141,6 +1140,7 @@ body {
           </div>
           <div id="usage-content" style="color: var(--text2); font-size: 14px;">加载中...</div>
         </div>
+      </div>
 
       <!-- Tasks 页面 -->
       <div class="page" id="page-tasks">
@@ -1974,7 +1974,7 @@ async function loadAgents() {
           </div>
           <span class="status-badge ${agent.status}">
             <span class="status-dot"></span>
-            <span>${agent.status}</span>
+            <span>${agent.status === 'disabled' ? '已禁用' : agent.status === 'idle' ? '空闲' : agent.status === 'active' ? '运行中' : agent.status}</span>
           </span>
         </div>
 
@@ -2123,7 +2123,7 @@ async function loadLogs() {
 
     // Parse table-format logs: | time | status | task | summary |
     const logEntries = lines
-      .filter(l => l.trim().startsWith('|') && !l.trim().startsWith('|--') && !l.trim().startsWith('| 时间'))
+      .filter(l => l.trim().startsWith('|') && !l.trim().startsWith('|--') && !l.trim().startsWith('| 时间') && !l.trim().startsWith('| #'))
       .slice(-50)
       .map(line => {
         const parts = line.split('|').map(s => s.trim()).filter(Boolean);
