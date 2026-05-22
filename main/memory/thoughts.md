@@ -26,3 +26,15 @@
 
 **下一步**：需要调试后端 UPDATE API 路由问题
 
+## 轮次285 - 2026-05-22 18:09
+
+**修复**：WebUI 后端长期任务更新 API bug
+
+**问题根因**：`_handle_longtask_update` 函数中 debug print 语句在 content 变量定义前执行
+
+**解决方案**：将 print 语句移到 content 变量定义之后
+
+**文件修改**：webui/server.py:1097-1103
+
+**状态**：WebUI 服务器需要重启以应用修复
+

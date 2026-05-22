@@ -1095,12 +1095,12 @@ class WebUIHandler(SimpleHTTPRequestHandler):
             return self._send_json({"error": str(e)}, status=500)
 
     def _handle_longtask_update(self):
-        print(f"[DEBUG] _handle_longtask_update called, content: {content}")
         """更新长期任务内容"""
         body = self._read_body()
         if body is None:
             return
         content = body.get("content", "")
+        print(f"[DEBUG] _handle_longtask_update called, content: {content}")
         longtask_file = LOOPCLI_ROOT / "longtask.md"
         try:
             longtask_file.write_text(content, encoding="utf-8")
