@@ -169,5 +169,14 @@
     "created": "2026-05-23",
     "assignee": "engineering-frontend-developer",
     "completed": "2026-05-23 05:36:30"
+  },
+  {
+    "id": 20,
+    "status": "done",
+    "title": "三消游戏Phase3a：元进度系统",
+    "description": "基于已有的Phase1+Phase2代码，开发W3元进度系统第一部分：1.地图界面(MapScreen.js)关卡选择地图路径式推进显示星级和锁定状态 2.角色系统(Characters.js)4个可选角色每个有独特技能角色选择界面 3.金币经济(CoinSystem.js)关卡奖励金币金币可购买道具续命 4.道具商店(ShopUI.js)3-5种道具金币购买 5.数据持久化(DataManager.js)localStorage保存进度 6.UI导航(Navigation.js)主菜单到地图到游戏到结算完整导航 7.修改index.html引入新模块 项目路径D:/game-projects/douyin-match3/ 参考GDD D:/game-projects/douyin-match3/GDD.md 禁止AskUserQuestion自主决策",
+    "created": "2026-05-23",
+    "assignee": "engineering-frontend-developer",
+    "completed": "2026-05-23 05:45:00"
   }
 ]
