@@ -1,0 +1,83 @@
+{
+  "timestamp": "2026-05-22T18:34:49.228422",
+  "summary": {
+    "total": 12,
+    "passed": 11,
+    "failed": 1,
+    "success_rate": "91.7%"
+  },
+  "results": [
+    {
+      "test": "Initial Load",
+      "status": "PASS",
+      "details": "sidebar=True, main=True, brand=True",
+      "timestamp": "2026-05-22T18:34:38.963111"
+    },
+    {
+      "test": "Navigation",
+      "status": "PASS",
+      "details": "7/7 items work",
+      "timestamp": "2026-05-22T18:34:42.677969"
+    },
+    {
+      "test": "Theme Switching",
+      "status": "PASS",
+      "details": "3/3 themes work",
+      "timestamp": "2026-05-22T18:34:43.729243"
+    },
+    {
+      "test": "Responsive Design",
+      "status": "PASS",
+      "details": "3/3 sizes work",
+      "timestamp": "2026-05-22T18:34:44.754784"
+    },
+    {
+      "test": "Dashboard Cards",
+      "status": "PASS",
+      "details": "Found 4 cards",
+      "timestamp": "2026-05-22T18:34:45.330341"
+    },
+    {
+      "test": "Agent List",
+      "status": "PASS",
+      "details": "Displaying 8 agents",
+      "timestamp": "2026-05-22T18:34:45.890879"
+    },
+    {
+      "test": "Tasks Page",
+      "status": "PASS",
+      "details": "Tasks page loads",
+      "timestamp": "2026-05-22T18:34:46.462588"
+    },
+    {
+      "test": "Logs Page",
+      "status": "PASS",
+      "details": "Logs page loads",
+      "timestamp": "2026-05-22T18:34:47.007507"
+    },
+    {
+      "test": "Performance Page",
+      "status": "PASS",
+      "details": "Performance page loads",
+      "timestamp": "2026-05-22T18:34:47.573516"
+    },
+    {
+      "test": "Screenshots Page",
+      "status": "PASS",
+      "details": "Screenshots page loads",
+      "timestamp": "2026-05-22T18:34:48.127963"
+    },
+    {
+      "test": "Settings Page",
+      "status": "PASS",
+      "details": "Settings page loads",
+      "timestamp": "2026-05-22T18:34:48.680217"
+    },
+    {
+      "test": "Long Task Display",
+      "status": "FAIL",
+      "details": "No long task",
+      "timestamp": "2026-05-22T18:34:49.191732"
+    }
+  ]
+}

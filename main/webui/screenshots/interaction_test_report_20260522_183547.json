@@ -1,0 +1,60 @@
+{
+  "timestamp": "2026-05-22T18:35:57.628908",
+  "type": "interaction_tests",
+  "summary": {
+    "total": 8,
+    "passed": 6,
+    "failed": 2,
+    "success_rate": "75.0%"
+  },
+  "results": [
+    {
+      "test": "Button Count",
+      "status": "PASS",
+      "details": "Found 30 buttons, 6 nav items",
+      "timestamp": "2026-05-22T18:35:49.537061"
+    },
+    {
+      "test": "Theme Toggle",
+      "status": "PASS",
+      "details": "3/3 themes switched",
+      "timestamp": "2026-05-22T18:35:51.306645"
+    },
+    {
+      "test": "API Endpoints",
+      "status": "PASS",
+      "details": "5/5 endpoints respond",
+      "timestamp": "2026-05-22T18:35:51.430292"
+    },
+    {
+      "test": "Create Agent Button",
+      "status": "FAIL",
+      "details": "Found 0 create buttons",
+      "timestamp": "2026-05-22T18:35:52.987662"
+    },
+    {
+      "test": "Message Form",
+      "status": "FAIL",
+      "details": "input=True, send=False",
+      "timestamp": "2026-05-22T18:35:54.069444"
+    },
+    {
+      "test": "Automation Buttons",
+      "status": "PASS",
+      "details": "Found 7 automation-related elements",
+      "timestamp": "2026-05-22T18:35:55.201799"
+    },
+    {
+      "test": "Quick Actions",
+      "status": "PASS",
+      "details": "Found 8 action elements",
+      "timestamp": "2026-05-22T18:35:56.305508"
+    },
+    {
+      "test": "Mobile Touch",
+      "status": "PASS",
+      "details": "2/10 buttons touch-friendly",
+      "timestamp": "2026-05-22T18:35:57.495681"
+    }
+  ]
+}

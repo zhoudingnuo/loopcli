@@ -599,6 +599,9 @@ class WebUIHandler(SimpleHTTPRequestHandler):
         if path == "/api/stats":
             return self._handle_stats_get()
 
+        if path == "/api/screenshots":
+            return self._handle_screenshots_get()
+
         # Static files
         super().do_GET()
 
@@ -1233,6 +1236,30 @@ class WebUIHandler(SimpleHTTPRequestHandler):
                 "storage": {
                     "log_size_mb": round(total_log_size / 1024 / 1024, 2)
                 }
+            })
+        except Exception as e:
+            return self._send_json({"error": str(e)}, status=500)
+
+    def _handle_screenshots_get(self):
+        """获取截图列表"""
+        try:
+            screenshots_dir = WEBUI_DIR / "screenshots"
+            if not screenshots_dir.exists():
+                return self._send_json({"screenshots": [], "total": 0})
+
+            screenshots = []
+            for png_file in sorted(screenshots_dir.glob("*.png"), key=lambda p: p.stat().st_mtime, reverse=True):
+                stat = png_file.stat()
+                screenshots.append({
+                    "name": png_file.name,
+                    "size": round(stat.st_size / 1024, 2),  # KB
+                    "modified": datetime.fromtimestamp(stat.st_mtime, timezone.utc).isoformat(),
+                    "url": f"/screenshots/{png_file.name}"
+                })
+
+            return self._send_json({
+                "screenshots": screenshots[:50],  # 最多返回50个
+                "total": len(screenshots)
             })
         except Exception as e:
             return self._send_json({"error": str(e)}, status=500)

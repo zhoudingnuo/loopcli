@@ -882,6 +882,12 @@ body {
     flex-shrink: 0;
     margin-bottom: 0;
     margin-right: 8px;
+    min-height: 44px;
+    min-width: 44px;
+  }
+  button, .btn {
+    min-height: 44px;
+    min-width: 44px;
   }
   .content { padding: 20px; }
   .stats-grid { grid-template-columns: 1fr 1fr; }
@@ -949,6 +955,10 @@ body {
       <div class="nav-item" data-page="logs">
         <span>◐</span>
         <span>Logs</span>
+      </div>
+      <div class="nav-item" data-page="screenshots">
+        <span>📷</span>
+        <span>Screenshots</span>
       </div>
       <div class="nav-item" data-page="settings">
         <span>⚙</span>
@@ -1159,6 +1169,28 @@ body {
             <div class="loading">
               <div class="spinner"></div>
               <div>加载日志...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Screenshots 页面 -->
+      <div class="page" id="page-screenshots">
+        <div class="page-header">
+          <h2>测试截图</h2>
+          <p>Playwright 测试截图预览</p>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3>最新截图</h3>
+            <button class="btn btn-secondary" onclick="loadScreenshots()" style="margin-left: auto;">刷新</button>
+          </div>
+          <div class="card-body">
+            <div id="screenshots-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
+              <div style="grid-column: 1/-1; text-align: center; color: var(--text2); padding: 40px;">
+            加载中...
+              </div>
             </div>
           </div>
         </div>
@@ -1425,6 +1457,9 @@ async function loadPageData(pageId) {
       break;
     case 'logs':
       await loadLogs();
+      break;
+    case 'screenshots':
+      await loadScreenshots();
       break;
     case 'settings':
       loadSettings();
@@ -1844,6 +1879,48 @@ async function loadLogs() {
   }
 }
 
+// 加载 Screenshots 页面
+async function loadScreenshots() {
+  try {
+    const response = await fetch('/api/screenshots');
+    const data = await response.json();
+
+    if (data.error) {
+      document.getElementById('screenshots-grid').innerHTML =
+        `<div style="grid-column: 1/-1; text-align: center; color: var(--text2); padding: 40px;">错误: ${data.error}</div>`;
+      return;
+    }
+
+    const grid = document.getElementById('screenshots-grid');
+    if (data.screenshots.length === 0) {
+      grid.innerHTML =
+        '<div style="grid-column: 1/-1; text-align: center; color: var(--text2); padding: 40px;">暂无截图</div>';
+      return;
+    }
+
+    grid.innerHTML = data.screenshots.map(screenshot => `
+      <div style="background: var(--surface2); border-radius: 12px; overflow: hidden; border: 1px solid var(--border);">
+        <img src="${screenshot.url}" alt="${screenshot.name}"
+             style="width: 100%; height: 200px; object-fit: cover; cursor: pointer;"
+             onclick="window.open('${screenshot.url}', '_blank')">
+        <div style="padding: 12px;">
+          <div style="font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${screenshot.name}">
+            ${screenshot.name}
+          </div>
+          <div style="font-size: 11px; color: var(--text2); display: flex; justify-content: space-between;">
+            <span>${screenshot.size} KB</span>
+            <span>${new Date(screenshot.modified).toLocaleString('zh-CN')}</span>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  } catch (error) {
+    console.error('加载截图失败:', error);
+    document.getElementById('screenshots-grid').innerHTML =
+      '<div style="grid-column: 1/-1; text-align: center; color: var(--text2); padding: 40px;">加载失败</div>';
+  }
+}
+
 // 主题管理
 function initTheme() {
   const savedTheme = localStorage.getItem('webui_theme') || 'dark';
@@ -2141,7 +2218,8 @@ const keyboardShortcuts = {
   '2': 'tasks',
   '3': 'performance',
   '4': 'logs',
-  '5': 'settings',
+  '5': 'screenshots',
+  '6': 'settings',
   'r': 'refresh',
   'h': 'help'
 };
