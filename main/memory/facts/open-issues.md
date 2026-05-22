@@ -15,4 +15,4 @@ created: 2026-05-23
 - usage.py 统计数据的展示方式可优化
 - inbox archive 已积累 80+ 文件，可考虑按月归档压缩
 
-**Related:** [[current-architecture]]
+**Related:** [[current-architecture]] [[webui-pitfalls]] [[cost-control]]

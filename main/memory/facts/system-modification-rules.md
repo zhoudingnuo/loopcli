@@ -16,4 +16,4 @@ created: 2026-05-22
 
 **Why:** 2026-05-22 事故：MCP 服务器故障阻塞整个系统。测试能快速发现语法错误、导入失败、子进程卡死。
 
-**Related:** [[cost-control]]
+**Related:** [[cost-control]] [[current-architecture]] [[key-decisions]]

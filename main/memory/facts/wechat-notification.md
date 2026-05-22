@@ -22,4 +22,4 @@ report/ 目录文件自动发送到用户微信。
 ## 格式
 `D:/loopcli/main/report/report_YYYYMMDD_HHMM.md`，≤200字。
 
-**Related:** [[cost-control]]
+**Related:** [[cost-control]] [[agent-scheduling]] [[open-issues]]

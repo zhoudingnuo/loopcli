@@ -22,4 +22,4 @@ created: 2026-05-23
 - **原因**：子 Agent 运行在非交互模式（--print），问问题会永久卡死系统
 - **教训**：2026-05-22 曾因此导致系统阻塞
 
-**Related:** [[memory-system-design]] [[current-architecture]]
+**Related:** [[memory-system-design]] [[current-architecture]] [[cost-control]] [[agent-scheduling]]

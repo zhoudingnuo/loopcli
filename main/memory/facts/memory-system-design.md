@@ -45,4 +45,4 @@ updated: 2026-05-23
 - 文件式系统零依赖、可 Git 追踪、token 成本可控
 - Reddit 社区共识：小规模 agent 用 Git/file-based 比向量 DB 更实用
 
-**Related:** [[cost-control]]
+**Related:** [[cost-control]] [[key-decisions]] [[current-architecture]]

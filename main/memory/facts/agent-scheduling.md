@@ -20,4 +20,4 @@ created: 2026-05-22
 - 禁止扫描 `D:/loopcli/subagent/` 目录（276个模板，数据量太大）
 - 子 Agent PROMPT.md 必须包含"禁止 AskUserQuestion"
 
-**Related:** [[cost-control]] [[current-architecture]]
+**Related:** [[cost-control]] [[current-architecture]] [[key-decisions]] [[wechat-notification]]

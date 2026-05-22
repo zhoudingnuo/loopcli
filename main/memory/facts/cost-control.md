@@ -24,4 +24,4 @@ created: 2026-05-22
 
 **Why:** 2026-05-22 曾因 agent 空转浪费大量 token。
 
-**Related:** [[system-modification-rules]]
+**Related:** [[system-modification-rules]] [[agent-scheduling]] [[memory-system-design]] [[key-decisions]]

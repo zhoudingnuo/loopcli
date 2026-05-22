@@ -25,4 +25,4 @@ created: 2026-05-23
 - 微信集成：inbox/ 接收消息，report/ 发送通知
 - 长期任务：`D:/loopcli/longtask.md`
 
-**Related:** [[webui-pitfalls]] [[agent-scheduling]]
+**Related:** [[webui-pitfalls]] [[agent-scheduling]] [[key-decisions]] [[open-issues]] [[system-modification-rules]]

@@ -22,4 +22,4 @@ created: 2026-05-23
 ## 统计卡片标签对比度
 - `--text2` 从 `#9ca3af` 提升至 `#b0b8c4`
 
-**Related:** [[current-architecture]]
+**Related:** [[current-architecture]] [[open-issues]] [[key-decisions]]
