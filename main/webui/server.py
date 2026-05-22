@@ -645,6 +645,8 @@ class WebUIHandler(SimpleHTTPRequestHandler):
             return self._handle_automation_git_sync()
         if path == "/api/longtask/clear":
             return self._handle_longtask_clear()
+        if path == "/api/longtask/update":
+            return self._handle_longtask_update()
 
         self._send_json({"error": "Not found"}, status=404)
 
@@ -1089,6 +1091,20 @@ class WebUIHandler(SimpleHTTPRequestHandler):
                 return self._send_json({"status": "cleared", "message": "长期任务已取消"})
             else:
                 return self._send_json({"status": "no_task", "message": "无长期任务"})
+        except Exception as e:
+            return self._send_json({"error": str(e)}, status=500)
+
+    def _handle_longtask_update(self):
+        print(f"[DEBUG] _handle_longtask_update called, content: {content}")
+        """更新长期任务内容"""
+        body = self._read_body()
+        if body is None:
+            return
+        content = body.get("content", "")
+        longtask_file = LOOPCLI_ROOT / "longtask.md"
+        try:
+            longtask_file.write_text(content, encoding="utf-8")
+            return self._send_json({"status": "updated", "message": "长期任务已更新", "content": content})
         except Exception as e:
             return self._send_json({"error": str(e)}, status=500)
 

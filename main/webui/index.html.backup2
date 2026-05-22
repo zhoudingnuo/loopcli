@@ -1231,9 +1231,6 @@ body {
               <div class="description" id="longtask-status">加载中...</div>
             </div>
             <div class="setting-control">
-              <button class="btn btn-secondary" id="edit-longtask-btn" onclick="startEditLongTask()" style="display: none;">
-                ✎ 编辑
-              </button>
               <button class="btn btn-secondary" id="cancel-longtask-btn" onclick="cancelLongTask()" style="display: none;">
                 ✕ 取消任务
               </button>
@@ -1243,13 +1240,6 @@ body {
             <div style="background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 16px; font-family: monospace; font-size: 13px; white-space: pre-wrap; color: var(--text2); max-height: 200px; overflow-y: auto;" id="longtask-text"></div>
           </div>
         </div>
-          <div id="longtask-edit" style="display: none; margin-top: 16px;">
-            <textarea id="longtask-editor" style="width: 100%; min-height: 120px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-family: monospace; font-size: 13px; color: var(--text); resize: vertical;" placeholder="输入长期任务内容..."></textarea>
-            <div style="display: flex; gap: 8px; margin-top: 8px;">
-              <button class="btn btn-primary" onclick="saveLongTask()">💾 保存</button>
-              <button class="btn btn-secondary" onclick="cancelEditLongTask()">取消</button>
-            </div>
-          </div>
       </div>
     </div>
   </main>
@@ -1896,7 +1886,6 @@ async function loadLongTask() {
       textEl.textContent = data.content;
       contentEl.style.display = 'block';
       cancelBtn.style.display = 'block';
-      document.getElementById('edit-longtask-btn').style.display = 'block';
     } else {
       statusEl.textContent = '无长期任务';
       contentEl.style.display = 'none';
@@ -1925,46 +1914,6 @@ async function cancelLongTask() {
 }
 
 // 通知系统
-
-async function startEditLongTask() {
-  const contentEl = document.getElementById('longtask-content');
-  const editEl = document.getElementById('longtask-edit');
-  const editorEl = document.getElementById('longtask-editor');
-  const textEl = document.getElementById('longtask-text');
-  
-  editorEl.value = textEl.textContent || '';
-  contentEl.style.display = 'none';
-  editEl.style.display = 'block';
-  showNotification('进入编辑模式', 'info');
-}
-
-async function saveLongTask() {
-  const editorEl = document.getElementById('longtask-editor');
-  const content = editorEl.value;
-  
-  try {
-    const response = await fetch(`${API_BASE}/longtask/update`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content })
-    });
-    if (!response.ok) throw new Error('API 请求失败');
-    const data = await response.json();
-    
-    showNotification(data.message || '长期任务已更新', 'success');
-    document.getElementById('longtask-edit').style.display = 'none';
-    await loadLongTask();
-  } catch (error) {
-    console.error('保存长期任务失败:', error);
-    showNotification('保存失败: ' + error.message, 'error');
-  }
-}
-
-function cancelEditLongTask() {
-  document.getElementById('longtask-edit').style.display = 'none';
-  document.getElementById('longtask-content').style.display = 'block';
-  showNotification('已取消编辑', 'info');
-}
 function showNotification(message, type = 'info', duration = 3000) {
   const container = document.getElementById('notification-container');
   const notification = document.createElement('div');
