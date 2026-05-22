@@ -3,57 +3,92 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LoopCLI - Agent 控制台 v3</title>
+<title>LoopCLI - Agent 控制台 v5</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  /* v3 配色 - 更精致的深色主题 */
-  --bg: #080c14;
-  --surface: #0e1424;
-  --surface2: #161e32;
-  --border: #252d42;
-  --text: #f4f8ff;
-  --text2: #7a8699;
+  /* v5 配色 - 玻璃态深色主题 */
+  --bg: #050810;
+  --surface: rgba(15, 20, 35, 0.8);
+  --surface2: rgba(25, 35, 55, 0.6);
+  --border: rgba(100, 120, 160, 0.2);
+  --text: #f8faff;
+  --text2: #8896aa;
 
-  /* 品牌色 - 紫蓝渐变 */
-  --accent: #9b8cf7;
-  --accent2: #b79bfb;
-  --accent-gradient: linear-gradient(135deg, #9b8cf7 0%, #d094fc 100%);
+  /* 品牌色 - 赛博朋克渐变 */
+  --accent: #a78bfa;
+  --accent2: #f472b6;
+  --accent3: #38bdf8;
+  --accent-gradient: linear-gradient(135deg, #a78bfa 0%, #f472b6 50%, #38bdf8 100%);
+  --accent-gradient-subtle: linear-gradient(135deg, rgba(167, 139, 250, 0.15) 0%, rgba(244, 114, 182, 0.15) 50%, rgba(56, 189, 248, 0.15) 100%);
 
-  /* 状态色 */
-  --green: #00e090;
-  --green-bg: rgba(0, 224, 144, 0.12);
-  --yellow: #ffc947;
-  --yellow-bg: rgba(255, 201, 71, 0.12);
-  --red: #ff7a7a;
-  --red-bg: rgba(255, 122, 122, 0.12);
-  --blue: #6eb5ff;
-  --blue-bg: rgba(110, 181, 255, 0.12);
+  /* 状态色 - 更鲜艳 */
+  --green: #22d3ee;
+  --green-bg: rgba(34, 211, 238, 0.15);
+  --green-glow: rgba(34, 211, 238, 0.4);
+  --yellow: #fbbf24;
+  --yellow-bg: rgba(251, 191, 36, 0.15);
+  --yellow-glow: rgba(251, 191, 36, 0.4);
+  --red: #f87171;
+  --red-bg: rgba(248, 113, 113, 0.15);
+  --red-glow: rgba(248, 113, 113, 0.4);
+  --blue: #60a5fa;
+  --blue-bg: rgba(96, 165, 250, 0.15);
   --purple: #c084fc;
-  --purple-bg: rgba(192, 132, 252, 0.12);
+  --purple-bg: rgba(192, 132, 252, 0.15);
 
-  --radius: 14px;
-  --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.2);
-  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.5);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --radius-lg: 24px;
+  --shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.6);
+  --shadow-glow: 0 0 40px rgba(167, 139, 250, 0.3);
 
   /* 动画 */
-  --transition-fast: 0.15s ease;
-  --transition-normal: 0.25s ease;
-  --transition-slow: 0.4s ease;
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* 滚动条美化 */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+  transition: background var(--transition-fast);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
 }
 
 /* 浅色主题 */
 [data-theme="light"] {
-  --bg: #f8f9fc;
-  --surface: #ffffff;
-  --surface2: #f0f2f8;
-  --border: #e1e4ed;
+  --bg: #f0f4f8;
+  --surface: rgba(255, 255, 255, 0.9);
+  --surface2: rgba(245, 248, 252, 0.8);
+  --border: rgba(150, 170, 200, 0.25);
   --text: #1a1d2e;
   --text2: #6b7280;
-  --shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.04);
-  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.12);
+  --shadow: 0 8px 32px rgba(100, 120, 160, 0.12);
+  --shadow-sm: 0 4px 16px rgba(100, 120, 160, 0.08);
+  --shadow-lg: 0 20px 60px rgba(100, 120, 160, 0.18);
+  --shadow-glow: 0 0 40px rgba(167, 139, 250, 0.2);
+}
+
+/* 玻璃态效果 */
+.glass {
+  background: var(--surface);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--border);
+}
+.glass-strong {
+  background: var(--surface2);
+  backdrop-filter: blur(30px) saturate(200%);
+  -webkit-backdrop-filter: blur(30px) saturate(200%);
 }
 
 body {
@@ -103,9 +138,18 @@ body {
   right: 0;
   top: 0;
   bottom: 0;
-  width: 1px;
-  background: linear-gradient(180deg, transparent, var(--accent) 50%, transparent);
-  opacity: 0.4;
+  width: 2px;
+  background: var(--accent-gradient);
+  opacity: 0.3;
+  filter: blur(1px);
+}
+.sidebar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--accent-gradient-subtle);
+  opacity: 0.05;
+  pointer-events: none;
 }
 
 .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
@@ -260,16 +304,53 @@ body {
   justify-content: space-between;
   align-items: center;
   background: var(--surface);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(20px) saturate(180%);
+  gap: 24px;
 }
 .header h2 {
-  font-size: 22px;
-  font-weight: 800;
+  font-size: 24px;
+  font-weight: 900;
   background: var(--accent-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   letter-spacing: -0.5px;
+  min-width: 120px;
+}
+
+/* 搜索框 */
+.header-search {
+  position: relative;
+  flex: 1;
+  max-width: 400px;
+}
+.search-input {
+  width: 100%;
+  padding: 12px 40px 12px 16px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 13px;
+  transition: all var(--transition-normal);
+  backdrop-filter: blur(10px);
+}
+.search-input::placeholder {
+  color: var(--text2);
+}
+.search-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.15);
+}
+.search-icon {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text2);
+  font-size: 14px;
+  pointer-events: none;
 }
 .header-actions { display: flex; gap: 12px; align-items: center; }
 
@@ -295,8 +376,35 @@ body {
 /* 统计卡片 */
 .stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+  transition: all var(--transition-normal);
+}
+.stat-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--accent-gradient-subtle);
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+}
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-glow);
+  border-color: var(--accent);
+}
+.stat-card:hover::before {
+  opacity: 1;
+}
   margin-bottom: 32px;
 }
 .stat-card {
@@ -544,17 +652,18 @@ body {
 
 /* 按钮 */
 .btn {
-  padding: 11px 20px;
-  border-radius: var(--radius);
+  padding: 12px 24px;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   background: var(--surface2);
   color: var(--text);
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
   transition: all var(--transition-normal);
   position: relative;
   overflow: hidden;
+  backdrop-filter: blur(10px);
 }
 .btn::before {
   content: '';
@@ -567,19 +676,19 @@ body {
 .btn:hover {
   border-color: var(--accent);
   transform: translateY(-2px);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-sm), 0 0 20px rgba(167, 139, 250, 0.2);
 }
 .btn:active {
-  transform: translateY(0);
+  transform: translateY(0) scale(0.98);
 }
 .btn-primary {
   background: var(--accent-gradient);
   border: none;
   color: #fff;
-  box-shadow: 0 6px 20px rgba(155, 140, 247, 0.4);
+  box-shadow: 0 6px 24px rgba(167, 139, 250, 0.4);
 }
 .btn-primary:hover {
-  box-shadow: 0 8px 28px rgba(155, 140, 247, 0.6);
+  box-shadow: 0 8px 32px rgba(167, 139, 250, 0.6), 0 0 30px rgba(244, 114, 182, 0.3);
   transform: translateY(-2px);
 }
 .btn-primary::before { display: none; }
@@ -1024,6 +1133,21 @@ body {
   color: #fff;
 }
 
+/* 搜索高亮 */
+.search-highlight {
+  animation: searchPulse 1s ease infinite;
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.2), var(--shadow-glow) !important;
+}
+@keyframes searchPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.2), var(--shadow-glow);
+  }
+  50% {
+    box-shadow: 0 0 0 5px rgba(167, 139, 250, 0.4), var(--shadow-glow);
+  }
+}
+
 /* 全屏模式 */
 .fullscreen .sidebar { display: none; }
 .fullscreen .header { padding: 16px 24px; }
@@ -1261,12 +1385,16 @@ body {
         <span>发送消息</span>
       </div>
     </nav>
-    <div class="sidebar-footer">LoopCLI v3.0</div>
+    <div class="sidebar-footer">LoopCLI v5.0</div>
   </aside>
 
   <div class="main">
     <div class="header">
       <h2 id="pageTitle">仪表盘</h2>
+      <div class="header-search">
+        <input type="text" id="globalSearch" placeholder="搜索 Agent、任务..." class="search-input">
+        <span class="search-icon">🔍</span>
+      </div>
       <div class="header-actions">
         <span class="poll-indicator" id="poll-indicator">
           <span class="poll-dot" id="poll-dot"></span>
@@ -1553,7 +1681,97 @@ body {
 </div>
 
 <script>
-// ============ v3 增强功能 ============
+// ============ v5 增强功能 ============
+
+// 全局搜索
+const searchInput = document.getElementById('globalSearch');
+let allAgents = [];
+let allTasks = [];
+
+// 搜索功能实现
+searchInput.addEventListener('input', async (e) => {
+  const query = e.target.value.toLowerCase().trim();
+  const currentPage = document.querySelector('.page.active');
+  const pageId = currentPage?.id;
+
+  if (!query) {
+    // 清空搜索时恢复显示
+    document.querySelectorAll('.search-highlight').forEach(el => {
+      el.classList.remove('search-highlight');
+    });
+    return;
+  }
+
+  // 根据当前页面执行搜索
+  if (pageId === 'page-agents') {
+    filterAgents(query);
+  } else if (pageId === 'page-tasks') {
+    filterTasks(query);
+  } else {
+    // 跨页面搜索 - 显示结果模态框
+    await globalSearch(query);
+  }
+});
+
+function filterAgents(query) {
+  const cards = document.querySelectorAll('.agent-card');
+  cards.forEach(card => {
+    const name = card.querySelector('.agent-name')?.textContent.toLowerCase() || '';
+    const status = card.querySelector('.status-badge')?.textContent.toLowerCase() || '';
+    const matches = name.includes(query) || status.includes(query);
+    card.style.display = matches ? 'block' : 'none';
+    if (matches && query) {
+      card.classList.add('search-highlight');
+    } else {
+      card.classList.remove('search-highlight');
+    }
+  });
+}
+
+function filterTasks(query) {
+  const cards = document.querySelectorAll('.task-card');
+  cards.forEach(card => {
+    const title = card.querySelector('.task-title')?.textContent.toLowerCase() || '';
+    const agent = card.querySelector('.task-agent')?.textContent.toLowerCase() || '';
+    const status = card.querySelector('.task-status')?.textContent.toLowerCase() || '';
+    const matches = title.includes(query) || agent.includes(query) || status.includes(query);
+    card.style.display = matches ? 'block' : 'none';
+    if (matches && query) {
+      card.classList.add('search-highlight');
+    } else {
+      card.classList.remove('search-highlight');
+    }
+  });
+}
+
+async function globalSearch(query) {
+  // 获取所有数据
+  try {
+    const [agentsRes, tasksRes] = await Promise.all([
+      fetch('/api/agents'),
+      fetch('/api/tasks?agent=__all__')
+    ]);
+    const agents = await agentsRes.json();
+    const tasks = await tasksRes.json();
+
+    // 搜索结果
+    const matchedAgents = agents.filter(a =>
+      a.agent_id?.toLowerCase().includes(query) ||
+      a.status?.toLowerCase().includes(query)
+    );
+    const matchedTasks = tasks.filter(t =>
+      t.title?.toLowerCase().includes(query) ||
+      t.assignee?.toLowerCase().includes(query) ||
+      t.status?.toLowerCase().includes(query)
+    );
+
+    // 显示搜索结果（可以扩展为模态框）
+    console.log('搜索结果:', { agents: matchedAgents, tasks: matchedTasks });
+    showToast(`找到 ${matchedAgents.length} 个 Agent, ${matchedTasks.length} 个任务`, 'info');
+  } catch (e) {
+    console.error('搜索失败:', e);
+  }
+}
 
 // 主题切换
 const themeToggle = document.getElementById('theme-toggle');
