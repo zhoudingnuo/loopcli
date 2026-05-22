@@ -1,11 +1,12 @@
 # LoopCLI 工作记忆
 
-## 2026-05-23 轮次361（本轮）
+## 2026-05-23 轮次362（本轮）
 
-- game-designer 完成抖音小游戏调研，market-analyst 完成 Steam 调研，两者已禁用
-- 用户报 WebUI bug：配额栏显示两个"Token 配额 (5h)"，已派 engineering-frontend-developer 修复
-- 调研产出：抖音三消+成语、Steam恐怖/解谜/放置三个方向
-- 下一步等 bug 修复完成后，考虑推进游戏立项
+- engineering-frontend-developer 完成 WebUI 配额去重 bug 修复，已禁用
+- game-designer、market-analyst 仍禁用，inbox 消息已归档
+- 游戏开发推进：重新启用 game-designer，派发抖音三消立项 GDD 任务（#4）
+- 选择抖音三消作为首款游戏：3-4周周期，20K DAU 月收 ¥288K
+- 下一轮：检查 GDD 产出，推进实际开发（创建开发 agent），考虑 Steam 立项
 
 ## 2026-05-23 轮次348
 
