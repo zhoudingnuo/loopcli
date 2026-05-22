@@ -228,8 +228,14 @@ def cmd_run(args):
             break
 
         if args.iterations == 0 or count < args.iterations:
+            # 有 longtask 时用默认间隔，无任务时隔 15 分钟
+            lt_path = os.path.join(LOOPCLI_DIR, "longtask.md")
+            has_longtask = os.path.isfile(lt_path) and os.path.getsize(lt_path) > 10
+            wait_secs = args.wait if has_longtask else 900
+            if not has_longtask:
+                out(f"  {C.DIM}无长期任务，15 分钟后开始下一轮{C.RST}")
             draw_input()
-            for _ in range(args.wait):
+            for _ in range(wait_secs):
                 if not process_queue():
                     stop_event.set()
                     break

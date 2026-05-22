@@ -1,9 +1,9 @@
 {
   "agent": "main",
   "status": "idle",
-  "last_run": "2026-05-23 03:53:42",
-  "run_count": 349,
-  "last_action": "webui_layout_restructure_dashboard",
+  "last_run": "2026-05-23 04:04:16",
+  "run_count": 351,
+  "last_action": "idle_round_no_pending_tasks",
   "active_agents": [],
   "pending_user_requests": []
 }
