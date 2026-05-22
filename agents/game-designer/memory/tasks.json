@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "status": "done",
+    "title": "调研设计3款HTML5小游戏用于盈利",
+    "description": "调研设计3款HTML5小游戏用于盈利",
+    "created": "2026-05-23",
+    "assignee": "game-designer",
+    "completed": "2026-05-23T04:25:07"
+  },
+  {
+    "id": 2,
+    "status": "done",
+    "title": "补充详细任务描述",
+    "description": "调研当前市场最容易盈利的HTML5游戏类型，设计3款可行游戏。每款含核心玩法循环、目标用户、盈利模式、开发难度评估。优先考虑休闲益智类、放置挂机类、文字知识类。方案保存到D:/game-projects/research/。要具体到可立即开始开发。禁止AskUserQuestion。",
+    "created": "2026-05-23",
+    "assignee": "game-designer",
+    "completed": "2026-05-23T04:27:00"
+  }
+]

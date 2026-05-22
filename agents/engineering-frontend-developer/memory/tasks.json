@@ -133,5 +133,14 @@
     "created": "2026-05-23",
     "assignee": "engineering-frontend-developer",
     "completed": "2026-05-23 04:18:04"
+  },
+  {
+    "id": 16,
+    "status": "done",
+    "title": "\"侧边栏全面中文化\"",
+    "description": "\"用户要求UI侧边栏除agents等不好翻译的词外全部改为中文。检查webui/index.html中所有侧边栏菜单项、按钮文字、标签、标题、提示语等，将英文全部替换为中文。保持代码中的变量名、CSS类名、API路径不变，只改用户可见的显示文本。文件：D:/loopcli/main/webui/index.html。禁止AskUserQuestion。\"",
+    "created": "2026-05-23",
+    "assignee": "engineering-frontend-developer",
+    "completed": "2026-05-23 04:25:10"
   }
 ]

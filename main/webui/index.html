@@ -1395,7 +1395,7 @@ body {
           <div class="setting-item">
             <div class="setting-label">
               <div class="title">WebUI 版本</div>
-              <div class="description">v8.6 - 深度优化：搜索栏修复、响应式改进、通知位置优化、结构修复</div>
+              <div class="description">v8.8 - 全面中文化：侧边栏翻译、主题名称本地化、状态标签本地化</div>
             </div>
           </div>
           <div class="setting-item">
@@ -1496,6 +1496,8 @@ function showNotification(message, type = 'info', duration = 5000) {
 
 // 主题管理
 const themes = ['dark', 'light', 'cyberpunk'];
+const themeNames = { dark: '深色', light: '浅色', cyberpunk: '赛博朋克' };
+const statusNames = { running: '运行中', idle: '空闲', disabled: '已禁用', active: '活跃', done: '已完成', pending: '待处理' };
 let currentThemeIndex = 0;
 
 function initTheme() {
@@ -2086,7 +2088,7 @@ async function loadDashboard() {
     statusCounts[a.status] = (statusCounts[a.status] || 0) + 1;
   });
   const statusData = Object.entries(statusCounts).map(([status, count]) => ({
-    label: status,
+    label: statusNames[status] || status,
     value: count
   }));
   const statusColors = ['#10b981', '#f59e0b', '#ef4444', '#3b82f6'];
@@ -2126,7 +2128,7 @@ async function loadTasks() {
       <tr>
         <td>${task.id}</td>
         <td>${task.title || task.subject || '-'}</td>
-        <td><span class="status-badge ${task.status}">${task.status}</span></td>
+        <td><span class="status-badge ${task.status}">${statusNames[task.status] || task.status}</span></td>
         <td>${task.agent_id || '-'}</td>
         <td>${task.created_at || '-'}</td>
       </tr>
@@ -2301,7 +2303,7 @@ function initThemeSelector() {
       localStorage.setItem('webui_theme', newTheme);
       updateThemeIcon(newTheme);
       currentThemeIndex = themes.indexOf(newTheme);
-      showNotification(`主题已切换: ${newTheme}`, 'success');
+      showNotification(`主题已切换: ${themeNames[newTheme] || newTheme}`, 'success');
     });
   }
 }
@@ -2610,15 +2612,15 @@ function showKeyboardHelp() {
       <h3 style="margin-bottom: 16px; color: var(--text);">键盘快捷键</h3>
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 13px;">
         <div style="color: var(--text2);"><kbd style="background: var(--surface2); padding: 2px 6px; border-radius: 4px;">1</kbd></div>
-        <div style="color: var(--text);">Agents 页面</div>
+        <div style="color: var(--text);">Agent 页面</div>
         <div style="color: var(--text2);"><kbd style="background: var(--surface2); padding: 2px 6px; border-radius: 4px;">2</kbd></div>
-        <div style="color: var(--text);">Tasks 页面</div>
+        <div style="color: var(--text);">任务页面</div>
         <div style="color: var(--text2);"><kbd style="background: var(--surface2); padding: 2px 6px; border-radius: 4px;">3</kbd></div>
-        <div style="color: var(--text);">Performance 页面</div>
+        <div style="color: var(--text);">性能页面</div>
         <div style="color: var(--text2);"><kbd style="background: var(--surface2); padding: 2px 6px; border-radius: 4px;">4</kbd></div>
-        <div style="color: var(--text);">Logs 页面</div>
+        <div style="color: var(--text);">日志页面</div>
         <div style="color: var(--text2);"><kbd style="background: var(--surface2); padding: 2px 6px; border-radius: 4px;">5</kbd></div>
-        <div style="color: var(--text);">Settings 页面</div>
+        <div style="color: var(--text);">设置页面</div>
         <div style="color: var(--text2);"><kbd style="background: var(--surface2); padding: 2px 6px; border-radius: 4px;">R</kbd></div>
         <div style="color: var(--text);">刷新当前页面</div>
         <div style="color: var(--text2);"><kbd style="background: var(--surface2); padding: 2px 6px; border-radius: 4px;">H</kbd></div>
@@ -2755,7 +2757,7 @@ async function loadUsageStats() {
     // 模型明细（紧凑列表）
     if (data.models && data.models.length > 0) {
       html += `<div style="font-size:12px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">模型用量</div>`;
-      html += `<div style="display:flex;flex-wrap:wrap;gap:8px;">` + data.models.map(m => `<div style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--surface2);border-radius:8px;font-size:13px;"><span style="color:var(--accent);font-weight:600;">${m.name}</span><span style="color:var(--text2)">${fmt(m.tokens)} tokens</span></div>`).join('') + `</div>`;
+      html += `<div style="display:flex;flex-wrap:wrap;gap:8px;">` + data.models.map(m => `<div style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--surface2);border-radius:8px;font-size:13px;"><span style="color:var(--accent);font-weight:600;">${m.name}</span><span style="color:var(--text2)">${fmt(m.tokens)} 令牌</span></div>`).join('') + `</div>`;
     }
 
     el.innerHTML = html;
@@ -2792,7 +2794,7 @@ async function init() {
   // 主题切换按钮
   document.getElementById('theme-toggle')?.addEventListener('click', () => {
     cycleTheme();
-    showNotification(`已切换到 ${themes[currentThemeIndex]} 主题`, 'success');
+    showNotification(`已切换到 ${themeNames[themes[currentThemeIndex]] || themes[currentThemeIndex]} 主题`, 'success');
   });
 
   // 帮助按钮

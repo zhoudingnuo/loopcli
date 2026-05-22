@@ -40,3 +40,4 @@
 - 修改 drawDonutChart 函数：移除固定 max-width:180px，SVG 使用 viewBox 自适应
 - 新增 CSS 响应式规则：480px 以下图表和图例垂直堆叠
 - 结果文件：memory/results/20260523_041804.md
+| 2026-05-23 04:25:10 | 完成 | #16 侧边栏全面中文化 | 添加themeNames/statusNames映射表，翻译快捷键帮助页面名称、主题切换通知、任务状态标签、圆环图状态标签、模型用量单位，更新版本号v8.8 |

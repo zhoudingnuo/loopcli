@@ -1,0 +1,23 @@
+{
+  "agent": "game-designer",
+  "status": "idle",
+  "current_task": null,
+  "last_run": "2026-05-23 04:23:44",
+  "run_count": 3,
+  "created": "2026-05-23",
+  "current_iteration": 2,
+  "last_completed_task": "补充详细任务描述",
+  "last_result": "memory/results/20260523_042507_html5_games_design.md",
+  "completed_tasks": [
+    {
+      "id": 1,
+      "title": "调研设计3款HTML5小游戏用于盈利",
+      "completed": "2026-05-23T04:25:07"
+    },
+    {
+      "id": 2,
+      "title": "补充详细任务描述",
+      "completed": "2026-05-23T04:27:00"
+    }
+  ]
+}
