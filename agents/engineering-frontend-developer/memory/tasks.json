@@ -178,5 +178,14 @@
     "created": "2026-05-23",
     "assignee": "engineering-frontend-developer",
     "completed": "2026-05-23 05:45:00"
+  },
+  {
+    "id": 21,
+    "status": "done",
+    "title": "Phase3b: 每日系统+关卡21-50+社交裂变",
+    "description": "See task details in prompt",
+    "created": "2026-05-23",
+    "assignee": "engineering-frontend-developer",
+    "completed": "2026-05-23 06:00:00"
   }
 ]

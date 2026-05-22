@@ -1,12 +1,12 @@
 # LoopCLI 工作记忆
 
-## 2026-05-23 轮次372
+## 2026-05-23 轮次374
 
-- Phase 2 完成：11个JS模块（含Obstacle/AudioManager/Boss/levels 20关/ScoreSystem 5种目标）
-- 已派发 Phase 3a（task#20）：元进度系统（地图界面/角色/金币/道具/持久化/导航）
-- engineering-frontend-developer 继续运行，无其他活跃 agent
+- Phase 3a 完成：6个新模块(DataManager/CoinSystem/Characters/MapScreen/ShopUI/Navigation, 1050行)
+- Phase 3b 已派发(task#21)：每日系统+关卡21-50+宝箱+社交UI框架
+- engineering-frontend-developer 已重新启用
 - 无新微信消息
-- 下一步：等 frontend-developer 完成 Phase 3a，然后派 Phase 3b（每日系统+关卡21-50）
+- 下一步：等 Phase 3b 完成 → Phase 4（变现/广告/上线）
 
 ## 2026-05-23 轮次371
 

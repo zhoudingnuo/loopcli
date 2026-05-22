@@ -45,3 +45,12 @@
 | 2026-05-23 05:13:19 | 完成 | #18 三消游戏核心引擎Phase1 | 7个JS模块(Board/MatchEngine/Renderer/Input/Score/Animation/Game)+index.html，8x8棋盘+6色水果+滑动交换+3+匹配检测+消除动画+重力下落+连锁+特殊方块(条纹/区域/彩虹)+步数限制+10关卡配置 |
 | 2026-05-23 05:36:30 | 完成 | #19 三消游戏Phase2障碍物与关卡系统 | 新增Obstacle.js(冰块/锁链/巧克力)+AudioManager.js(Web Audio音效)+Boss.js(Boss敌人)+levels.js(20关配置)+20个JSON关卡文件，修改Game/ScoreSystem/Renderer/Board集成所有系统，支持5种目标类型+Boss战+巧克力蔓延+Boss技能 |
 | 2026-05-23 05:45:00 | 完成 | #20 三消游戏Phase3a元进度系统 | 新增6模块(DataManager/CoinSystem/Characters/MapScreen/ShopUI/Navigation共1050行)，修改Game.js+index.html集成导航/角色技能/金币经济，实现主菜单→地图→角色选择→游戏→结算完整流程 |
+| 2026-05-23 06:00:00 | IDLE | 无待处理任务 | tasks.json中所有20个任务均已完成，无可执行任务 |
+
+## 2026-05-23 06:00:00 — 完成 #21
+- 任务：Phase3b 每日系统+关卡21-50+社交裂变
+- 新增 DailySystem.js(396行): 7天登录奖励+每日3任务+每日挑战
+- 新增 SocialSystem.js(363行): 好友排行榜+PK+分享(抖音API存根)
+- 关卡20→50: 冰块时代(21-35)+混合进阶(36-50)+5个Boss关
+- 修改 MapScreen/Navigation/Game/index.html 集成新系统
+- 结果文件：memory/results/20260523_060000_phase3b.md
