@@ -253,6 +253,70 @@ def query_usage_summary():
         return {"error": str(e)}
 
 
+def get_usage_trend():
+    """获取最近7天的token消耗趋势"""
+    try:
+        run_log_path = LOOPCLI_ROOT / "main" / "log" / "run.md"
+        if not run_log_path.exists():
+            return {"data": [], "summary": "暂无数据"}
+
+        with open(run_log_path, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+
+        # 解析日志数据
+        daily_data = {}
+        for line in lines:
+            if "|" not in line:
+                continue
+            parts = [p.strip() for p in line.split("|")]
+            if len(parts) < 4:
+                continue
+
+            # 解析日期（格式：2026-05-22 17:19）
+            date_part = parts[1].split(" ")[0] if " " in parts[1] else parts[1]
+
+            # 累计每天的任务数作为活跃度指标
+            if date_part not in daily_data:
+                daily_data[date_part] = 0
+
+            # 状态为done的任务计数
+            if "done" in parts[2].lower():
+                daily_data[date_part] += 1
+
+        # 生成最近7天的数据
+        trend_data = []
+        today = datetime.now().date()
+
+        for i in range(6, -1, -1):
+            date = today - timedelta(days=i)
+            date_str = date.strftime("%Y-%m-%d")
+            value = daily_data.get(date_str, 0)
+
+            # 格式化标签
+            if i == 0:
+                label = "今天"
+            elif i == 1:
+                label = "昨天"
+            else:
+                label = date.strftime("%m/%d")
+
+            trend_data.append({
+                "label": label,
+                "date": date_str,
+                "value": value
+            })
+
+        total = sum(d["value"] for d in trend_data)
+        avg = total / 7 if trend_data else 0
+
+        return {
+            "data": trend_data,
+            "summary": f"7天累计 {total} 次任务，平均 {avg:.1f} 次/天"
+        }
+    except Exception as e:
+        return {"error": str(e), "data": [], "summary": "数据加载失败"}
+
+
 # --- Loop Process Management ---
 
 def get_loop_state():
@@ -513,6 +577,9 @@ class WebUIHandler(SimpleHTTPRequestHandler):
 
         if path == "/api/agent/activity":
             return self._send_json(get_main_agent_activity())
+
+        if path == "/api/usage/trend":
+            return self._send_json(get_usage_trend())
 
         if path == "/api/usage":
             return self._send_json(query_usage_summary())
