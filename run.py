@@ -36,7 +36,7 @@ from lib.usage import load_pricing, query_model_usage, load_last_usage, save_las
 from lib.git_sync import git_push
 from lib.cli import (
     discover_agents, cmd_create, cmd_task, cmd_list, cmd_templates,
-    cmd_enable, cmd_disable, cmd_msg, cmd_weixin,
+    cmd_enable, cmd_disable, cmd_msg, cmd_weixin, load_agent_tasks,
 )
 
 DEFAULT_PROMPT = """读取 SOUL.md 作为你的身份。
@@ -55,7 +55,6 @@ DEFAULT_PROMPT = """读取 SOUL.md 作为你的身份。
 7. 通过 inbox 通知 main：写入 D:/loopcli/main/inbox/<你的名字>_<时间>.md，简要报告任务结果
 8. 如果没有 pending 任务，输出 "IDLE" 并结束本轮
 
-发送图片给用户：将图片文件（.png/.jpg/.jpeg/.gif/.bmp/.webp）复制到 D:/loopcli/main/report/ 目录即可，微信桥接会自动发送。
 """
 
 
@@ -166,27 +165,45 @@ def cmd_run(args):
 
         out(f"{C.BOLD}{C.CYAN}══ Loop {iter_label} | {len(agents)} Agents | {ts} ══{C.RST}")
 
-        threads = []
-        thread_agents = {}
+        threads = {}  # {thread: agent_name}
         activity = {}
         for agent in agents:
             p_agent_header(agent["name"], count)
             t = threading.Thread(target=run_agent, args=(agent, count, run_log_dir, CLAUDE, activity))
             t.start()
-            threads.append(t)
-            thread_agents[t] = agent["name"]
-        for t in threads:
-            aname = thread_agents[t]
-            while t.is_alive():
+            threads[t] = agent["name"]
+
+        # 持续监控：等待完成 + 实时激活新被指派的 agent
+        while threads:
+            # 清理已完成的线程
+            finished = [t for t in threads if not t.is_alive()]
+            for t in finished:
+                del threads[t]
+
+            # 检查超时
+            for t, aname in list(threads.items()):
+                if not t.is_alive():
+                    continue
                 last_active = activity.get(aname, 0)
                 if last_active > 0 and time.time() - last_active > 600:
                     out(f"  {C.RED}⚠ {aname} 10分钟无输出，跳过等待{C.RST}")
-                    break
-                t.join(timeout=30)
-            else:
-                continue
-            if t.is_alive():
-                out(f"  {C.RED}⚠ {aname} 线程未正常退出，强制继续下一轮{C.RST}")
+                    del threads[t]
+
+            # 实时激活：检查不在运行中的 agent 是否有新 pending 任务
+            running_names = set(threads.values())
+            for a in discover_agents():
+                if a["name"] in running_names:
+                    continue
+                tasks = load_agent_tasks(a["path"])
+                if any(t.get("status") == "pending" for t in tasks):
+                    p_agent_header(a["name"], count)
+                    nt = threading.Thread(target=run_agent, args=(a, count, run_log_dir, CLAUDE, activity))
+                    nt.start()
+                    threads[nt] = a["name"]
+                    out(f"  {C.CYAN}⚡ {a['name']} 被实时激活{C.RST}")
+
+            if threads:
+                time.sleep(1)
 
         git_push()
 

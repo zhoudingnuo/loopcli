@@ -1,9 +1,10 @@
 # LoopCLI 工作记忆
 
-## 2026-05-23 轮次342
+## 2026-05-23 轮次343
 
-**记忆系统迭代优化**：
-- PROMPT.md 回忆触发规则从模糊的"根据任务需要"改为 5 条具体触发规则（修改代码前、遇到报错、调度Agent、用户提往事、发现wiki-link）
-- 9 个 fact 文件全部添加 tags 标签（frontmatter），提高 Grep 搜索命中率
-- 链式回忆限制最多 3 层，防止过度消耗 token
-- 系统核心能力：Hot索引(~300 tokens/轮) → 按需Grep → wiki-link链式 → 3层截断
+**记忆系统长期任务评估**：
+- 研究了 GitHub 高 star 记忆项目：Mem0(51k)、ReMe、Cognee
+- 社区共识(Reddit 200票)：小规模 agent 用 file-based + Git 比 vector DB 更实用
+- 我们的三层系统(Hot/Warm/Cold + wiki-link + Grep)已验证有效
+- 更新 memory-system-design.md 加入设计决策说明
+- **长期任务状态**：记忆系统核心功能已完成（三层架构、链式回忆、PROMPT.md 适配、GitHub 研究验证）
