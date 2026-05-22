@@ -488,6 +488,35 @@ body {
   opacity: 0.6;
 }
 
+/* 快捷键帮助 */
+kbd.kbd {
+  display: inline-block;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 2px 0 var(--border);
+  font-family: monospace;
+}
+.shortcut-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background var(--transition-fast);
+}
+.shortcut-item:hover {
+  background: var(--surface2);
+}
+.shortcut-item span {
+  color: var(--text2);
+  font-size: 13px;
+}
+
 /* Content */
 .content {
   flex: 1;
@@ -1341,6 +1370,35 @@ body {
 .poll-dot.error {
   background: var(--red);
   box-shadow: 0 0 10px rgba(255, 122, 122, 0.7);
+}
+
+/* Performance indicator */
+.perf-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text2);
+  font-weight: 700;
+  padding: 4px 10px;
+  background: var(--surface2);
+  border-radius: 12px;
+  transition: all var(--transition-normal);
+}
+.perf-icon {
+  font-size: 12px;
+}
+.perf-indicator.fast {
+  color: var(--green);
+  background: var(--green-bg);
+}
+.perf-indicator.medium {
+  color: var(--yellow);
+  background: var(--yellow-bg);
+}
+.perf-indicator.slow {
+  color: var(--red);
+  background: var(--red-bg);
 }
 
 /* Log stream controls */
@@ -2217,9 +2275,14 @@ body {
           <span class="poll-dot" id="poll-dot"></span>
           <span id="poll-time">-</span>
         </span>
+        <span class="perf-indicator" id="perf-indicator" title="API 响应时间">
+          <span class="perf-icon">⚡</span>
+          <span id="perf-time">-</span>
+        </span>
         <button class="toolbar-btn" id="theme-toggle" title="切换主题 (Ctrl+T)">🌙</button>
         <button class="toolbar-btn" id="fullscreen-toggle" title="全屏 (F11)">⛶</button>
         <button class="toolbar-btn" id="compact-toggle" title="紧凑模式 (Ctrl+M)">⬇</button>
+        <button class="toolbar-btn" id="shortcuts-toggle" title="快捷键 (?)">⌨️</button>
         <span id="log-status"></span>
         <button class="btn btn-primary" id="newTaskBtn">+ 新任务 <span class="kb-hint">N</span></button>
       </div>
@@ -2534,6 +2597,15 @@ body {
             </button>
           </div>
 
+          <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border)">
+            <button class="btn btn-primary" onclick="runAllAutomation()" style="width: 100%; padding: 16px; font-size: 16px; font-weight: 700; background: var(--accent-gradient)">
+              🚀 一键优化全部
+            </button>
+            <p style="color: var(--text3); font-size: 12px; margin-top: 12px; text-align: center">
+              按顺序执行所有自动化操作：健康检查 → 清理日志 → 压缩记忆 → 禁用空闲 Agent → Git 同步
+            </p>
+          </div>
+
           <div id="automation-result" class="automation-result" style="display:none">
             <h4 style="margin-bottom:12px">执行结果</h4>
             <pre id="automation-output" style="background:var(--surface2);padding:16px;border-radius:8px;overflow:auto;max-height:300px;font-size:12px"></pre>
@@ -2570,8 +2642,91 @@ body {
   </div>
 </div>
 
+<!-- 快捷键帮助模态框 -->
+<div class="modal" id="shortcutsModal">
+  <div class="modal-content" style="max-width: 500px">
+    <h3>⌨️ 快捷键</h3>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px">
+      <div class="shortcut-item">
+        <kbd class="kbd">Ctrl</kbd> + <kbd class="kbd">B</kbd>
+        <span>折叠/展开侧边栏</span>
+      </div>
+      <div class="shortcut-item">
+        <kbd class="kbd">Ctrl</kbd> + <kbd class="kbd">T</kbd>
+        <span>切换主题</span>
+      </div>
+      <div class="shortcut-item">
+        <kbd class="kbd">Ctrl</kbd> + <kbd class="kbd">M</kbd>
+        <span>紧凑模式</span>
+      </div>
+      <div class="shortcut-item">
+        <kbd class="kbd">Ctrl</kbd> + <kbd class="kbd">Q</kbd>
+        <span>快速操作</span>
+      </div>
+      <div class="shortcut-item">
+        <kbd class="kbd">N</kbd>
+        <span>新任务</span>
+      </div>
+      <div class="shortcut-item">
+        <kbd class="kbd">?</kbd>
+        <span>显示快捷键</span>
+      </div>
+      <div class="shortcut-item">
+        <kbd class="kbd">Esc</kbd>
+        <span>关闭模态框</span>
+      </div>
+      <div class="shortcut-item">
+        <kbd class="kbd">F11</kbd>
+        <span>全屏模式</span>
+      </div>
+    </div>
+    <div class="modal-actions" style="margin-top: 24px">
+      <button class="btn btn-primary" onclick="closeShortcutsModal()">关闭</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ============ v5 增强功能 ============
+
+// 性能监控
+const perfMonitor = {
+  metrics: {},
+  history: [],
+  maxHistory: 50,
+
+  start(key) {
+    this.metrics[key] = performance.now();
+  },
+
+  end(key) {
+    if (this.metrics[key]) {
+      const duration = performance.now() - this.metrics[key];
+      this.history.push({ key, duration, time: Date.now() });
+      if (this.history.length > this.maxHistory) {
+        this.history.shift();
+      }
+      delete this.metrics[key];
+      return duration;
+    }
+    return 0;
+  },
+
+  getAverage(key) {
+    const filtered = this.history.filter(h => h.key === key);
+    if (filtered.length === 0) return 0;
+    return filtered.reduce((sum, h) => sum + h.duration, 0) / filtered.length;
+  },
+
+  getLast(key) {
+    for (let i = this.history.length - 1; i >= 0; i--) {
+      if (this.history[i].key === key) {
+        return this.history[i].duration;
+      }
+    }
+    return 0;
+  }
+};
 
 // 全局搜索
 const searchInput = document.getElementById('globalSearch');
@@ -2734,6 +2889,12 @@ compactToggle.addEventListener('click', () => {
   showToast(document.body.classList.contains('compact') ? '紧凑模式' : '标准模式', 'info');
 });
 
+// 快捷键帮助
+const shortcutsToggle = document.getElementById('shortcuts-toggle');
+shortcutsToggle.addEventListener('click', () => {
+  openShortcutsModal();
+});
+
 // 键盘快捷键
 document.addEventListener('keydown', (e) => {
   // Ctrl/Cmd + K: 快速导航
@@ -2767,6 +2928,10 @@ document.addEventListener('keydown', (e) => {
     if (modal.classList.contains('show')) {
       modal.classList.remove('show');
     }
+    const shortcutsModal = document.getElementById('shortcutsModal');
+    if (shortcutsModal.classList.contains('show')) {
+      closeShortcutsModal();
+    }
   }
   // F11: 全屏
   if (e.key === 'F11') {
@@ -2781,7 +2946,21 @@ document.addEventListener('keydown', (e) => {
     const navItem = document.querySelector(`.nav-item[data-page="${pages[index]}"]`);
     if (navItem) navItem.click();
   }
+  // ?: 显示快捷键帮助
+  if (e.key === '?' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) {
+    e.preventDefault();
+    openShortcutsModal();
+  }
 });
+
+// 快捷键帮助模态框
+function openShortcutsModal() {
+  document.getElementById('shortcutsModal').classList.add('show');
+}
+
+function closeShortcutsModal() {
+  document.getElementById('shortcutsModal').classList.remove('show');
+}
 
 // ============ 原有功能 ============
 
@@ -3007,26 +3186,32 @@ function updatePollIndicator(error) {
 }
 
 async function loadAgents() {
+  perfMonitor.start('loadAgents');
   try {
     const r = await fetch('/api/agents');
     if (!r.ok) throw new Error('HTTP ' + r.status);
     agents = await r.json();
+    perfMonitor.end('loadAgents');
   } catch (e) {
     agents = [];
+    perfMonitor.end('loadAgents');
     showToast('获取 Agent 列表失败: ' + e.message, 'error');
     updatePollIndicator(true);
   }
 }
 
 async function loadTasks(agentFilter) {
+  perfMonitor.start('loadTasks');
   try {
     let url = '/api/tasks';
     if (agentFilter) url += '?agent=' + encodeURIComponent(agentFilter);
     const r = await fetch(url);
     if (!r.ok) throw new Error('HTTP ' + r.status);
     tasks = await r.json();
+    perfMonitor.end('loadTasks');
   } catch (e) {
     tasks = [];
+    perfMonitor.end('loadTasks');
     showToast('获取任务列表失败: ' + e.message, 'error');
   }
 }
@@ -3046,7 +3231,33 @@ async function loadData() {
   await Promise.all([loadAgents(), loadTasks()]);
   const hasError = agents.length === 0 && tasks.length === 0;
   if (!hasError) updatePollIndicator(false);
+  updatePerfIndicator();
   render();
+}
+
+function updatePerfIndicator() {
+  const perfEl = document.getElementById('perf-indicator');
+  const timeEl = document.getElementById('perf-time');
+
+  const agentsTime = perfMonitor.getLast('loadAgents');
+  const tasksTime = perfMonitor.getLast('loadTasks');
+  const avgTime = (agentsTime + tasksTime) / 2;
+
+  if (avgTime > 0) {
+    timeEl.textContent = avgTime.toFixed(0) + 'ms';
+
+    // 更新状态样式
+    perfEl.classList.remove('fast', 'medium', 'slow');
+    if (avgTime < 200) {
+      perfEl.classList.add('fast');
+    } else if (avgTime < 500) {
+      perfEl.classList.add('medium');
+    } else {
+      perfEl.classList.add('slow');
+    }
+  } else {
+    timeEl.textContent = '-';
+  }
 }
 
 function renderStats() {
@@ -3755,6 +3966,64 @@ async function runAutomation(action) {
   }
 }
 
+// 一键执行所有自动化操作
+async function runAllAutomation() {
+  const resultDiv = document.getElementById('automation-result');
+  const outputEl = document.getElementById('automation-output');
+  const actions = [
+    { name: 'health-check', label: '健康检查' },
+    { name: 'cleanup-logs', label: '清理日志' },
+    { name: 'compress-memory', label: '压缩记忆' },
+    { name: 'disable-idle-agents', label: '禁用空闲 Agent' },
+    { name: 'git-sync', label: 'Git 同步' }
+  ];
+
+  resultDiv.style.display = 'block';
+  const results = [];
+
+  for (let i = 0; i < actions.length; i++) {
+    const action = actions[i];
+    outputEl.textContent = `正在执行 (${i + 1}/${actions.length}): ${action.label}...`;
+
+    try {
+      const resp = await fetch(`/api/automation/${action.name}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const data = await resp.json();
+
+      if (resp.ok) {
+        results.push({ action: action.label, status: '✅', data });
+      } else {
+        results.push({ action: action.label, status: '❌', error: data.error || '未知错误' });
+      }
+    } catch (e) {
+      results.push({ action: action.label, status: '❌', error: e.message });
+    }
+
+    // 短暂延迟，避免请求过快
+    await new Promise(resolve => setTimeout(resolve, 300));
+  }
+
+  // 显示完整结果
+  let report = '🚀 一键优化完成\n\n';
+  results.forEach(r => {
+    report += `${r.status} ${r.action}\n`;
+    if (r.data) {
+      const summary = JSON.stringify(r.data, null, 2);
+      report += `  ${summary.split('\n').slice(1, -1).join('\n  ')}\n`;
+    } else if (r.error) {
+      report += `  错误: ${r.error}\n`;
+    }
+  });
+
+  outputEl.textContent = report;
+  showToast('一键优化完成', 'success');
+
+  // 刷新数据
+  await loadData();
+}
+
 // ============ 图表渲染功能 ============
 
 // 刷新图表（带错误处理）
@@ -3769,6 +4038,39 @@ function refreshCharts() {
 }
 
 // ============ v5.1 新增功能 ============
+
+// 数据导出功能
+async function exportReport() {
+  try {
+    const [agentsData, tasksData] = await Promise.all([
+      fetch('/api/agents').then(r => r.json()),
+      fetch('/api/tasks?agent=__all__').then(r => r.json())
+    ]);
+
+    const report = {
+      timestamp: new Date().toISOString(),
+      summary: {
+        totalAgents: agentsData.length,
+        activeAgents: agentsData.filter(a => a.status === 'running').length,
+        totalTasks: tasksData.length,
+        completedTasks: tasksData.filter(t => t.status === 'done' || t.status === 'completed').length
+      },
+      agents: agentsData,
+      tasks: tasksData
+    };
+
+    const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `loopcli_report_${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('报告已导出', 'success');
+  } catch (e) {
+    showToast('导出失败: ' + e.message, 'error');
+  }
+}
 
 // 快速操作面板
 function showQuickActions() {

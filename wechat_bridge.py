@@ -436,20 +436,20 @@ class WeChatInboxHandler:
                         continue
 
                     content = report_file.read_text(encoding="utf-8")
-                    self._send_report(report_file.name, content)
-                    self.processed_reports.add(report_file.name)
-                    self._save_processed_reports()
+                    if self._send_report(report_file.name, content):
+                        self.processed_reports.add(report_file.name)
+                        self._save_processed_reports()
 
                 time.sleep(3)
             except Exception as e:
                 _log(f"[微信] 报告监控错误: {e}")
                 time.sleep(5)
 
-    def _send_report(self, filename: str, content: str):
+    def _send_report(self, filename: str, content: str) -> bool:
         # 找到有 context_token 的用户发送
         if not self.bridge.context_tokens:
             _log(f"[微信] 跳过报告 {filename}：无可用 context_token（需要先从微信发一条消息）")
-            return
+            return False
 
         user_id = list(self.bridge.context_tokens.keys())[0]
         # 截断过长内容
@@ -459,8 +459,10 @@ class WeChatInboxHandler:
         try:
             self.bridge.send_message(user_id, content)
             _log(f"[微信] 报告已发送: {filename}")
+            return True
         except Exception as e:
             _log(f"[微信] 发送报告失败 {filename}: {e}")
+            return False
 
     def start(self):
         self.bridge.start(self.handle_incoming_message)

@@ -458,9 +458,13 @@ def run_agent(agent, iteration, run_log_dir):
         # 等进程退出
         proc.wait()
 
-        # 进程退出后关 stdout，解除 drain_stdout 阻塞
+        # 进程退出后关管道，解除所有阻塞的读取线程
         try:
             proc.stdout.close()
+        except Exception:
+            pass
+        try:
+            proc.stderr.close()
         except Exception:
             pass
 
