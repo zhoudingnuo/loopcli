@@ -1,20 +1,20 @@
 {
-  "timestamp": "2026-05-22T16:57:21.481478",
+  "timestamp": "2026-05-22T19:17:27.710211",
   "summary": {
     "total": 9,
-    "passed": 8,
-    "failed": 1
+    "passed": 9,
+    "failed": 0
   },
   "results": [
     {
       "test": "page_load",
       "status": "pass",
-      "time": "2026-05-22T16:56:58.709820"
+      "time": "2026-05-22T19:17:09.263974"
     },
     {
       "test": "navigation",
       "status": "pass",
-      "time": "2026-05-22T16:57:00.457143"
+      "time": "2026-05-22T19:17:10.989805"
     },
     {
       "test": "agents_page",
@@ -22,37 +22,36 @@
       "data": {
         "total_agents": "8"
       },
-      "time": "2026-05-22T16:57:01.007832"
+      "time": "2026-05-22T19:17:11.538861"
     },
     {
       "test": "tasks_page",
       "status": "pass",
-      "time": "2026-05-22T16:57:01.546267"
+      "time": "2026-05-22T19:17:12.085165"
     },
     {
       "test": "performance_page",
       "status": "pass",
       "data": {
-        "cpu": "11%",
-        "memory": "252 MB"
+        "cpu": "39%",
+        "memory": "186 MB"
       },
-      "time": "2026-05-22T16:57:02.077349"
+      "time": "2026-05-22T19:17:12.629999"
     },
     {
       "test": "logs_page",
       "status": "pass",
-      "time": "2026-05-22T16:57:02.611717"
+      "time": "2026-05-22T19:17:13.180502"
     },
     {
       "test": "settings_page",
-      "status": "fail",
-      "error": "Page.wait_for_selector: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator(\".settings-section\") to be visible\n    14 × locator resolved to 5 elements. Proceeding with the first one: <div class=\"settings-section\">…</div>\n",
-      "time": "2026-05-22T16:57:08.646484"
+      "status": "pass",
+      "time": "2026-05-22T19:17:14.844611"
     },
     {
       "test": "responsive_design",
       "status": "pass",
-      "time": "2026-05-22T16:57:09.584499"
+      "time": "2026-05-22T19:17:15.790810"
     },
     {
       "test": "auto_refresh",
@@ -60,7 +59,7 @@
       "data": {
         "initial_agents": "8"
       },
-      "time": "2026-05-22T16:57:21.481478"
+      "time": "2026-05-22T19:17:27.710211"
     }
   ]
 }
