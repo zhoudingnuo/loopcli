@@ -1,9 +1,10 @@
 {
   "agent": "market-analyst",
-  "status": "disabled",
+  "status": "idle",
   "current_task": null,
-  "last_run": "2026-05-21 17:36:33",
-  "run_count": 3,
+  "last_run": "2026-05-23 04:34:19",
+  "run_count": 5,
   "created": "2026-05-21",
-  "tasks_completed": 1
+  "tasks_completed": 2,
+  "current_iteration": 4
 }

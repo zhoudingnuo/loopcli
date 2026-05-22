@@ -1,1 +1,20 @@
-[{"id":1,"status":"done","title":"研究高价值内容方向","description":"研究当前最具价值的内容创作方向：\n1. 使用 WebSearch 搜索 2026 年技术内容趋势（AI、Web3、自动化工具等）\n2. 找出 3-5 个能产生长期价值的内容方向\n3. 每个方向分析：潜在受众、变现方式、竞争程度\n4. 将研究结果保存到 memory/market-research/value-content-2026-05-21.md","created":"2026-05-21","assignee":"market-analyst","completed":"2026-05-21"}]
+[
+  {
+    "id": 1,
+    "status": "done",
+    "title": "研究高价值内容方向",
+    "description": "研究当前最具价值的内容创作方向：\n1. 使用 WebSearch 搜索 2026 年技术内容趋势（AI、Web3、自动化工具等）\n2. 找出 3-5 个能产生长期价值的内容方向\n3. 每个方向分析：潜在受众、变现方式、竞争程度\n4. 将研究结果保存到 memory/market-research/value-content-2026-05-21.md",
+    "created": "2026-05-21",
+    "assignee": "market-analyst",
+    "completed": "2026-05-21"
+  },
+  {
+    "id": 2,
+    "status": "done",
+    "title": "调研Steam独立游戏市场机会",
+    "description": "调研Steam独立游戏市场：1.2025-2026年Steam独立游戏热门品类和趋势 2.适合个人/小团队（1-3人）开发的低成本高回报品类 3.Steam上架流程（Steam Direct费用、审核周期）4.成功案例：低成本独立游戏的高收益案例 5.推荐2-3个适合当前团队开发的游戏方向，含预估开发时间和盈利潜力。产出保存到 D:/game-projects/research/ 目录。",
+    "created": "2026-05-23",
+    "assignee": "market-analyst",
+    "completed": "2026-05-23"
+  }
+]

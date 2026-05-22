@@ -16,5 +16,14 @@
     "created": "2026-05-23",
     "assignee": "game-designer",
     "completed": "2026-05-23T04:27:00"
+  },
+  {
+    "id": 3,
+    "status": "done",
+    "title": "调研并设计抖音小游戏盈利方案",
+    "description": "调研抖音小游戏平台：1.开发技术栈要求（是否支持H5\\Canvas\\WebGL）2.审核上架流程和周期 3.变现方式（广告\\内购\\流量分成）4.成功案例分析。然后设计2款适合快速上线的抖音小游戏GDD，包含核心玩法、开发周期预估、盈利模型。参考已有的HTML5调研成果（D:/game-projects/research/html5-games-blueprint.md）。产出保存到 D:/game-projects/research/ 目录。",
+    "created": "2026-05-23",
+    "assignee": "game-designer",
+    "completed": "2026-05-23T04:39:37"
   }
 ]

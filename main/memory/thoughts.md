@@ -1,11 +1,13 @@
 # LoopCLI 工作记忆
 
-## 2026-05-23 轮次356（本轮）
+## 2026-05-23 轮次359（本轮）
 
-- engineering-frontend-developer 完成全部15项任务，已归档反馈
-- 未处理微信消息(04:09)：UI侧边栏中英混搭，需全部改中文 → 已派发 task #16
-- 长期任务：开发游戏盈利 → 已创建 game-designer agent，任务：调研设计3款HTML5小游戏
-- 当前活跃 agent：engineering-frontend-developer、game-designer
+- 用户偏好变更：HTML5游戏 → 抖音小游戏 + Steam独立游戏
+- 已禁用完成的 engineering-frontend-developer（中文化v8.8完成）
+- 已禁用 game-designer 后重新启用，派发抖音小游戏调研任务 #3
+- 已启用 market-analyst，派发Steam独立游戏市场调研任务 #2
+- HTML5调研成果已保存在 D:/game-projects/research/ 作为参考
+- 用户告知：Web有两个Token配额（5h短期+每周额度），需注意用量控制
 
 ## 2026-05-23 轮次348
 

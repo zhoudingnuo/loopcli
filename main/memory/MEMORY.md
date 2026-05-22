@@ -14,8 +14,9 @@
 - [记忆系统设计](memory/facts/memory-system-design.md) — 三层架构原理和使用方法
 
 ## 项目状态
-- [当前架构](memory/facts/current-architecture.md) — WebUI v8.7, agent框架, MCP配置
+- [当前架构](memory/facts/current-architecture.md) — WebUI v8.8, agent框架, MCP配置
 - [待解决问题](memory/facts/open-issues.md) — 已知bug和待优化项
+- [游戏开发方向](memory/facts/game-development.md) — 抖音小游戏+Steam独立游戏，调研进行中
 
 ## 决策记录
 - [关键决策](memory/facts/key-decisions.md) — 重要技术选型和原因
