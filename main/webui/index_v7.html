@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LoopCLI - Agent 控制台 v7.3</title>
+<title>LoopCLI - Agent 控制台 v7</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -324,46 +324,9 @@ body {
   .agents-grid { grid-template-columns: 1fr; }
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
 }
-
-/* 通知系统 */
-#notification-container {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 9999;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.notification {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-left: 4px solid var(--accent);
-  border-radius: 8px;
-  padding: 12px 16px;
-  min-width: 280px;
-  max-width: 400px;
-  box-shadow: var(--shadow-lg);
-  animation: slideIn 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.notification.success { border-left-color: var(--green); }
-.notification.error { border-left-color: var(--red); }
-.notification.warning { border-left-color: var(--yellow); }
-@keyframes slideIn {
-  from { transform: translateX(100%); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
-}
-@keyframes slideOut {
-  from { transform: translateX(0); opacity: 1; }
-  to { transform: translateX(100%); opacity: 0; }
-}
 </style>
 </head>
 <body>
-<div id="notification-container"></div>
 <div class="app">
   <!-- 侧边栏 -->
   <aside class="sidebar">
@@ -379,11 +342,7 @@ body {
         <span>◉</span>
         <span>Tasks</span>
       </div>
-      <div class="nav-item" onclick="location.href='/performance.html'">
-        <span>📊</span>
-        <span>Performance</span>
-      </div>
-      <div class="nav-item" onclick="location.href='/logs.html'">
+      <div class="nav-item" data-page="logs">
         <span>◐</span>
         <span>Logs</span>
       </div>
@@ -537,11 +496,10 @@ async function enableAgent(id) {
   try {
     const response = await fetch(`${API_BASE}/agents/${id}/enable`, { method: 'POST' });
     if (response.ok) {
-      showNotification('Agent 已启用', 'success');
-      setTimeout(() => location.reload(), 1000);
+      location.reload();
     }
   } catch (error) {
-    showNotification('启用失败: ' + error.message, 'error');
+    console.error('启用失败:', error);
   }
 }
 
@@ -550,32 +508,11 @@ async function disableAgent(id) {
   try {
     const response = await fetch(`${API_BASE}/agents/${id}/disable`, { method: 'POST' });
     if (response.ok) {
-      showNotification('Agent 已禁用', 'success');
-      setTimeout(() => location.reload(), 1000);
+      location.reload();
     }
   } catch (error) {
-    showNotification('禁用失败: ' + error.message, 'error');
+    console.error('禁用失败:', error);
   }
-}
-
-// 通知系统
-function showNotification(message, type = 'info', duration = 3000) {
-  const container = document.getElementById('notification-container');
-  const notification = document.createElement('div');
-  notification.className = `notification ${type}`;
-
-  const icons = { info: 'ℹ', success: '✓', warning: '⚠', error: '✕' };
-  notification.innerHTML = `
-    <span style="font-size: 18px;">${icons[type] || icons.info}</span>
-    <span style="flex: 1; font-size: 13px;">${message}</span>
-  `;
-
-  container.appendChild(notification);
-
-  setTimeout(() => {
-    notification.style.animation = 'slideOut 0.3s ease';
-    setTimeout(() => notification.remove(), 300);
-  }, duration);
 }
 
 // 导航切换
@@ -586,35 +523,11 @@ document.querySelectorAll('.nav-item').forEach(item => {
   });
 });
 
-// 自动刷新
-let autoRefreshTimer = null;
-
-function startAutoRefresh(interval = 10000) {
-  stopAutoRefresh();
-  autoRefreshTimer = setInterval(async () => {
-    const agents = await fetchAgents();
-    renderStats(agents);
-    renderAgents(agents);
-  }, interval);
-  console.log(`自动刷新已启动 (${interval}ms)`);
-}
-
-function stopAutoRefresh() {
-  if (autoRefreshTimer) {
-    clearInterval(autoRefreshTimer);
-    autoRefreshTimer = null;
-    console.log('自动刷新已停止');
-  }
-}
-
 // 初始化
 async function init() {
   const agents = await fetchAgents();
   renderStats(agents);
   renderAgents(agents);
-
-  // 启动自动刷新（10秒）
-  startAutoRefresh(10000);
 }
 
 init();

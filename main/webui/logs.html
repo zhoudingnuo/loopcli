@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LoopCLI - 日志查看器</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --surface2: #21262d;
+  --border: #30363d;
+  --text: #c9d1d9;
+  --text2: #8b949e;
+  --text3: #6e7681;
+  --accent: #58a6ff;
+  --accent-gradient: linear-gradient(135deg, #58a6ff, #8b5cf6);
+  --radius: 12px;
+}
+body {
+  font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.6;
+  padding: 20px;
+}
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.header h1 {
+  font-size: 24px;
+  font-weight: 700;
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.back-btn {
+  padding: 8px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  text-decoration: none;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+.back-btn:hover {
+  background: var(--surface2);
+  border-color: var(--accent);
+}
+.log-container {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+}
+.log-entry {
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.log-entry:last-child { border-bottom: none; }
+.log-entry:hover {
+  background: var(--surface2);
+}
+.log-time {
+  color: var(--text3);
+  font-size: 11px;
+}
+.log-level-info { color: #58a6ff; }
+.log-level-warn { color: #ffd000; }
+.log-level-error { color: #ff4757; }
+.log-level-success { color: #06d6a0; }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>📋 系统日志</h1>
+  <a href="/" class="back-btn">← 返回</a>
+</div>
+<div class="log-container" id="logs">
+  <div style="text-align: center; padding: 40px; color: var(--text2);">加载中...</div>
+</div>
+<script>
+async function fetchLogs() {
+  try {
+    const response = await fetch('/api/logs');
+    if (!response.ok) throw new Error('获取日志失败');
+    const logs = await response.json();
+    renderLogs(logs);
+  } catch (error) {
+    document.getElementById('logs').innerHTML =
+      `<div style="text-align: center; padding: 40px; color: var(--red);">错误: ${error.message}</div>`;
+  }
+}
+
+function renderLogs(logs) {
+  const container = document.getElementById('logs');
+  if (!logs || logs.length === 0) {
+    container.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text2);">暂无日志</div>';
+    return;
+  }
+  container.innerHTML = logs.map(log => {
+    const levelClass = `log-level-${log.level || 'info'}`;
+    const time = log.time || new Date().toLocaleString();
+    return `
+      <div class="log-entry">
+        <span class="log-time">[${time}]</span>
+        <span class="${levelClass}">[${log.level || 'INFO'}]</span>
+        <span>${log.message || log}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+fetchLogs();
+// 自动刷新日志
+setInterval(fetchLogs, 5000);
+</script>
+</body>
+</html>
