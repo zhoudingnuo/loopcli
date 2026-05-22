@@ -55,7 +55,8 @@
   --accent-gradient: linear-gradient(135deg, #00ffff 0%, #ff00ff 50%, #39ff14 100%);
 }
 
-  /* 状态色 */
+/* 状态色和通用变量 - 必须在 :root 内 */
+:root {
   --green: #10b981;
   --green-bg: rgba(16, 185, 129, 0.15);
   --yellow: #f59e0b;
@@ -72,6 +73,7 @@
   --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
+html { background: var(--bg); }
 body {
   font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
   background: var(--bg);
@@ -97,6 +99,7 @@ body {
   flex-direction: column;
   overflow: hidden;
   position: relative;
+  background: var(--bg);
 }
 
 /* 侧边栏 */
@@ -1482,7 +1485,11 @@ function initTheme() {
 }
 
 function applyTheme(theme) {
-  document.documentElement.setAttribute('data-theme', theme);
+  if (theme === 'dark') {
+    document.documentElement.removeAttribute('data-theme');
+  } else {
+    document.documentElement.setAttribute('data-theme', theme);
+  }
   localStorage.setItem('webui_theme', theme);
   updateThemeIcon(theme);
 }
@@ -2240,8 +2247,14 @@ function initThemeSelector() {
     themeSelector.value = savedTheme;
     themeSelector.addEventListener('change', (e) => {
       const newTheme = e.target.value;
-      document.documentElement.setAttribute('data-theme', newTheme);
+      if (newTheme === 'dark') {
+        document.documentElement.removeAttribute('data-theme');
+      } else {
+        document.documentElement.setAttribute('data-theme', newTheme);
+      }
       localStorage.setItem('webui_theme', newTheme);
+      updateThemeIcon(newTheme);
+      currentThemeIndex = themes.indexOf(newTheme);
       showNotification(`主题已切换: ${newTheme}`, 'success');
     });
   }
