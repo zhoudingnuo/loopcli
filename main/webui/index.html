@@ -1121,21 +1121,21 @@ body {
         </div>
 
         <!-- 可视化图表区域（SVG 美化版） -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-bottom: 32px;">
-          <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px;">
-            <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--text2);">Agent 状态分布</h3>
-            <div id="agent-status-chart" style="display:flex;align-items:center;justify-content:center;gap:24px;min-height:180px;"></div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 32px;">
+          <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+            <h3 style="font-size: 15px; font-weight: 700; margin-bottom: 20px; color: var(--text2); display:flex; align-items:center; gap:8px;"><span style="display:inline-block;width:4px;height:18px;background:linear-gradient(180deg,#6366f1,#8b5cf6);border-radius:2px;"></span>Agent 状态分布</h3>
+            <div id="agent-status-chart" style="display:flex;align-items:center;justify-content:center;min-height:200px;"></div>
           </div>
-          <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px;">
-            <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--text2);">任务完成进度</h3>
-            <div id="task-progress-chart" style="min-height:180px;"></div>
+          <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+            <h3 style="font-size: 15px; font-weight: 700; margin-bottom: 20px; color: var(--text2); display:flex; align-items:center; gap:8px;"><span style="display:inline-block;width:4px;height:18px;background:linear-gradient(180deg,#10b981,#34d399);border-radius:2px;"></span>任务完成进度</h3>
+            <div id="task-progress-chart" style="min-height:200px;"></div>
           </div>
         </div>
 
         <!-- 用量统计面板 -->
-        <div id="usage-panel" style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 32px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-            <h3 style="font-size: 16px; font-weight: 600; color: var(--text2);">用量统计</h3>
+        <div id="usage-panel" style="background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px; margin-bottom: 32px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 style="font-size: 15px; font-weight: 700; color: var(--text2); display:flex; align-items:center; gap:8px;"><span style="display:inline-block;width:4px;height:18px;background:linear-gradient(180deg,#f59e0b,#fbbf24);border-radius:2px;"></span>用量统计</h3>
             <span id="usage-refresh-time" style="font-size: 12px; color: var(--text3);">每5分钟刷新</span>
           </div>
           <div id="usage-content" style="color: var(--text2); font-size: 14px;">加载中...</div>
@@ -1355,7 +1355,7 @@ body {
           <div class="setting-item">
             <div class="setting-label">
               <div class="title">WebUI 版本</div>
-              <div class="description">v8.4 - 用量统计、美化图表、Agent排序</div>
+              <div class="description">v8.5 - 美化图表、用量面板重构、额度卡片</div>
             </div>
           </div>
           <div class="setting-item">
@@ -1773,49 +1773,68 @@ async function refreshAgents() {
   showNotification('刷新成功', 'success');
 }
 
-// SVG 圆环图
+// SVG 圆环图（美化版）
 function drawDonutChart(containerId, data, colors) {
   const container = document.getElementById(containerId);
   if (!container) return;
   const total = data.reduce((s, d) => s + d.value, 0);
   if (total === 0) { container.innerHTML = '<span style="color:var(--text3)">暂无数据</span>'; return; }
 
-  const size = 140, cx = 70, cy = 70, r = 54, stroke = 14;
+  const size = 160, cx = 80, cy = 80, r = 58, stroke = 18;
   const circumference = 2 * Math.PI * r;
   let offset = 0;
+  const gapAngle = data.filter(d => d.value > 0).length > 1 ? 3 : 0;
+
+  const gradients = colors.map((c, i) => {
+    const id = `grad-${containerId}-${i}`;
+    return `<defs><linearGradient id="${id}" x1="0%" y1="0%" x2="100%" y2="100%">`;
+  }).join('');
 
   let arcs = data.map((item, i) => {
     if (item.value === 0) return '';
     const pct = item.value / total;
-    const dash = circumference * pct;
+    const dash = Math.max(0, circumference * pct - gapAngle);
     const gap = circumference - dash;
-    const html = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${colors[i % colors.length]}" stroke-width="${stroke}" stroke-dasharray="${dash} ${gap}" stroke-dashoffset="${-offset}" transform="rotate(-90 ${cx} ${cy})" style="transition:all .5s ease"/>`;
-    offset += dash;
+    const color = colors[i % colors.length];
+    const html = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="${stroke}" stroke-dasharray="${dash} ${gap}" stroke-dashoffset="${-offset}" stroke-linecap="round" transform="rotate(-90 ${cx} ${cy})" style="transition:all .6s cubic-bezier(.4,0,.2,1);filter:drop-shadow(0 0 6px ${color}40);"/>`;
+    offset += dash + gapAngle;
     return html;
   }).join('');
 
-  const svg = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">${arcs}<text x="${cx}" y="${cy - 6}" text-anchor="middle" fill="var(--text)" font-size="22" font-weight="800">${total}</text><text x="${cx}" y="${cy + 12}" text-anchor="middle" fill="var(--text3)" font-size="10">总计</text></svg>`;
+  const svg = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="filter:drop-shadow(0 4px 12px rgba(0,0,0,0.15));">${arcs}<text x="${cx}" y="${cy - 8}" text-anchor="middle" fill="var(--text)" font-size="28" font-weight="800" font-family="system-ui,sans-serif">${total}</text><text x="${cx}" y="${cy + 14}" text-anchor="middle" fill="var(--text3)" font-size="11" font-family="system-ui,sans-serif">总计</text></svg>`;
 
-  const legend = data.map((item, i) => `<div style="display:flex;align-items:center;gap:8px;margin:4px 0;"><span style="width:10px;height:10px;border-radius:50%;background:${colors[i % colors.length]};flex-shrink:0;"></span><span style="font-size:13px;color:var(--text2)">${item.label}</span><span style="font-size:13px;font-weight:700;color:var(--text);margin-left:auto;">${item.value}</span></div>`).join('');
+  const legend = data.filter(d => d.value > 0).map((item, i) => {
+    const origIdx = data.indexOf(item);
+    const color = colors[origIdx % colors.length];
+    const pct = Math.round(item.value / total * 100);
+    return `<div style="display:flex;align-items:center;gap:10px;padding:6px 0;">
+      <span style="width:12px;height:12px;border-radius:3px;background:${color};flex-shrink:0;box-shadow:0 2px 6px ${color}40;"></span>
+      <span style="font-size:14px;color:var(--text2);min-width:50px;">${item.label}</span>
+      <span style="font-size:14px;font-weight:700;color:var(--text);margin-left:auto;">${item.value}</span>
+      <span style="font-size:11px;color:var(--text3);min-width:36px;text-align:right;">${pct}%</span>
+    </div>`;
+  }).join('');
 
-  container.innerHTML = svg + `<div style="min-width:100px;">${legend}</div>`;
+  container.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;gap:28px;">${svg}<div style="min-width:130px;">${legend}</div></div>`;
 }
 
-// 进度条列表
+// 进度条列表（美化版）
 function drawProgressBars(containerId, data, maxBar) {
   const container = document.getElementById(containerId);
   if (!container) return;
-  if (!data || data.length === 0) { container.innerHTML = '<span style="color:var(--text3)">暂无数据</span>'; return; }
+  if (!data || data.length === 0) { container.innerHTML = '<div style="color:var(--text3);text-align:center;padding:20px;">暂无数据</div>'; return; }
   const maxVal = maxBar || Math.max(...data.map(d => d.value), 1);
-  container.innerHTML = data.map(item => {
+  const barColors = ['#6366f1','#8b5cf6','#a78bfa','#c4b5fd','#7c3aed','#5b21b6'];
+  container.innerHTML = data.map((item, idx) => {
     const pct = Math.round((item.value / maxVal) * 100);
-    return `<div style="margin-bottom:10px;">
-      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;gap:8px;">
-        <span style="color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;max-width:60%;">${item.label}</span>
-        <span style="color:var(--text);font-weight:600;flex-shrink:0;">${item.value}</span>
+    const color = barColors[idx % barColors.length];
+    return `<div style="margin-bottom:14px;padding:10px 14px;background:var(--surface2);border-radius:10px;transition:transform .2s ease;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <span style="color:var(--text);font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;max-width:60%;">${item.label}</span>
+        <span style="color:${color};font-weight:700;font-size:14px;flex-shrink:0;">${pct}%</span>
       </div>
-      <div style="height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;">
-        <div style="height:100%;width:${pct}%;background:var(--accent-gradient);border-radius:4px;transition:width .5s ease;"></div>
+      <div style="height:6px;background:rgba(128,128,128,0.15);border-radius:3px;overflow:hidden;">
+        <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,${color},${color}cc);border-radius:3px;transition:width .6s cubic-bezier(.4,0,.2,1);box-shadow:0 0 8px ${color}40;"></div>
       </div>
     </div>`;
   }).join('');
@@ -2614,29 +2633,52 @@ async function loadUsageStats() {
       </div>`;
     };
 
-    let html = `<div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;margin-bottom:16px;">
-      <div style="padding:6px 14px;background:var(--surface2);border-radius:8px;font-size:13px;"><span style="color:var(--text2)">24h调用</span> <strong style="color:var(--text)">${fmt(data.call_count)}</strong></div>
-      <div style="padding:6px 14px;background:var(--surface2);border-radius:8px;font-size:13px;"><span style="color:var(--text2)">24h Token</span> <strong style="color:var(--text)">${fmt(data.total_tokens)}</strong></div>
-      ${data.weekly && data.weekly.tokens ? `<div style="padding:6px 14px;background:var(--surface2);border-radius:8px;font-size:13px;"><span style="color:var(--text2)">7天 Token</span> <strong style="color:var(--text)">${fmt(data.weekly.tokens)}</strong></div><div style="padding:6px 14px;background:var(--surface2);border-radius:8px;font-size:13px;"><span style="color:var(--text2)">7天调用</span> <strong style="color:var(--text)">${fmt(data.weekly.calls)}</strong></div>` : ''}
+    let html = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px;">
+      <div style="padding:14px 16px;background:var(--surface2);border-radius:12px;text-align:center;">
+        <div style="font-size:12px;color:var(--text3);margin-bottom:4px;">24h 调用</div>
+        <div style="font-size:20px;font-weight:800;color:var(--text);font-family:system-ui,sans-serif;">${fmt(data.call_count)}</div>
+      </div>
+      <div style="padding:14px 16px;background:var(--surface2);border-radius:12px;text-align:center;">
+        <div style="font-size:12px;color:var(--text3);margin-bottom:4px;">24h Token</div>
+        <div style="font-size:20px;font-weight:800;color:var(--text);font-family:system-ui,sans-serif;">${fmt(data.total_tokens)}</div>
+      </div>
+      ${data.weekly && data.weekly.tokens ? `<div style="padding:14px 16px;background:var(--surface2);border-radius:12px;text-align:center;">
+        <div style="font-size:12px;color:var(--text3);margin-bottom:4px;">7天 Token</div>
+        <div style="font-size:20px;font-weight:800;color:var(--text);font-family:system-ui,sans-serif;">${fmt(data.weekly.tokens)}</div>
+      </div>
+      <div style="padding:14px 16px;background:var(--surface2);border-radius:12px;text-align:center;">
+        <div style="font-size:12px;color:var(--text3);margin-bottom:4px;">7天调用</div>
+        <div style="font-size:20px;font-weight:800;color:var(--text);font-family:system-ui,sans-serif;">${fmt(data.weekly.calls)}</div>
+      </div>` : ''}
     </div>`;
 
-    // 额度面板
+    // 额度面板（卡片式）
     if (data.quotas && data.quotas.length > 0) {
-      html += `<div style="margin-bottom:16px;">`;
+      html += `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-bottom:20px;">`;
       (data.quotas).forEach(q => {
         let detail = '';
         if (q.type === 'mcp_month' && q.current !== undefined && q.total !== undefined) {
           detail = `${q.current}/${q.total} 分钟`;
         }
-        html += quotaBar(q.label, q.percentage, detail);
+        const c = barColor(q.percentage);
+        html += `<div style="padding:16px;background:var(--surface2);border-radius:12px;border-left:3px solid ${c};">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <span style="font-size:13px;font-weight:600;color:var(--text2)">${q.label}</span>
+            <span style="font-size:15px;font-weight:800;color:${c};font-family:system-ui,sans-serif;">${q.percentage}%</span>
+          </div>
+          <div style="height:6px;background:rgba(128,128,128,0.15);border-radius:3px;overflow:hidden;">
+            <div style="height:100%;width:${Math.min(q.percentage,100)}%;background:${c};border-radius:3px;transition:width .6s ease;box-shadow:0 0 8px ${c}40;"></div>
+          </div>
+          ${detail ? `<div style="font-size:11px;color:var(--text3);margin-top:6px;">${detail}</div>` : ''}
+        </div>`;
       });
       html += `</div>`;
     }
 
-    // 模型明细
+    // 模型明细（紧凑列表）
     if (data.models && data.models.length > 0) {
-      html += `<div style="font-size:13px;color:var(--text3);margin-bottom:8px;">模型用量</div>`;
-      html += data.models.map(m => `<div style="display:flex;align-items:center;gap:8px;margin:4px 0;font-size:13px;"><span style="color:var(--accent);font-weight:600;">${m.name}</span><span style="color:var(--text2)">${fmt(m.tokens)} tokens</span></div>`).join('');
+      html += `<div style="font-size:12px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">模型用量</div>`;
+      html += `<div style="display:flex;flex-wrap:wrap;gap:8px;">` + data.models.map(m => `<div style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--surface2);border-radius:8px;font-size:13px;"><span style="color:var(--accent);font-weight:600;">${m.name}</span><span style="color:var(--text2)">${fmt(m.tokens)} tokens</span></div>`).join('') + `</div>`;
     }
 
     el.innerHTML = html;
