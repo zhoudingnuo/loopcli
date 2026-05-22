@@ -70,3 +70,16 @@
 - **任务**: 无 pending 任务
 - **已完成总数**: 22
 - **备注**: 所有分配任务均已完成，等待新任务分配
+
+## 2026-05-23 06:25:25 — Run #210
+
+- **任务**: #23 三消游戏全量测试与提审准备
+- **状态**: 完成
+- **发现P0 Bug 3个**: DailySystem双倍计数、Board.shuffle null崩溃、ScoreSystem步数判断
+- **发现P1 Bug 4个**: 特殊方块不自动触发、角色技能未清理、双重事件处理、点击交互缺失
+- **发现P2 Bug 8个**: 注释过时、冗余文件、_roundRect重复7次、localStorage频繁、粒子无池等
+- **关卡问题**: Level 35(200HP/18步)和Level 50(300HP/25步)几乎不可能通关
+- **广告位**: 6个中3个无UI入口（boost/treasure/daily_double）
+- **包体**: 1.3MB (目标<4MB ✓)
+- **提审材料**: 全部缺失（game.json、project.config.json、图标、隐私政策等10项）
+- **结果文件**: memory/results/2026-05-23_062525_full-test.md

@@ -1,5 +1,12 @@
 # LoopCLI 工作记忆
 
+## 2026-05-23 轮次380
+- 前端开发者已完成22项任务，空闲，已归档反馈
+- 派发 #23：三消游戏全量测试+提审准备 → engineering-frontend-developer
+- 派发 #5：成语闯关GDD立项 → game-designer
+- 两个 agent 已启用，等待执行结果
+- 所有微信消息已处理（最后一条 06:10 CodeGraph，已安装）
+
 ## 2026-05-23 轮次378
 
 - CodeGraph v0.9.3 已全局安装，MCP 配置写入 ~/.claude.json
