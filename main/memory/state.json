@@ -1,12 +1,10 @@
 {
   "agent": "main",
   "status": "idle",
-  "last_run": "2026-05-23 06:02:55",
-  "run_count": 378,
-  "last_action": "dispatched_phase4_task22",
-  "active_agents": [
-    "engineering-frontend-developer"
-  ],
+  "last_run": "2026-05-23 06:13:43",
+  "run_count": 380,
+  "last_action": "installed_codegraph_disabled_idle_agent",
+  "active_agents": [],
   "pending_user_requests": [],
-  "current_iteration": 6
+  "current_iteration": 7
 }
