@@ -1,13 +1,9 @@
 {
   "agent": "main",
   "status": "idle",
-  "last_run": "2026-05-22 19:26:28",
-  "run_count": 312,
-  "last_action": "dispatched_webui_improvement_task",
-  "active_agents": [
-    "engineering-frontend-developer"
-  ],
-  "pending_user_requests": [
-    "wechat_image_support"
-  ]
+  "last_run": "2026-05-22 19:29:23",
+  "run_count": 314,
+  "last_action": "cost_control_agents_disabled",
+  "active_agents": [],
+  "pending_user_requests": []
 }

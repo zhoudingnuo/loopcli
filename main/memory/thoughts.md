@@ -1,23 +1,13 @@
 # LoopCLI 记忆
 
-## 2026-05-22 轮次311
+## 2026-05-22 轮次313
 
-**用户需求处理**：
-- 启用engineering-frontend-developer agent处理webui改进任务
-- 任务：长期任务编辑/取消功能，移到主页醒目位置
-- 微信图片功能：已反馈用户当前未实现，需要开发
+**成本控制执行**：
+- 禁用3个空闲agents：content-generator、engineering-autonomous-optimization-architect、engineering-frontend-developer
+- WebUI测试9/9通过，功能正常
+- API状态同步正确，所有agents正确显示disabled状态
+- 生成5页最新截图
 
-**成本控制**：所有其他agent保持禁用状态
+**长期任务进度**：WebUI已优化完成（2570行，80K），所有功能测试通过
 
-## 2026-05-22 轮次309
-
-**WebUI深度优化完成**：
-- 代码从2591行减少到2570行（-21行）
-- 归档备份388KB，删除重复函数
-- Playwright测试9/9通过
-
-## 2026-05-22 关键决策
-
-**WebUI优化方向**：使用playwright测试确保功能正常，移动端优化完成
-
-**成本控制策略**：无任务时立即禁用agent，这是铁律
+**成本控制铁律**：无任务时立即禁用agent，每轮必检查
