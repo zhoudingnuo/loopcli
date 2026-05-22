@@ -49,9 +49,11 @@ for t in tsummary.get("toolSummaryList", []):
 quota = query("/api/monitor/usage/quota/limit", use_params=False)
 for item in quota.get("limits", []):
     t, pct = item.get("type", "?"), item.get("percentage", 0)
+    unit = item.get("unit", 0)
     if "TOKEN" in t:
-        print(f"\nToken 配额 (5h): {pct:.1f}%")
+        label = "Token 配额 (5h)" if unit == 3 else f"Token 配额 (周)" if unit == 6 else f"Token 配额 (unit={unit})"
+        print(f"\n{label}: {pct:.1f}%")
     elif "TIME" in t:
         cur = item.get("currentValue", 0)
         total = item.get("usage", "?")
-        print(f"MCP 配额 (月): {pct:.1f}% ({cur}/{total} 分钟)")
+        print(f"MCP 配额 (月): {pct:.1f}% ({cur}/{total} 次)")

@@ -1,11 +1,19 @@
 # LoopCLI 工作记忆
 
-## 2026-05-23 轮次365（本轮）
+## 2026-05-23 轮次367
 
-- game-designer 完成 GDD（消消消大作战），已禁用
-- 用户发了抖音小游戏官方文档链接，已保存到 facts
-- 用户确认有两个配额（5h + 每周）
-- 下一步：基于 GDD 创建开发 agent 开始编码，或等用户确认方向
+- 无新用户消息，所有 wechat 消息已处理归档
+- engineering-frontend-developer 运行中（run_count=190），正在执行 task#18（三消游戏 Phase 1）
+- 游戏项目已初始化目录结构（D:/game-projects/douyin-match3/），尚无源码
+- 所有其他 agent 已禁用
+- 下一步：等 frontend-developer 完成 Phase 1，验证结果
+
+## 2026-05-23 轮次366
+
+- 无新用户消息，无 wechat 消息
+- 长期任务：游戏开发 — 已启用 engineering-frontend-developer 派发 Phase 1（核心引擎）
+- 所有其他 agent 已禁用
+- 下一步：检查 frontend-developer 完成情况，推进 Phase 2
 
 ## 2026-05-23 轮次362
 

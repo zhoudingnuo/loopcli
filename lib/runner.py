@@ -150,10 +150,10 @@ def run_agent(agent, iteration, run_log_dir, claude_cmd, activity=None):
 
         def watchdog():
             while proc.poll() is None:
-                timeout = 30 if got_result[0] else 600
+                timeout = 30 if got_result[0] else 1800
                 if time.time() - last_output[0] > timeout:
                     stuck[0] = True
-                    label = "30秒（agent已输出结果）" if got_result[0] else "10分钟无输出"
+                    label = "30秒（agent已输出结果）" if got_result[0] else "30分钟无输出"
                     out(f"  {_agent_tag(name)} {C.RED}⏰ 超时（{label}），正在终止...{C.RST}")
                     proc.kill()
                     try:

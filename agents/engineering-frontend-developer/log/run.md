@@ -42,3 +42,4 @@
 - 结果文件：memory/results/20260523_041804.md
 | 2026-05-23 04:25:10 | 完成 | #16 侧边栏全面中文化 | 添加themeNames/statusNames映射表，翻译快捷键帮助页面名称、主题切换通知、任务状态标签、圆环图状态标签、模型用量单位，更新版本号v8.8 |
 | 2026-05-23 04:43:00 | 完成 | #17 修复配额重复显示bug | server.py配额处理添加seen_token去重标记，只取第一个TOKEN条目，解决WebUI显示两个Token配额5h的问题 |
+| 2026-05-23 05:13:19 | 完成 | #18 三消游戏核心引擎Phase1 | 7个JS模块(Board/MatchEngine/Renderer/Input/Score/Animation/Game)+index.html，8x8棋盘+6色水果+滑动交换+3+匹配检测+消除动画+重力下落+连锁+特殊方块(条纹/区域/彩虹)+步数限制+10关卡配置 |

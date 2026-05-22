@@ -151,5 +151,14 @@
     "created": "2026-05-23",
     "assignee": "engineering-frontend-developer",
     "completed": "2026-05-23 04:43:00"
+  },
+  {
+    "id": 18,
+    "status": "done",
+    "title": "三消游戏核心引擎开发 - Phase 1",
+    "description": "基于 D:/game-projects/douyin-match3/GDD.md 开发「消消消大作战」Phase 1 核心引擎。\n\n项目目录：D:/game-projects/douyin-match3/\n\nPhase 1 需要实现：\n1. 项目初始化（package.json, 目录结构 src/js src/css src/assets）\n2. 8x8 棋盘渲染（HTML5 Canvas, 6种水果色块）\n3. 触摸/鼠标滑动交换（相邻元素上下左右交换）\n4. 匹配检测算法（3+同色水平/垂直连线检测）\n5. 消除动画 + 重力下落 + 顶部填充 + 连锁检测\n6. 特殊方块生成（4连→条纹炸弹, 5连→彩虹, L/T形→区域炸弹）\n7. 步数限制 + 关卡目标（分数达标类型）\n8. 连锁计分系统（连锁倍率：2连1.5x, 3连2.0x, 4+连2.5x）\n\n技术要求：\n- 纯 HTML5 Canvas + JavaScript（无框架依赖，包体<4MB）\n- 抖音小游戏兼容（参考 https://developer.open-douyin.com/docs/resource/zh-CN/mini-game/develop/guide/dev-guide/bytedance-mini-game）\n- 可在浏览器中直接测试（index.html 入口）\n- 代码清晰模块化：Board.js, MatchEngine.js, Renderer.js, InputHandler.js, ScoreSystem.js\n\n完成后在项目目录创建 index.html 可直接浏览器打开测试。",
+    "created": "2026-05-23",
+    "assignee": "engineering-frontend-developer",
+    "completed": "2026-05-23 05:13:19"
   }
 ]

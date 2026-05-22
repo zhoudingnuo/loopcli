@@ -195,8 +195,8 @@ def cmd_run(args):
                 if not t.is_alive():
                     continue
                 last_active = activity.get(aname, 0)
-                if last_active > 0 and time.time() - last_active > 600:
-                    out(f"  {C.RED}⚠ {aname} 10分钟无输出，跳过等待{C.RST}")
+                if last_active > 0 and time.time() - last_active > 1800:
+                    out(f"  {C.RED}⚠ {aname} 30分钟无输出，跳过等待{C.RST}")
                     del threads[t]
 
             # 实时激活：检查不在运行中的 agent 是否有新 pending 任务

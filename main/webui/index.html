@@ -2737,7 +2737,9 @@ async function loadUsageStats() {
       (data.quotas).forEach(q => {
         let detail = '';
         if (q.type === 'mcp_month' && q.current !== undefined && q.total !== undefined) {
-          detail = `${q.current}/${q.total} 分钟`;
+          detail = `${q.current}/${q.total} 次`;
+        } else if (q.type === 'token_weekly' && q.current !== undefined && q.total !== undefined) {
+          detail = `${q.current}/${q.total}`;
         }
         const c = barColor(q.percentage);
         html += `<div style="padding:16px;background:var(--surface2);border-radius:12px;border-left:3px solid ${c};">
