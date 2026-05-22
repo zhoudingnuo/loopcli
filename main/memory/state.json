@@ -1,9 +1,9 @@
 {
   "agent": "main",
   "status": "idle",
-  "last_run": "2026-05-22 19:29:23",
-  "run_count": 314,
-  "last_action": "cost_control_agents_disabled",
+  "last_run": "2026-05-22 19:33:46",
+  "run_count": 316,
+  "last_action": "webui_logs_bug_fix",
   "active_agents": [],
   "pending_user_requests": []
 }

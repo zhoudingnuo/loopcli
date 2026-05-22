@@ -2095,21 +2095,41 @@ async function loadLogs() {
   try {
     const response = await fetch(`${API_BASE}/logs`);
     if (!response.ok) throw new Error('API 请求失败');
-    const logs = await response.json();
+    const data = await response.json();
 
     const container = document.getElementById('logs-content');
-    if (!logs || logs.length === 0) {
+    const lines = Array.isArray(data) ? data : (data.lines || []);
+    if (!lines || lines.length === 0) {
       container.innerHTML = '<div style="text-align: center; color: var(--text2);">暂无日志</div>';
       return;
     }
 
-    container.innerHTML = logs.slice(-50).map(log => `
-      <div class="log-entry">
+    // Parse table-format logs: | time | status | task | summary |
+    const logEntries = lines
+      .filter(l => l.trim().startsWith('|') && !l.trim().startsWith('|--') && !l.trim().startsWith('| 时间'))
+      .slice(-50)
+      .map(line => {
+        const parts = line.split('|').map(s => s.trim()).filter(Boolean);
+        if (parts.length >= 4) {
+          return { time: parts[0], status: parts[1], task: parts[2], message: parts[3] };
+        }
+        return { time: '', status: '', task: '', message: line };
+      });
+
+    if (logEntries.length === 0) {
+      container.innerHTML = '<div style="text-align: center; color: var(--text2);">暂无日志条目</div>';
+      return;
+    }
+
+    container.innerHTML = logEntries.map(log => {
+      const levelClass = log.status === 'done' ? 'success' : log.status === 'idle' ? 'warning' : 'info';
+      return `<div class="log-entry">
         <span class="log-time">${log.time || '-'}</span>
-        <span class="log-level ${log.level || 'info'}">${log.level || 'INFO'}</span>
-        <span class="log-message">${log.message || log.content || '-'}</span>
-      </div>
-    `).join('');
+        <span class="log-level ${levelClass}">${log.status || 'info'}</span>
+        <span style="color:var(--accent);font-weight:600;margin-right:8px;font-size:12px;">${log.task}</span>
+        <span class="log-message">${log.message || '-'}</span>
+      </div>`;
+    }).join('');
   } catch (error) {
     console.error('加载日志失败:', error);
     document.getElementById('logs-content').innerHTML =
