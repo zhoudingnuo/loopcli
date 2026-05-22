@@ -3,8 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LoopCLI - Agent 控制台 v8.7</title>
+<title>LoopCLI - Agent 控制台 v8.8</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
+.ti { font-size: 18px; vertical-align: middle; }
+.nav-item .ti { font-size: 20px; }
+.btn .ti { font-size: 16px; }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
   /* v8.1 配色 - 深色主题（默认） */
@@ -195,7 +199,7 @@ body {
 }
 .search-input {
   width: 100%;
-  padding: 14px 20px;
+  padding: 14px 20px 14px 44px;
   background: var(--surface);
   border: 2px solid var(--border);
   border-radius: 12px;
@@ -233,17 +237,11 @@ body {
   border-color: var(--green);
   background: var(--green-bg);
 }
-.refresh-icon {
-  width: 14px;
-  height: 14px;
-  border: 2px solid currentColor;
-  border-top-color: transparent;
-  border-radius: 50%;
+.refresh-icon-ti {
   animation: spin 1s linear infinite;
 }
-.auto-refresh-indicator:not(.active) .refresh-icon {
+.auto-refresh-indicator:not(.active) .refresh-icon-ti {
   animation: none;
-  border-top-color: currentColor;
 }
 
 /* 快捷键帮助面板 */
@@ -983,7 +981,7 @@ body {
 
 <!-- 自动刷新指示器 -->
 <div class="auto-refresh-indicator" id="auto-refresh-indicator">
-  <div class="refresh-icon"></div>
+  <i class="ti ti-refresh refresh-icon-ti"></i>
   <span id="refresh-status">自动刷新: 10s</span>
 </div>
 
@@ -992,7 +990,7 @@ body {
 
 <!-- 快捷键面板 -->
 <div class="shortcuts-panel" id="shortcuts-panel">
-  <h3>⌨️ 键盘快捷键</h3>
+  <h3><i class="ti ti-keyboard"></i> 键盘快捷键</h3>
   <div class="shortcut-item">
     <span class="shortcut-key">1-5</span>
     <span>切换页面</span>
@@ -1010,7 +1008,7 @@ body {
     <span>关闭面板</span>
   </div>
   <div style="margin-top: 20px; text-align: center;">
-    <button class="btn btn-primary" onclick="closeShortcutsPanel()">关闭</button>
+    <button class="btn btn-primary" onclick="closeShortcutsPanel()"><i class="ti ti-x"></i> 关闭</button>
   </div>
 </div>
 
@@ -1022,36 +1020,36 @@ body {
     </div>
     <nav class="nav">
       <div class="nav-item active" data-page="agents">
-        <span>◈</span>
+        <i class="ti ti-robot"></i>
         <span>Agents</span>
       </div>
       <div class="nav-item" data-page="tasks">
-        <span>◉</span>
+        <i class="ti ti-list-check"></i>
         <span>Tasks</span>
       </div>
       <div class="nav-item" data-page="performance">
-        <span>📊</span>
+        <i class="ti ti-chart-bar"></i>
         <span>Performance</span>
       </div>
       <div class="nav-item" data-page="logs">
-        <span>◐</span>
+        <i class="ti ti-file-text"></i>
         <span>Logs</span>
       </div>
       <div class="nav-item" data-page="screenshots">
-        <span>📷</span>
+        <i class="ti ti-camera"></i>
         <span>Screenshots</span>
       </div>
       <div class="nav-item" data-page="settings">
-        <span>⚙</span>
+        <i class="ti ti-settings"></i>
         <span>Settings</span>
       </div>
     </nav>
     <div class="sidebar-footer">
       <button class="theme-toggle" id="theme-toggle" title="切换主题">
-        <span id="theme-icon">🌙</span>
+        <i id="theme-icon" class="ti ti-moon"></i>
       </button>
       <button class="help-toggle" id="help-toggle" title="快捷键帮助">
-        <span>?</span>
+        <i class="ti ti-help-circle"></i>
       </button>
     </div>
   </aside>
@@ -1068,19 +1066,20 @@ body {
 
         <div class="action-bar" style="display: flex; gap: 12px; margin-bottom: 20px;">
           <button class="btn btn-primary" id="create-agent-btn" onclick="showCreateAgentModal()" style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 16px;">➕</span>
+            <i class="ti ti-plus"></i>
             <span>创建 Agent</span>
           </button>
           <button class="btn btn-secondary" id="refresh-btn" onclick="refreshAgents()" style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 16px;">🔄</span>
+            <i class="ti ti-refresh"></i>
             <span>刷新</span>
           </button>
         </div>
 
-        <div class="search-bar" style="display: flex; gap: 12px; align-items: center;">
+        <div class="search-bar" style="display: flex; gap: 12px; align-items: center; position: relative;">
+          <i class="ti ti-search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text2); z-index: 1;"></i>
           <input type="text" class="search-input" id="agent-search" placeholder="搜索 Agent (按名称、ID 或状态)..." style="flex: 1; min-width: 0;">
           <button class="btn btn-secondary" id="export-btn" onclick="exportAgentsData()" style="flex-shrink: 0; white-space: nowrap;">
-            📥 导出
+            <i class="ti ti-download"></i> 导出
           </button>
         </div>
 
@@ -1109,7 +1108,7 @@ body {
           <div style="display: flex; justify-content: space-between; align-items: flex-start; position: relative; z-index: 1;">
             <div style="flex: 1;">
               <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-                <span style="font-size: 24px;">🎯</span>
+                <span style="font-size: 24px;"><i class="ti ti-target"></i></span>
                 <h3 style="font-size: 20px; font-weight: 700; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">长期任务</h3>
                 <span id="longtask-badge" style="display: none; background: var(--accent); color: white; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 600;">进行中</span>
               </div>
@@ -1119,15 +1118,15 @@ body {
                 <div id="longtask-edit-main" style="display: none; margin-top: 12px;">
                   <textarea id="longtask-editor-main" style="width: 100%; min-height: 120px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-family: monospace; font-size: 13px; color: var(--text); resize: vertical;" placeholder="输入长期任务内容..."></textarea>
                   <div style="display: flex; gap: 8px; margin-top: 8px;">
-                    <button class="btn btn-primary" onclick="saveLongTaskMain()">💾 保存</button>
+                    <button class="btn btn-primary" onclick="saveLongTaskMain()"><i class="ti ti-device-floppy"></i> 保存</button>
                     <button class="btn btn-secondary" onclick="cancelEditLongTaskMain()">取消</button>
                   </div>
                 </div>
               </div>
             </div>
             <div style="display: flex; gap: 8px;">
-              <button class="btn btn-primary" id="edit-longtask-btn-main" onclick="startEditLongTaskMain()" style="display: none;">✎ 编辑</button>
-              <button class="btn btn-secondary" id="cancel-longtask-btn-main" onclick="cancelLongTaskMain()" style="display: none;">✕ 取消</button>
+              <button class="btn btn-primary" id="edit-longtask-btn-main" onclick="startEditLongTaskMain()" style="display: none;"><i class="ti ti-pencil"></i> 编辑</button>
+              <button class="btn btn-secondary" id="cancel-longtask-btn-main" onclick="cancelLongTaskMain()" style="display: none;"><i class="ti ti-x"></i> 取消</button>
             </div>
           </div>
         </div>
@@ -1264,7 +1263,7 @@ body {
         <div class="logs-container">
           <div class="logs-header">
             <span>最新日志</span>
-            <button class="btn btn-secondary" onclick="clearLogs()">清空</button>
+            <button class="btn btn-secondary" onclick="clearLogs()"><i class="ti ti-trash"></i> 清空</button>
           </div>
           <div class="logs-content" id="logs-content">
             <div class="loading">
@@ -1285,7 +1284,7 @@ body {
         <div class="card">
           <div class="card-header">
             <h3>最新截图</h3>
-            <button class="btn btn-secondary" onclick="loadScreenshots()" style="margin-left: auto;">刷新</button>
+            <button class="btn btn-secondary" onclick="loadScreenshots()" style="margin-left: auto;"><i class="ti ti-refresh"></i> 刷新</button>
           </div>
           <div class="card-body">
             <div id="screenshots-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
@@ -1412,10 +1411,10 @@ body {
             </div>
             <div class="setting-control">
               <button class="btn btn-secondary" id="edit-longtask-btn" onclick="startEditLongTask()" style="display: none;">
-                ✎ 编辑
+                <i class="ti ti-pencil"></i> 编辑
               </button>
               <button class="btn btn-secondary" id="cancel-longtask-btn" onclick="cancelLongTask()" style="display: none;">
-                ✕ 取消任务
+                <i class="ti ti-x"></i> 取消任务
               </button>
             </div>
           </div>
@@ -1425,7 +1424,7 @@ body {
           <div id="longtask-edit" style="display: none; margin-top: 16px;">
             <textarea id="longtask-editor" style="width: 100%; min-height: 120px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-family: monospace; font-size: 13px; color: var(--text); resize: vertical;" placeholder="输入长期任务内容..."></textarea>
             <div style="display: flex; gap: 8px; margin-top: 8px;">
-              <button class="btn btn-primary" onclick="saveLongTask()">💾 保存</button>
+              <button class="btn btn-primary" onclick="saveLongTask()"><i class="ti ti-device-floppy"></i> 保存</button>
               <button class="btn btn-secondary" onclick="cancelEditLongTask()">取消</button>
             </div>
           </div>
@@ -1445,10 +1444,10 @@ function showNotification(message, type = 'info', duration = 5000) {
   if (!container) return;
 
   const icons = {
-    success: '✓',
-    info: 'ℹ',
-    warning: '⚠',
-    error: '✕'
+    success: '<i class="ti ti-check" style="font-size:18px"></i>',
+    info: '<i class="ti ti-info-circle" style="font-size:18px"></i>',
+    warning: '<i class="ti ti-alert-triangle" style="font-size:18px"></i>',
+    error: '<i class="ti ti-x" style="font-size:18px"></i>'
   };
 
   const notification = document.createElement('div');
@@ -1456,7 +1455,7 @@ function showNotification(message, type = 'info', duration = 5000) {
   notification.innerHTML = `
     <span class="notification-icon">${icons[type] || icons.info}</span>
     <span class="notification-message">${message}</span>
-    <span class="notification-close" onclick="this.parentElement.remove()">×</span>
+    <span class="notification-close" onclick="this.parentElement.remove()"><i class="ti ti-x" style="font-size:14px"></i></span>
   `;
 
   container.appendChild(notification);
@@ -1502,8 +1501,8 @@ function cycleTheme() {
 function updateThemeIcon(theme) {
   const icon = document.getElementById('theme-icon');
   if (icon) {
-    const icons = { dark: '🌙', light: '☀️', cyberpunk: '🌈' };
-    icon.textContent = icons[theme] || '🌙';
+    const icons = { dark: 'ti ti-moon', light: 'ti ti-sun', cyberpunk: 'ti ti-palette' };
+    icon.className = icons[theme] || 'ti ti-moon';
   }
 }
 
@@ -1717,8 +1716,8 @@ async function showCreateAgentModal() {
         </div>
 
         <div style="display: flex; gap: 12px; justify-content: flex-end; padding-top: 16px; border-top: 1px solid var(--border);">
-          <button onclick="closeCreateAgentModal()" class="btn btn-secondary">取消</button>
-          <button onclick="createNewAgent()" class="btn btn-primary">创建</button>
+          <button onclick="closeCreateAgentModal()" class="btn btn-secondary"><i class="ti ti-x"></i> 取消</button>
+          <button onclick="createNewAgent()" class="btn btn-primary"><i class="ti ti-plus"></i> 创建</button>
         </div>
       </div>
 
@@ -2052,10 +2051,10 @@ async function loadAgents() {
 
         <div class="agent-actions">
           <button class="btn btn-primary" onclick="enableAgent('${agent.id}')">
-            ✓ 启用
+            <i class="ti ti-player-play"></i> 启用
           </button>
           <button class="btn btn-secondary" onclick="disableAgent('${agent.id}')">
-            ✕ 禁用
+            <i class="ti ti-player-stop"></i> 禁用
           </button>
         </div>
       </div>

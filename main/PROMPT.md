@@ -11,6 +11,30 @@
 迭代是自动运行的，禁止你运行python run.py嵌套
 
 
+# 三层记忆系统
+
+## 初始化（每轮必做）
+1. 读取 `memory/MEMORY.md` — 热索引（≤50行，~300 tokens）
+2. 读取 `memory/state.json` — 当前状态
+3. 根据任务需要，用 Grep 搜索 `memory/facts/` 检索温记忆
+4. 跟随 fact 文件中的 `[[wiki-link]]` 链式回忆关联知识
+
+## 记忆层级
+- **Hot**（热）：`MEMORY.md` 索引 + `state.json` — 每轮必读
+- **Warm**（温）：`memory/facts/*.md` — 按需 Grep 搜索，独立 fact 文件
+- **Cold**（冷）：`memory/archive/` — 归档旧记忆，仅历史回顾时搜索
+
+## 写入记忆
+- 新事实/经验/决策 → 创建 `memory/facts/<topic>.md`
+- 文件内用 `[[wiki-link]]` 链接相关记忆
+- 更新 `MEMORY.md` 索引添加一行指针
+- 当轮工作记忆写入 `memory/thoughts.md`（≤8000字）
+
+## 压缩规则
+- MEMORY.md 超 50 行 → 合并/归档最旧条目
+- fact 文件超 100 行 → 提炼核心到新文件，旧文件移入 archive/
+- thoughts.md 超 50 行 → 压缩为最近 5 轮 + 关键决策
+
 # 执行流程
 
 1. **处理用户消息**（有就立即处理）
@@ -23,19 +47,22 @@
    - 成本优化（压缩 memory、清理日志、归档 inbox）
    - 仅当以上都没有时：维护性工作
 4. **更新记录**：
-   - memory/thoughts.md（允许 8000 字，这是你的记忆，你可以把经验教训，有意义的事情添加）
+   - 重要知识写入 `memory/facts/`，更新 `MEMORY.md` 索引
+   - 当轮工作记忆写入 `memory/thoughts.md`（允许 8000 字）
    - 归档已处理的 inbox 消息到 inbox/archive/
    - 更新memory/state.json（不超过 5 行）
    - 追加摘要到 log/run.md（格式：`| 时间 | 状态 | 任务 | 摘要 |`）
 
 # 微信通知
 
-report/ 目录中的文件会自动发送到用户微信。
+report/ 目录中的文件会自动发送到用户微信。**只推重要消息，宁可少发。**
 
-推送：
+必须推送：
 - 用户微信指令的执行结果
 - Agent 执行失败/报错
 - 系统关键状态变更（Agent 创建/删除、配置变更）
-- 运行报告
+
+禁止推送：
+- 日常运行状态、维护操作、空闲 Agent 禁用、周期性检查结果
 
 推送格式：写入 `D:/loopcli/main/report/report_YYYYMMDD_HHMM.md`，内容不超过 200 字。

@@ -1,22 +1,13 @@
-# LoopCLI 记忆
+# LoopCLI 工作记忆
 
-## 2026-05-22 轮次335
+## 2026-05-23 轮次341
 
-**WebUI v8.7 深度优化**：
-- 性能页响应时间：改为测量 /api/health（不再依赖 /api/usage），从"- ms"修复为实际值(106ms)
-- Token消耗：显示"暂无"降级逻辑，当前显示290,589,950真实数据
-- 搜索框与导出按钮：flex布局+min-width:0+white-space:nowrap，不再重叠
-- 统计卡片标签：--text2从#9ca3af提升至#b0b8c4，对比度提升
-- Agent卡片按钮：agent-actions添加justify-content:stretch，按钮均匀分布
-- 长期任务文字：添加overflow-wrap:break-word+word-break:break-word，防截断
-- Playwright 9/9全通过，API验证全部通过
+**三层记忆系统实现完成**：
+- 创建 Hot/Warm/Cold 三层架构：MEMORY.md 索引 → facts/ 知识文件 → archive/ 归档
+- 迁移 thoughts.md 关键知识到 9 个独立 fact 文件，每个带 [[wiki-link]] 链式关联
+- PROMPT.md 已适配新记忆系统：初始化读索引、按需 Grep 搜索、链式回忆流程
+- 参考项目：Cog（三层文件记忆）、Claude Code 自身指针索引模式
 
-## 2026-05-22 轮次333
-
-**WebUI v8.6 深度优化**：
-- 修复搜索框与导出按钮重叠（改为flex布局并列）
-- 修复设置页长期任务编辑区结构错位（longtask-edit移入settings-section内）
-- 自动刷新指示器移至右下角（避免与通知冲突）
-- 移动端sidebar品牌文字缩小防截断
-- 性能页面硬编码变化值改为动态ID
-- Playwright 64/64全通过，零JS错误
+**深色主题修复**：
+- 用户报告深色主题主背景白色，根因是 html 和 .main 缺少显式 background: var(--bg)
+- 已修复，已推送微信通知
