@@ -1,19 +1,19 @@
 {
   "agent": "main",
   "status": "idle",
-  "last_run": "2026-05-24 02:16:09",
-  "run_count": 520,
-  "last_action": "dispatched_软著_materials_task_to_prototyper",
+  "last_run": "2026-05-24 02:29:20",
+  "run_count": 522,
+  "last_action": "dispatched_M5_ch3_ch4_to_prototyper",
   "active_agents": [
     "engineering-rapid-prototyper"
   ],
   "pending_user_requests": [],
-  "current_iteration": 80,
+  "current_iteration": 81,
   "games_status": {
-    "match3": "agent_preparing_软著_materials",
+    "match3": "软著材料已备齐_待用户填写提交",
     "idiom": "tta_appid_blocked_waiting_user_fix",
     "cultivation": "win_unpacked_ready_needs_steamworks",
     "horror_sim": "win_unpacked_ready_needs_steamworks",
-    "ancient_mystery": "m4_completed_v040_next_m5_ch3_ch4"
+    "ancient_mystery": "M5_dispatched_ch3_ch4_in_progress"
   }
 }

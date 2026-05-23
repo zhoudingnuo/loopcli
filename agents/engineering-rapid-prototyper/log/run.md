@@ -66,3 +66,12 @@
 - D:/games/match3-xiaoxiaoxiao/软著材料/src-code-doc.md
 - D:/games/match3-xiaoxiaoxiao/软著材料/software-manual.md
 - D:/games/match3-xiaoxiaoxiao/软著材料/application-info.md
+
+## 2026-05-24T03:00:00 - M5里程碑完成
+- **任务**: 长安诡案录M5：Ch3大明宫闹鬼+Ch4地下迷城
+- **状态**: 完成
+- **版本**: v0.4.0 → v0.5.0
+- **产出**: ch3.json + ch4.json（完整章节数据），scenes.json新增12场景，characters.json新增6角色，UIManager注册ch3/ch4，npm run build通过
+- **Ch3**: 30+对话、15物证、5 NPC、4庭审证人、19证词、14推理节点、3假设
+- **Ch4**: 35+对话、17物证、6 NPC、5庭审证人、24证词、15推理节点、3假设
+- **暗线**: 陆判官（陆无咎）正式登场，统一封印网络体系完整揭示
