@@ -259,5 +259,14 @@
     "created": "2026-05-23",
     "assignee": "engineering-frontend-developer",
     "completed": "2026-05-23 08:49:06"
+  },
+  {
+    "id": 30,
+    "status": "done",
+    "title": "修仙自动化工厂 Steam GDD",
+    "description": "为Steam独立游戏修仙自动化工厂编写完整GDD。核心：修仙主题放置自动化游戏，融合idle与工厂自动化。进度系统：炼气到化神。自动化：灵石采集>灵药种植>丹炉炼丹>丹药分配。技术：HTML5\\Canvas+Electron打包Steam。输出到D:/game-projects/steam-cultivation-factory/GDD.md。参考市场调研和三消GDD",
+    "created": "2026-05-23",
+    "assignee": "engineering-frontend-developer",
+    "completed": "2026-05-23 09:00:00"
   }
 ]

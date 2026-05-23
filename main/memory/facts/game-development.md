@@ -25,7 +25,8 @@
 - **成语闯关 W2 完成**（2026-05-23）：6新模块(TimedChallenge/IdiomCollection/DailySystem/PKMode/SocialManager/Characters)+关卡21-50
 - **三消提审材料完成**（Task #28）：图标/截图/隐私政策/SDK适配/压缩/配置，待用户填appid+广告位ID
 - **成语闯关 W3 派发**（Task #29）：穿山甲SDK+6广告位+埋点+提审材料+包体优化
-- **下一步**：等#29完成 → 成语提审 / 新游戏立项(Steam方向?)
+- **Steam项目启动**：修仙自动化工厂 — 放置/自动化+修仙主题，Task #30 GDD编写中
+- **下一步**：等#30 GDD完成 → 开始Steam原型开发
 
 ## 关键约束
 - 游戏项目放在 D 盘（`D:/game-projects/`），不放在 loopcli 根目录
