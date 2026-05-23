@@ -55,10 +55,13 @@
   - 参考：Lethal Company + Schedule I
 - [[current-architecture]]
 
-## 测试阶段（2026-05-23 启动）
-- **game-tester-mobile**：测试三消+成语闯关的手机端兼容性（触摸/屏幕适配/性能）
-- **game-tester-steam**：测试修仙工厂+深夜便利店的完整可玩性（流程/存档/数值）
-- 用户要求：抖音游戏要移植到手机，所有游戏要实际游玩测试
+## 测试阶段（2026-05-23 已完成）
+- **game-tester-mobile** ✅ 完成：三消(34/34)+成语(39/39)全部通过，发现并修复6个bug
+  - 最严重：Match3导航界面触屏完全无响应（已修复）
+- **game-tester-steam** ✅ 完成：修仙工厂(229/229)+深夜便利店(297/297)全部通过，发现并修复18个bug
+  - 修仙工厂：8 bug修复（2 Critical + 3 High + 3 Medium）
+  - 深夜便利店：10 bug修复（2 Critical + 3 High + 5 Medium）
+- 所有bug已修复，4款游戏可进入发布流程
 
 ## 关键约束
 - 游戏项目放在 D 盘（`D:/game-projects/`），不放在 loopcli 根目录

@@ -3,24 +3,25 @@
   "status": "idle",
   "created": "2026-05-23",
   "task": "测试两款抖音小游戏的手机端兼容性和完整游玩流程",
-  "current_iteration": 45,
-  "last_run": "2026-05-23 18:10:10",
+  "current_iteration": 46,
+  "last_run": "2026-05-23 18:36:52",
   "last_results": {
     "match3": {
       "tests_passed": 34,
       "tests_failed": 0,
-      "bugs_found": 3,
-      "bugs_fixed": 3,
-      "critical_bug": "Navigation screens non-responsive on touch devices - InputHandler preventDefault suppressed click events"
+      "bugs_found": 0,
+      "bugs_fixed": 0,
+      "note": "All clean — bugs were fixed in iteration 45"
     },
     "idiom": {
-      "tests_passed": 39,
+      "tests_passed": 45,
       "tests_failed": 0,
-      "bugs_found": 3,
-      "bugs_fixed": 3,
-      "critical_bug": "confirm() dialogs may not work in Douyin runtime"
+      "bugs_found": 2,
+      "bugs_fixed": 2,
+      "bug_1": "SocialManager.isDoujin typo — friend leaderboard always fell back to local",
+      "bug_2": "5x alert() calls replaced with custom _showToast() — Douyin runtime compatibility"
     }
   },
   "report_path": "D:/loopcli/main/inbox/game-tester-mobile-report.md",
-  "run_count": 1
+  "run_count": 3
 }

@@ -3,8 +3,20 @@
   "status": "idle",
   "created": "2026-05-23",
   "task": "测试两款Steam独立游戏的完整可玩性和bug修复",
-  "current_iteration": 44,
-  "last_run": "2026-05-23 18:10:10",
+  "current_iteration": 46,
+  "last_run": "2026-05-23 18:36:52",
   "result": "18个bug修复，526个测试全部通过，报告已生成",
-  "run_count": 1
+  "run_count": 3,
+  "verification": {
+    "cultivation_factory": {
+      "tests": "229/229 PASS",
+      "tsc": "PASS",
+      "bugs_fixed": 8
+    },
+    "horror_sim": {
+      "tests": "297/297 PASS",
+      "tsc": "PASS",
+      "bugs_fixed": 10
+    }
+  }
 }
