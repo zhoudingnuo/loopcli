@@ -1,18 +1,19 @@
 # 工作记忆
 
-## 2026-05-24 轮次546 (迭代94)
+## 2026-05-24 轮次548 (迭代95)
 
-### 本轮处理
-- 用户微信消息：问软著证书怎么弄，要求我帮忙申请
-- 软著需要在 register.ccopyright.com.cn 本人实名操作，我无法代替
-- 创建 specialized-document-generator agent 生成源代码文档(60页)+软件说明书
-- 发送report告知用户操作流程和我的准备工作
+### 本轮完成
+- 文档生成器完成：source-code.txt(110KB 3000行) + software-manual.md(14KB 7章)
+- 禁用 specialized-document-generator
+- 归档inbox，更新state.json
 
-### 状态
-- specialized-document-generator 运行中，生成消消消大作战软著材料
-- 消消乐 AppID/AppSecret 用户已提供（之前记录过）
-- 等用户注册版权中心账号后协助填写申请表
+### 阻塞项
+1. 软著申请：材料就绪，等用户个人信息（姓名/身份证/地址）
+2. Steam游戏：3款游戏代码+构建就绪，需用户Steam Partner账号
+   - ancient_mystery: v1.0.0 EA完成+完整商店描述
+   - cultivation_factory: Steamworks集成已有（SteamIntegration.ts）
+   - horror_sim: Steamworks引用在main.ts
 
-### 待跟进
-- 检查 agent 生成结果是否合格
-- 用户注册后协助填写软著申请表内容
+### 下轮
+- 检查用户回复个人信息→立即创建agent提交软著
+- 无新消息则准备Steam发布流程指南

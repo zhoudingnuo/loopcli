@@ -1,16 +1,14 @@
 {
   "agent": "main",
   "status": "idle",
-  "last_run": "2026-05-24 03:48:44",
-  "run_count": 547,
-  "last_action": "处理用户微信软著请求_创建doc-agent准备材料_发report回复",
-  "active_agents": [
-    "specialized-document-generator"
-  ],
+  "last_run": "2026-05-24 04:00:35",
+  "run_count": 549,
+  "last_action": "软著材料已生成_禁用doc-agent_等待用户提供个人信息",
+  "active_agents": [],
   "pending_user_requests": [
-    "软著申请_用户需到ccopyright注册账号_材料agent生成中"
+    "软著申请_材料已就绪_等用户回复个人信息（姓名/身份证/地址/电话/邮箱）"
   ],
-  "current_iteration": 94,
+  "current_iteration": 95,
   "games_status": {
     "match3": "软著材料已就绪_等用户个人信息提交申请",
     "idiom": "tta_appid_tma不兼容_需网页控制台上传",
