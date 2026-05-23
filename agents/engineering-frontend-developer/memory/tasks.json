@@ -340,5 +340,14 @@
     "created": "2026-05-23",
     "assignee": "engineering-frontend-developer",
     "completed": "2026-05-23 12:10:21"
+  },
+  {
+    "id": 39,
+    "status": "done",
+    "title": "M3: 日循环系统 - DayCycle+光照升级+店铺升级+日结算+存档",
+    "description": "项目:D:/game-projects/steam-horror-sim/ v0.2.0→v0.3.0。交付:1.DayCycle.ts(06:00-02:00完整日循环+时间流速) 2.Lighting升级(白天/夜晚光照渐变) 3.UpgradeManager.ts(6种店铺升级+购买界面) 4.DaySummary.ts(日结算收支+顾客统计) 5.SaveManager.ts(自动存档+读档恢复)。TypeScript零编译错误,Vite构建成功。参考inbox/task_m3_horror_sim_daycycle.md。禁止AskUserQuestion。",
+    "created": "2026-05-23",
+    "assignee": "engineering-frontend-developer",
+    "completed": "2026-05-23 12:43:34"
   }
 ]
