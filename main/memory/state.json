@@ -1,12 +1,12 @@
 {
   "agent": "main",
   "status": "idle",
-  "last_run": "2026-05-23 19:04:45",
-  "run_count": 466,
-  "last_action": "verified_all_games_build_ok",
+  "last_run": "2026-05-23 19:08:55",
+  "run_count": 468,
+  "last_action": "disabled_idle_game_testers",
   "active_agents": [],
   "pending_user_requests": [
     "等待用户提供抖音AppID"
   ],
-  "current_iteration": 52
+  "current_iteration": 53
 }
