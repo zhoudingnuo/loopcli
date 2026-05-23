@@ -1,13 +1,13 @@
 {
   "agent": "game-designer",
-  "status": "disabled",
+  "status": "idle",
   "current_task": null,
-  "last_run": "2026-05-23 06:28:56",
-  "run_count": 15,
+  "last_run": "2026-05-23 11:24:31",
+  "run_count": 17,
   "created": "2026-05-23",
-  "current_iteration": 9,
-  "last_completed_task": "第二款游戏立项：成语闯关",
-  "last_result": "任务 #5 完成 — 成语闯关GDD已创建",
+  "current_iteration": 27,
+  "last_completed_task": "立项：Steam恐怖模拟经营游戏GDD",
+  "last_result": "任务 #6 完成 — 深夜便利店GDD已创建",
   "completed_tasks": [
     {
       "id": 1,
@@ -33,6 +33,11 @@
       "id": 5,
       "title": "第二款游戏立项：成语闯关",
       "completed": "2026-05-23T06:27:23"
+    },
+    {
+      "id": 6,
+      "title": "立项：Steam恐怖模拟经营游戏GDD",
+      "completed": "2026-05-23T11:25:00"
     }
   ]
 }

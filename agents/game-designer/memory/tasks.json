@@ -43,5 +43,14 @@
     "created": "2026-05-23",
     "assignee": "game-designer",
     "completed": "2026-05-23T06:27:23"
+  },
+  {
+    "id": 6,
+    "status": "done",
+    "title": "立项：Steam恐怖模拟经营游戏GDD",
+    "completed": "2026-05-23T11:25:00",
+    "description": "创建一款Steam恐怖模拟经营游戏的完整GDD。\n\n游戏概念：深夜便利店/诡异旅馆 — 恐怖元素+经营玩法融合。\n\n市场定位：Steam（$9.99-$14.99定价），恐怖+模拟经营交叉品类（低竞争蓝海），主播驱动型病毒传播。\n\nGDD要求：1)核心概念（一句话描述+卖点）2)目标受众与市场分析 3)核心玩法循环（白天经营+夜晚恐怖事件）4)经营系统（商品管理、顾客、收入、升级）5)恐怖系统（异常事件、NPC行为、Jump Scare设计原则）6)叙事框架（多结局，谜团逐步揭示）7)视觉风格（像素风或低多边形，成本控制）8)音效设计（氛围营造）9)技术方案（HTML5 Canvas + Electron + TypeScript + Vite）10)开发排期（4-8周MVP）11)商业化策略（EA定价、DLC计划、主播友好设计）\n\n风格参考：Lethal Company + Schedule I 的交集。\n\n输出保存到 D:/game-projects/steam-horror-sim/GDD.md。\n\n参考已有修仙工厂GDD格式：D:/game-projects/steam-cultivation-factory/GDD.md。\n恐怖游戏的关键是氛围而非画面，重点设计声音和事件系统。主播友好性：设计有趣的反应时刻，适合被录播/直播。\n\n禁止AskUserQuestion。",
+    "created": "2026-05-23",
+    "assignee": "game-designer"
   }
 ]

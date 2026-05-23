@@ -41,6 +41,11 @@
   - Steam商店页面材料完成
   - TypeScript零错误编译、Vite构建96KB JS
 - **修仙工厂 v1.0.0 正式版开发完成** — 下一步：Steam上传+发布
+- **Steam恐怖模拟经营立项中**（Task #6）：game-designer正在创建GDD
+  - 概念：深夜便利店/诡异旅馆 + 恐怖经营
+  - 输出：D:/game-projects/steam-horror-sim/GDD.md
+  - 技术栈：Canvas+Electron+TS+Vite（与修仙工厂相同）
+  - 参考：Lethal Company + Schedule I
 - [[current-architecture]]
 
 ## 关键约束
