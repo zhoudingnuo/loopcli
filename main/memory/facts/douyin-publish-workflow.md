@@ -28,7 +28,8 @@ tmg upload -v 1.0.0 -c "版本说明" D:/games/match3-xiaoxiaoxiao
 - 游戏: 消消消大作战（三消）
 - 项目路径: `D:/games/match3-xiaoxiaoxiao`
 - 游戏控制台URL: `https://developer.open-douyin.com/game-console/1065926/game-manage`
-- 阻塞: 等待用户回复手机验证码或邮箱密码
+- AppSecret: `1e84b6c01d7906704f6bf4caf104b193334abb49`
+- 阻塞: ~~已解除~~ 用户已提供AppSecret(2026-05-23)
 
 ## 用户信息
 - 手机: 18108431035
@@ -48,3 +49,5 @@ tmg upload -v 1.0.0 -c "版本说明" D:/games/match3-xiaoxiaoxiao
 - 游戏列表 API: POST `/bff_api_game_console/v1/PlatBaseSettingService/QueryGameList?` (需要 headers: x-secsdk-csrf-token: DOWNGRADE, x-tt-groupid: 1065926)
 - 游戏状态: status 0=开发中, 1=已上线, 3=测试中; gameCountOverview 显示各状态数量
 - 微前端(Garfish)架构，游戏列表组件可能无法在 Playwright CDP 模式下正常渲染
+- **AppID类型必须匹配项目格式**: AppID tte7a1911c79c6fc8302 是小程序ID，compileType必须为"miniapp"（不能是"game"），否则tma upload报类型不匹配错误
+- **SSO Cookie转换方案(已验证可行)**: 用Playwright设置open-douyin.com cookies→访问`developer.open-douyin.com/login-check?service=https://microapp.bytedance.com/`→获取microapp.bytedance.com cookies→写入~/.tma-cli/.cookies→tma check-session确认登录→tma upload上传成功

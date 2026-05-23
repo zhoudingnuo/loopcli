@@ -14,3 +14,13 @@
 - **Status**: DONE
 - **Task**: 长安诡案录M1基础框架开发
 - **Result**: 完成。项目结构+水墨渲染+场景管理+对话引擎+基础UI。Vite构建通过，12模块21.57kB。详见 memory/results/2026-05-23T225700.md
+
+## Run #6 — 2026-05-23 23:15:00
+- Status: IDLE
+- 所有任务已完成，无 pending 任务
+- 已完成任务: (1) 抖音小游戏消消消大作战 (2) 长安诡案录M1基础框架开发
+
+## Run #8 — 2026-05-23 23:25:00
+- **Status**: DONE
+- **Task**: 上传消消消大作战到抖音小游戏平台 (任务#3)
+- **Result**: 成功上传。关键突破：(1)将游戏项目从game格式转换为miniapp格式适配AppID类型 (2)通过Playwright SSO转换获取toutiao.com认证cookies (3)tma upload成功，主包51.4KB。详见 memory/results/2026-05-23T232500.md

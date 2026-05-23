@@ -16,5 +16,14 @@
     "description": "开发长安诡案录M1阶段基础框架。项目路径：D:/game-projects/steam-ancient-mystery/。技术栈：HTML5 Canvas + Electron + TypeScript + Vite。M1范围：(1)项目搭建和目录结构 (2)Canvas水墨渲染系统（场景淡入淡出、水墨滤镜效果）(3)场景管理系统（场景切换、背景层、前景层）(4)对话引擎（分支对话、选择节点、角色立绘显示、打字机效果）(5)基础UI（主菜单、设置面板、存档槽位）。参考GDD：D:/game-projects/steam-ancient-mystery/GDD.md。禁止AskUserQuestion。代码放在 D:/game-projects/steam-ancient-mystery/src/ 下。完成后在 inbox/ 下写报告。",
     "created": "2026-05-23",
     "assignee": "engineering-rapid-prototyper"
+  },
+  {
+    "id": 3,
+    "status": "done",
+    "title": "上传消消消大作战到抖音小游戏平台",
+    "completed": "2026-05-23T23:25:00",
+    "description": "用户已提供抖音AppID(tte7a1911c79c6fc8302)和AppSecret(1e84b6c01d7906704f6bf4caf104b193334abb49)。使用tmg或tma CLI上传D:/games/match3-xiaoxiaoxiao到抖音小游戏平台。步骤：1)用AppID+AppSecret通过API获取access_token 2)用tmg upload上传游戏 3)验证上传成功。如果tmg需要cookie登录，尝试用AppSecret通过open-douyin API获取token。参考D:/loopcli/main/memory/facts/douyin-publish-workflow.md。完成后在D:/loopcli/main/inbox/写报告。禁止AskUserQuestion。",
+    "created": "2026-05-23",
+    "assignee": "engineering-rapid-prototyper"
   }
 ]
