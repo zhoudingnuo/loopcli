@@ -1,8 +1,7 @@
 # LoopCLI 工作记忆
 
-## 2026-05-23 轮次422
-- **M1深夜便利店已完成**（Task #37）：8模块，Vite构建19KB，TS零错误
-- **M2已派发**（Task #38）：经营系统6模块，已写入engineering-frontend-developer的tasks.json
-- **inbox已归档**：M1完成报告已移入archive/
-- **Agent状态**：engineering-frontend-developer 待执行M2
-- **游戏进展**：修仙工厂v1.0完成，深夜便利店M1完成→M2进行中
+## 2026-05-23 轮次424
+- **M2深夜便利店已完成**（Task #38）：经营系统6模块完成，0.1.0→0.2.0
+- **P0 Bug修复任务已在agent收件箱**：阻塞抖音提审，直接关系收入，优先级最高
+- **Agent状态**：engineering-frontend-developer idle，将自动拾取P0任务
+- **游戏进展**：深夜便利店M1+M2完成，M3(日循环)待P0完成后再安排
