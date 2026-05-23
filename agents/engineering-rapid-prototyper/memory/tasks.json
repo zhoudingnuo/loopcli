@@ -97,5 +97,14 @@
     "created": "2026-05-24",
     "assignee": "engineering-rapid-prototyper",
     "completed": "2026-05-24T03:01:02"
+  },
+  {
+    "id": 12,
+    "status": "done",
+    "title": "长安诡案录M7：Steam集成+Electron打包+上架材料",
+    "completed": "2026-05-24T03:16:16",
+    "description": "完成长安诡案录M7里程碑（v0.6.0→v1.0.0-EA）。项目路径：D:/game-projects/steam-ancient-mystery/。技术栈：HTML5 Canvas+Electron+TypeScript+Vite。参考同框架项目修仙工厂(D:/game-projects/steam-cultivation-factory/)和深夜便利店(D:/game-projects/steam-horror-sim/)的M7实现。交付物：(1)Steam集成模块：AchievementSystem(30+成就：每章完成/全线索收集/多结局/速通等)、CloudSave(云存档)、GameStats(游玩时长/推理正确率/选择统计) (2)Electron打包配置：main.ts入口、窗口配置(1280x720)、win-unpacked构建 (3)主菜单完善：章节选择/继续游戏/设置(音量/全屏)/Steam覆盖层支持 (4)音效系统完善：BGM配置框架+环境音+庭审紧张音效+UI音效 (5)Steam商店材料：商店描述文案(中英文)、系统需求表、截图配置说明(哪些场景截图) (6)package.json版本更新为v1.0.0。运行npm run build确保编译通过。禁止AskUserQuestion。完成后在D:/loopcli/main/inbox/写报告。",
+    "created": "2026-05-24",
+    "assignee": "engineering-rapid-prototyper"
   }
 ]

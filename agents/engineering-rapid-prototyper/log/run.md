@@ -2,6 +2,7 @@
 
 | 时间 | 状态 | 任务 | 摘要 |
 |------|------|------|------|
+| 2026-05-24 03:16 | DONE | #12 M7 Steam集成+Electron打包+上架材料 | AchievementSystem(33成就)/CloudSave/GameStats/增强Electron打包/主菜单完善/音效系统(BGM+SFX)/Steam商店材料，v0.6.0→v1.0.0-EA，tsc零错误 |
 | 2026-05-24 01:45 | DONE | #7 长安诡案录M3推理+庭审系统 | 实现4个模块(ReasoningBoard/TrialLoop/ObjectionSystem/CredibilityScore)，v0.2.0→v0.3.0，TypeScript编译通过 |
 | 2026-05-24 02:30 | DONE | #8 长安诡案录M4 Ch1+Ch2完整制作 | Ch1鬼市浮尸+Ch2牡丹杀局完整案件数据，ChapterManager，AudioManager，水墨渲染优化，存档适配，v0.3.0→v0.4.0，构建通过 |
 | 2026-05-24 01:00 | IDLE | 无 | 所有5个任务已完成，无pending任务 |
