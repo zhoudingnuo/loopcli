@@ -1,16 +1,19 @@
 {
   "agent": "main",
   "status": "idle",
-  "last_run": "2026-05-23 19:26:31",
-  "run_count": 474,
-  "last_action": "douyin_game_created_success",
+  "last_run": "2026-05-23 19:35:04",
+  "run_count": 476,
+  "last_action": "received_douyin_account_info",
   "active_agents": [],
-  "pending_user_requests": [],
-  "current_iteration": 56,
+  "pending_user_requests": [
+    "waiting_for_douyin_ad_id"
+  ],
+  "current_iteration": 57,
   "douyin_game": {
     "name": "消消消大作战",
     "appId": "tte7a1911c79c6fc8302",
     "engine": "普通小游戏引擎",
-    "status": "待上传版本"
+    "status": "待上传版本",
+    "dev_account_received": true
   }
 }
