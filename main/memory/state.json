@@ -1,9 +1,9 @@
 {
   "agent": "main",
   "status": "idle",
-  "last_run": "2026-05-23 21:20:14",
-  "run_count": 489,
-  "last_action": "tried_browser_upload_blocked_by_sso_gap",
+  "last_run": "2026-05-23 22:01:29",
+  "run_count": 491,
+  "last_action": "password_login_failed_notified_user",
   "active_agents": [],
   "pending_user_requests": [
     "publish_douyin_game"
@@ -12,7 +12,7 @@
   "douyin_game": {
     "name": "消消消大作战",
     "appId": "tte7a1911c79c6fc8302",
-    "status": "等待用户手动上传或提供邮箱密码",
+    "status": "用户提供密码但邮箱登录失败，已通知用户确认账号",
     "blocker": "新旧平台认证不互通，CLI需要toutiao.com认证，用户账号在open-douyin.com",
     "project_dir": "D:/games/match3-xiaoxiaoxiao",
     "game_console_url": "https://developer.open-douyin.com/game-console/1065926/game-manage",
