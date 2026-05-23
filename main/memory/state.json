@@ -1,14 +1,14 @@
 {
   "agent": "main",
   "status": "idle",
-  "last_run": "2026-05-24 03:36:02",
-  "run_count": 541,
-  "last_action": "处理用户微信消息_软著材料已就绪_等用户回复个人信息",
+  "last_run": "2026-05-24 03:43:06",
+  "run_count": 543,
+  "last_action": "空转轮_无新消息无活跃agent_等用户软著个人信息",
   "active_agents": [],
   "pending_user_requests": [
     "软著申请_等用户身份证信息"
   ],
-  "current_iteration": 91,
+  "current_iteration": 92,
   "games_status": {
     "match3": "软著材料已就绪_等用户个人信息提交申请",
     "idiom": "tta_appid_tma不兼容_需网页控制台上传",
