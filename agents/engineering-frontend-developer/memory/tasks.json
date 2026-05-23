@@ -241,5 +241,14 @@
     "created": "2026-05-23",
     "assignee": "engineering-frontend-developer",
     "completed": "2026-05-23 08:24:50"
+  },
+  {
+    "id": 28,
+    "status": "done",
+    "title": "三消提审材料补充",
+    "description": "为 D:/game-projects/douyin-match3/ 准备抖音小游戏提审材料：1)生成1024x1024应用图标 2)准备3-5张宣传截图 3)编写隐私政策页面 4)适配穿山甲SDK真实接入代码 5)JS/CSS压缩 6)检查game.json和project.config.json配置完整性。参考GDD.md中的提审要求。",
+    "created": "2026-05-23",
+    "assignee": "engineering-frontend-developer",
+    "completed": "2026-05-23 08:35:21"
   }
 ]
