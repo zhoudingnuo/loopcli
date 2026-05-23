@@ -1,12 +1,13 @@
 # LoopCLI 工作记忆
 
-## 2026-05-23 轮次426
-- **深夜便利店 M3 任务已派发**（Task #39）：日循环系统（DayCycle+光照升级+店铺升级+日结算+存档）
-- **已完成项目清理**：归档了 agent inbox 中 3 个过期任务文件（P0 bug fix、M2 horror sim、WebUI改进）
-- **Agent状态**：engineering-frontend-developer 等待拾取 M3 任务，game-designer/market-analyst 已禁用
-- **抖音游戏待办**：三消提审材料完成待用户填 appid+广告位ID，成语闯关 W3 待确认
+## 2026-05-23 轮次428
+- **本轮检查**：无新用户消息，无新 inbox
+- **Codegraph 已确认**：MCP 运行正常，133 文件/9682 节点已索引
+- **M3 状态**：task #39 在 engineering-frontend-developer inbox 中，agent 空闲待下轮拾取
+- **游戏项目**：深夜便利店 v0.2.0（M2完成），M3 日循环系统待开发
+- **Agent 控制**：仅 engineering-frontend-developer 活跃，其余 7 个已禁用
 
 ## 关键决策
 - 优先推进深夜便利店开发（最有商业潜力的 Steam 项目）
-- 抖音小游戏提审需要用户提供 appid+广告位ID（阻塞项）
-- 修仙工厂 v1.0.0 正式版完成，下一步 Steam 上传发布（需用户操作）
+- 抖音小游戏待办：三消提审材料完成待用户填 appid+广告位ID，成语闯关 W3 待确认
+- Codegraph 已安装，用户请求已完成
