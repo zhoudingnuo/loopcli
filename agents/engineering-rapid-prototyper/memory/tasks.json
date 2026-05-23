@@ -25,5 +25,14 @@
     "description": "用户已提供抖音AppID(tte7a1911c79c6fc8302)和AppSecret(1e84b6c01d7906704f6bf4caf104b193334abb49)。使用tmg或tma CLI上传D:/games/match3-xiaoxiaoxiao到抖音小游戏平台。步骤：1)用AppID+AppSecret通过API获取access_token 2)用tmg upload上传游戏 3)验证上传成功。如果tmg需要cookie登录，尝试用AppSecret通过open-douyin API获取token。参考D:/loopcli/main/memory/facts/douyin-publish-workflow.md。完成后在D:/loopcli/main/inbox/写报告。禁止AskUserQuestion。",
     "created": "2026-05-23",
     "assignee": "engineering-rapid-prototyper"
+  },
+  {
+    "id": 4,
+    "status": "done",
+    "title": "长安诡案录M2：调查系统",
+    "completed": "2026-05-23T23:41:16",
+    "description": "开发M2调查系统模块，项目路径：D:/game-projects/steam-ancient-mystery/\n\nM1已完成（基础框架：Canvas渲染、场景系统、对话引擎、基础UI、存档系统），现在开发M2。\n\nM2需要开发的模块：\n1. **场景探索系统** (SceneExplorer.ts) - 点击式场景探索，热点检测，可交互物品高亮，镜头平移/缩放\n2. **物证收集系统** (EvidenceCollector.ts) - 物品拾取，物证背包，物证详情查看，物证分类（关键/普通/误导）\n3. **审问系统** (InterrogationSystem.ts) - NPC审问对话树，压力值影响回答真实性，基于已收集物证解锁新对话选项\n4. **物证组合系统** (EvidenceCombiner.ts) - 拖拽组合物证，逻辑验证，产生新线索/物证\n\n技术要求：\n- TypeScript，与现有代码风格一致\n- 紧密集成现有SceneManager、DialogueEngine、GameState\n- Canvas渲染，水墨风格（延续M1视觉）\n- 每个模块独立文件，在src/game/下\n- 完成后版本号更新为0.2.0\n- 运行npm run build确保编译通过\n\n禁止AskUserQuestion。完成后在inbox中报告。",
+    "created": "2026-05-23",
+    "assignee": "engineering-rapid-prototyper"
   }
 ]

@@ -30,6 +30,8 @@ tmg upload -v 1.0.0 -c "版本说明" D:/games/match3-xiaoxiaoxiao
 - 游戏控制台URL: `https://developer.open-douyin.com/game-console/1065926/game-manage`
 - AppSecret: `1e84b6c01d7906704f6bf4caf104b193334abb49`
 - 阻塞: ~~已解除~~ 用户已提供AppSecret(2026-05-23)
+- **上传成功(2026-05-23)**：通过SSO+Playwright方案，tma upload v1.0.0成功，主包51.4KB
+- 后续：用户需到控制台设体验版 → tma audit提审
 
 ## 用户信息
 - 手机: 18108431035
