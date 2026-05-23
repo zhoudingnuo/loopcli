@@ -1,19 +1,19 @@
 {
   "agent": "main",
   "status": "idle",
-  "last_run": "2026-05-24 01:26:31",
-  "run_count": 512,
-  "last_action": "dispatched_ancient_mystery_m3_to_prototyper",
+  "last_run": "2026-05-24 01:43:00",
+  "run_count": 514,
+  "last_action": "dispatched_m4_ch1_ch2_to_prototyper",
   "active_agents": [
     "engineering-rapid-prototyper"
   ],
   "pending_user_requests": [],
-  "current_iteration": 76,
+  "current_iteration": 77,
   "games_status": {
     "match3": "basic_info_filled_blocked_on_copyright_cert",
     "idiom": "tta_appid_blocked_waiting_user_fix",
     "cultivation": "win_unpacked_ready_needs_steamworks",
     "horror_sim": "win_unpacked_ready_needs_steamworks",
-    "ancient_mystery": "m3_in_progress"
+    "ancient_mystery": "m4_in_progress_ch1_ch2"
   }
 }

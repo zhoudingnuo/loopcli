@@ -61,5 +61,14 @@
     "created": "2026-05-24",
     "assignee": "engineering-rapid-prototyper",
     "completed": "2026-05-24T01:45:00"
+  },
+  {
+    "id": 8,
+    "status": "done",
+    "title": "长安诡案录M4：Ch1+Ch2完整制作",
+    "description": "完成长安诡案录M4里程碑（v0.3.0→v0.4.0）。项目路径：D:/game-projects/steam-ancient-mystery/。交付物：1)Ch1鬼市浮尸完整案件（教学关+首次庭审，含场景、剧情、对话、证人、物证）2)Ch2牡丹杀局完整案件（多嫌疑人+密室推理）3)数据驱动：章节/ch1.json和ch2.json包含完整剧情、线索、角色数据 4)水墨风格基础渲染优化 5)存档系统适配章节进度 6)基础音效配置。参考GDD：D:/game-projects/steam-ancient-mystery/GDD.md 章节5（章节设计）。已完成模块可复用：ReasoningBoard/TrialLoop/ObjectionSystem/CredibilityScore/SceneExplorer/DialogueEngine/EvidenceManager。禁止AskUserQuestion。",
+    "created": "2026-05-24",
+    "assignee": "engineering-rapid-prototyper",
+    "completed": "2026-05-24T02:30:00"
   }
 ]

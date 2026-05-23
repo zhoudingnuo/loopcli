@@ -42,6 +42,9 @@
   - TypeScript零错误编译、Vite构建96KB JS
 - **修仙工厂 v1.0.0 正式版开发完成** — 下一步：Steam上传+发布
 - **第5款游戏启动**：中国古代悬疑解谜（Steam），GDD设计中（game-designer-mystery agent）
+- **长安诡案录 M1-M2 已完成**（Task #5-#6）：项目搭建+场景探索系统，v0.2.0
+- **M3已完成**（Task #7）：推理+庭审系统 — ReasoningBoard/TrialLoop/ObjectionSystem/CredibilityScore，v0.3.0
+  - 下一步：M4（Ch1+Ch2完整案件制作）
 - **Steam恐怖模拟经营 — GDD已完成**：《深夜便利店》
   - GDD：D:/game-projects/steam-horror-sim/GDD.md（~28K字，16章）
   - **M1已完成**（Task #37）：项目搭建+Canvas渲染+30x25地图+WASD移动+E交互+光照+6阶段状态机
