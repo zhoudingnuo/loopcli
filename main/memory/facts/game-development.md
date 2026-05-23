@@ -52,6 +52,7 @@
 - **M6已完成**（Task #42）：叙事系统 — 7模块(NarrativeTypes/ClueManager/StoryManager/EndingSystem/RadioManager/NoteManager/NarrativeChoiceManager)，v0.6.0
 - **M7已完成**（Task #43）：打磨上线 — 16种音效+4环境音+主菜单+暂停设置+Steam集成+NSIS打包，v1.0.0-EA ✅
   - **深夜便利店全部里程碑（M1-M7）开发完成，可进入发布流程**
+  - **Steam构建完成**：修仙工厂+深夜便利店 win-unpacked 可用（NSIS安装器需签名环境）
   - 技术栈：Canvas+Electron+TS+Vite（与修仙工厂相同）
   - 参考：Lethal Company + Schedule I
 - [[current-architecture]]
