@@ -29,3 +29,8 @@
 - **Status**: DONE
 - **Task**: 长安诡案录M2：调查系统 (任务#4)
 - **Result**: 交付4个模块：SceneExplorer（场景探索+热点+镜头）、EvidenceCollector（物证背包+分类）、InterrogationSystem（审问+压力值+物证解锁）、EvidenceCombiner（拖拽组合+配方系统）。集成到UIManager，新增M2工具栏。版本0.2.0，npm run build通过。详见 memory/results/20260523_234116.md
+
+## Run #12 — 2026-05-24 00:30:00
+- **Status**: PARTIAL
+- **Task**: 抖音消消消发布：填写基本信息+提审 (任务#5)
+- **Result**: 生成600x600游戏图标，通过Playwright填写基本信息（名称/简介/图标/分类/题材标签），存草稿无报错。tma audit失败：缺少软著证书和服务类目审批。阻塞项：(1)软著证书需人工申请 (2)服务类目需审批通过。详见 memory/results/2026-05-24T003000.md
