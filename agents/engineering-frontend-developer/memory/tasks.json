@@ -313,5 +313,14 @@
     "created": "2026-05-23",
     "assignee": "engineering-frontend-developer",
     "completed": "2026-05-23 10:42:58"
+  },
+  {
+    "id": 36,
+    "status": "done",
+    "title": "Steam修仙工厂M5-Phase2: 测试+平衡性+商店页面+最终构建",
+    "description": "修仙自动化工厂M5-Phase2。项目路径: D:/game-projects/steam-cultivation-factory/。当前版本0.5.0，M5-Phase1已完成(Steam集成+Electron打包+UI优化)。\n\n## 核心任务\n\n### 1. 游戏测试与Bug修复\n- 从头到尾完整游玩一遍（练气→飞升），记录所有bug\n- 修复所有发现的bug\n- 测试存档加载/保存/迁移是否正常\n- 测试Electron打包后运行是否正常\n- 测试Steam离线模式（不连Steam时）是否正常\n\n### 2. 游戏平衡性调整\n- 调整各境界突破所需修为，确保节奏合理（每境界30-60分钟）\n- 检查资源产出/消耗平衡\n- 调整建筑成本和收益曲线\n- 确保自动化收益明显优于手动\n- 传送带/傀儡效率需要有明显升级感\n\n### 3. Steam商店页面材料\n- 编写商店描述文案（中文，突出修仙+自动化工厂卖点）\n- 列出10-15个游戏特色要点\n- 建议Steam标签\n- 编写简短描述（200字以内）\n- 编写详细描述（可含格式）\n- 将文案保存到 D:/game-projects/steam-cultivation-factory/store-page.md\n\n### 4. 最终构建\n- TypeScript编译零错误\n- Vite构建成功\n- electron-builder生成可运行的安装包\n- 版本号更新到1.0.0\n\n禁止AskUserQuestion。",
+    "created": "2026-05-23",
+    "assignee": "engineering-frontend-developer",
+    "completed": "2026-05-23 11:07:40"
   }
 ]
