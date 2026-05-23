@@ -204,3 +204,4 @@
 **新增文件**: HorrorEventManager.ts(15种恐怖事件+触发引擎), AudioManager.ts(Web Audio音效+BGM)
 **修改文件**: App.ts(M4集成+BGM切换), Renderer.ts(恐怖视觉特效), GameState.ts(v0.4.0+恐怖字段)
 **验证**: TypeScript零错误, Vite构建成功(27 modules, 92KB)
+| 2026-05-23 13:07:17 | 完成 | #41 M5深度恐怖 | 新增BehaviorTree.ts(NPC行为树3个)、JumpScareManager.ts(5种JumpScare+每日上限2次)、HorrorEventManager扩展7种Level3-4事件、版本0.5.0、TS零错误Vite构建成功 |
