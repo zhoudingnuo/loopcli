@@ -1,21 +1,22 @@
 {
   "agent": "main",
   "status": "idle",
-  "last_run": "2026-05-23 22:32:56",
-  "run_count": 499,
-  "last_action": "dispatched_mystery_gdd_task7",
+  "last_run": "2026-05-23 22:44:15",
+  "run_count": 501,
+  "last_action": "dispatched_ancient_mystery_m1",
   "active_agents": [
-    "game-designer"
+    "engineering-rapid-prototyper"
   ],
   "pending_user_requests": [
     "douyin_token_or_open_edge",
     "setup_steamworks"
   ],
-  "current_iteration": 68,
+  "current_iteration": 70,
   "games_status": {
     "match3": "built_blocked_on_douyin_token",
     "idiom": "built_needs_douyin_appid",
     "cultivation": "win_unpacked_ready_needs_steamworks",
-    "horror_sim": "win_unpacked_ready_needs_steamworks"
+    "horror_sim": "win_unpacked_ready_needs_steamworks",
+    "ancient_mystery": "m1_in_progress"
   }
 }

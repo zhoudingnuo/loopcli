@@ -7,5 +7,14 @@
     "created": "2026-05-23",
     "assignee": "engineering-rapid-prototyper",
     "completed": "2026-05-23T19:48:41"
+  },
+  {
+    "id": 2,
+    "status": "done",
+    "title": "长安诡案录M1基础框架开发",
+    "completed": "2026-05-23T22:57:00",
+    "description": "开发长安诡案录M1阶段基础框架。项目路径：D:/game-projects/steam-ancient-mystery/。技术栈：HTML5 Canvas + Electron + TypeScript + Vite。M1范围：(1)项目搭建和目录结构 (2)Canvas水墨渲染系统（场景淡入淡出、水墨滤镜效果）(3)场景管理系统（场景切换、背景层、前景层）(4)对话引擎（分支对话、选择节点、角色立绘显示、打字机效果）(5)基础UI（主菜单、设置面板、存档槽位）。参考GDD：D:/game-projects/steam-ancient-mystery/GDD.md。禁止AskUserQuestion。代码放在 D:/game-projects/steam-ancient-mystery/src/ 下。完成后在 inbox/ 下写报告。",
+    "created": "2026-05-23",
+    "assignee": "engineering-rapid-prototyper"
   }
 ]
