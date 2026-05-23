@@ -43,5 +43,14 @@
     "description": "目标：完成消消消大作战在抖音平台的发布流程。背景：AppID tte7a1911c79c6fc8302，项目路径D:/game-projects/douyin-match3/，游戏已通过tma upload上传成功v1.0.0，tma audit失败需要先填写基本信息（名称、简介、图标、服务类目）。具体步骤：1.为消消消大作战创建游戏图标（canvas生成三消风格图标192x192 PNG）2.用Playwright连接Edge浏览器填写基本信息（名称：消消消大作战，简介：经典三消益智小游戏，图标：上传生成的图标，服务类目：选择游戏类目）3.运行npx tma audit --host douyin tte7a1911c79c6fc8302 4.报告结果。注意tma CLI已登录session有效，浏览器控制台URL https://developer.open-douyin.com/game-console/1065926/game-manage，禁止AskUserQuestion",
     "created": "2026-05-23",
     "assignee": "engineering-rapid-prototyper"
+  },
+  {
+    "id": 6,
+    "status": "done",
+    "title": "抖音成语闯关大师发布：创建小游戏+上传",
+    "description": "目标：在抖音平台创建新的【小游戏】应用（不是小程序）并上传成语闯关大师。步骤：1)用Playwright连接Edge浏览器(SSO cookie转换方案参考D:/loopcli/main/memory/facts/douyin-publish-workflow.md)登录developer.open-douyin.com 2)创建新小游戏应用：名称'成语闯关大师'，分类益智/闯关 3)获取新AppID 4)更新D:/game-projects/douyin-idiom/project.config.json填入appid(compileType保持'game') 5)确保dist目录包含完整可玩版本 6)运行npx tma upload -v 1.0.0 -c '成语闯关大师v1.0.0首版' D:/game-projects/douyin-idiom上传。tma CLI已登录。完成后在D:/loopcli/main/inbox/写报告。禁止AskUserQuestion。",
+    "created": "2026-05-24",
+    "assignee": "engineering-rapid-prototyper",
+    "completed": "2026-05-24T01:30:00"
   }
 ]

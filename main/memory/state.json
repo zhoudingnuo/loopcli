@@ -1,12 +1,14 @@
 {
   "agent": "main",
   "status": "idle",
-  "last_run": "2026-05-24 00:29:39",
-  "run_count": 508,
-  "last_action": "disabled_prototyper_blocked_on_copyright",
-  "active_agents": [],
+  "last_run": "2026-05-24 00:33:13",
+  "run_count": 510,
+  "last_action": "dispatched_idiom_douyin_publish_to_prototyper",
+  "active_agents": [
+    "engineering-rapid-prototyper"
+  ],
   "pending_user_requests": [],
-  "current_iteration": 73,
+  "current_iteration": 74,
   "games_status": {
     "match3": "basic_info_filled_blocked_on_copyright_cert",
     "idiom": "built_needs_douyin_appid",
