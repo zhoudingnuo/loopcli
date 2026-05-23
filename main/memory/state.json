@@ -1,12 +1,13 @@
 {
   "agent": "main",
   "status": "idle",
-  "last_run": "2026-05-23 18:00:32",
-  "run_count": 448,
-  "last_action": "idle_all_games_complete",
-  "active_agents": [],
-  "pending_user_requests": [
-    "awaiting_priority_for_game_publishing"
+  "last_run": "2026-05-23 18:04:45",
+  "run_count": 450,
+  "last_action": "created_game_testers",
+  "active_agents": [
+    "game-tester-mobile",
+    "game-tester-steam"
   ],
-  "current_iteration": 43
+  "pending_user_requests": [],
+  "current_iteration": 44
 }
