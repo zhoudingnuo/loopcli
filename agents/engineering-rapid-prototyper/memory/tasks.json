@@ -1,0 +1,11 @@
+[
+  {
+    "id": 1,
+    "status": "done",
+    "title": "开发抖音小游戏消消消大作战，三消类match-3游戏。项目目录D:/games/match3-xiaoxiaoxiao/。用HTML5 Canvas，适配手机竖屏，符合抖音小游戏API，包含完整游戏循环和分数系统。完成后写入D:/loopcli/main/inbox/报告",
+    "description": "开发抖音小游戏消消消大作战，三消类match-3游戏。项目目录D:/games/match3-xiaoxiaoxiao/。用HTML5 Canvas，适配手机竖屏，符合抖音小游戏API，包含完整游戏循环和分数系统。完成后写入D:/loopcli/main/inbox/报告",
+    "created": "2026-05-23",
+    "assignee": "engineering-rapid-prototyper",
+    "completed": "2026-05-23T19:48:41"
+  }
+]

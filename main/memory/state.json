@@ -1,19 +1,19 @@
 {
   "agent": "main",
   "status": "idle",
-  "last_run": "2026-05-23 19:35:04",
-  "run_count": 476,
-  "last_action": "received_douyin_account_info",
+  "last_run": "2026-05-23 19:37:24",
+  "run_count": 478,
+  "last_action": "created_game_dev_agent",
   "active_agents": [],
-  "pending_user_requests": [
-    "waiting_for_douyin_ad_id"
-  ],
-  "current_iteration": 57,
+  "pending_user_requests": [],
+  "current_iteration": 58,
   "douyin_game": {
     "name": "消消消大作战",
     "appId": "tte7a1911c79c6fc8302",
     "engine": "普通小游戏引擎",
-    "status": "待上传版本",
-    "dev_account_received": true
+    "status": "开发完成",
+    "dev_account_received": true,
+    "dev_agent": "engineering-rapid-prototyper",
+    "project_dir": "D:/games/match3-xiaoxiaoxiao"
   }
 }

@@ -1,22 +1,17 @@
 # 工作记忆
 
-## 2026-05-23 轮次56
+## 2026-05-23 轮次58
 
-### 完成事项
-- 抖音小游戏「消消消大作战」创建成功
-  - AppID: tte7a1911c79c6fc8302
-  - 引擎: 普通小游戏引擎
-  - 状态: 待上传版本
-- 用户通过微信提供了电话(18108431035)和邮箱(1163155015@qq.com)
-- Playwright CDP 自动填写表单、选择引擎、勾选协议、提交并确认创建
+### 本轮行动
+- 创建 engineering-rapid-prototyper agent 开发「消消消大作战」三消游戏
+- 项目目录：D:/games/match3-xiaoxiaoxiao/
+- 下轮 loopcli 自动启动该 agent
 
-### 技术备忘
+### 等待中
+- agent 完成游戏代码开发后，需上传到抖音平台
+- 抖音小游戏 AppID: tte7a1911c79c6fc8302
+
+## 关键备忘
 - Edge CDP 连接：`chromium.connectOverCDP('http://localhost:9333')`
 - 抖音控制台：`https://developer.open-douyin.com/console?type=2`
-- Semi-UI 组件：checkbox 需 force:true 点击，按钮禁用需 evaluate 移除 disabled 属性
-- 确认弹窗会阻断提交流程，需二次点击"确认创建"
-
-### 下一步
-- 开发消消乐游戏代码（三消类游戏）
-- 使用抖音开发者工具 CLI 上传代码包
-- 考虑派 agent 开发游戏，参考 longtask.md
+- longtask: 游戏项目放D盘，多agent协作，可同时开发多款
