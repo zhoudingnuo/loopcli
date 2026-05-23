@@ -25,8 +25,12 @@
 - **成语闯关 W2 完成**（2026-05-23）：6新模块(TimedChallenge/IdiomCollection/DailySystem/PKMode/SocialManager/Characters)+关卡21-50
 - **三消提审材料完成**（Task #28）：图标/截图/隐私政策/SDK适配/压缩/配置，待用户填appid+广告位ID
 - **成语闯关 W3 派发**（Task #29）：穿山甲SDK+6广告位+埋点+提审材料+包体优化
-- **Steam项目启动**：修仙自动化工厂 — 放置/自动化+修仙主题，Task #30 GDD编写中
-- **下一步**：等#30 GDD完成 → 开始Steam原型开发
+- **Steam项目启动**：修仙自动化工厂 — 放置/自动化+修仙主题
+- **GDD已完成**(Task #30)：`D:/game-projects/steam-cultivation-factory/GDD.md`（~28000字，16章）
+  - 6大境界、6级自动化、12区域、7种丹药、14周开发计划
+  - 技术栈：HTML5 Canvas + Electron + TypeScript + Vite
+- **M1已派发**(Task #31)：基础框架搭建（Vite+TS+Electron+Canvas渲染+地图+建筑放置+手动采集）
+- **下一步**：等#31完成 → 进入M2炼气期完整体验
 
 ## 关键约束
 - 游戏项目放在 D 盘（`D:/game-projects/`），不放在 loopcli 根目录

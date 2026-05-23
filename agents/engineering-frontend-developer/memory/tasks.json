@@ -268,5 +268,14 @@
     "created": "2026-05-23",
     "assignee": "engineering-frontend-developer",
     "completed": "2026-05-23 09:00:00"
+  },
+  {
+    "id": 31,
+    "status": "done",
+    "title": "Steam修仙工厂 M1: 基础框架搭建",
+    "description": "开发修仙自动化工厂Steam版M1阶段(基础框架)。项目路径:D:/game-projects/steam-cultivation-factory/ GDD:D:/game-projects/steam-cultivation-factory/GDD.md 技术栈:HTML5-Canvas+Electron+TypeScript+Vite。M1交付物:1)Vite+TypeScript+Electron项目初始化(tsconfig/vite.config/electron-builder) 2)Canvas渲染系统Renderer.ts(2D渲染)+Camera.ts(缩放平移)+基础精灵绘制 3)游戏主循环App.ts(60FPS+deltaTime+状态管理) 4)网格地图Map.ts(32x32+区域渲染+基础地形) 5)建筑放置Building.ts(网格放置+buildings.json数据) 6)手动采集Resources.ts(点击灵石矿/灵草采集+资源管理+数值显示) 7)GameState.ts(immutable状态+存档接口)。参考GDD第十章技术设计项目结构和第三章资源体系。完成后在inbox报告。禁止AskUserQuestion。",
+    "created": "2026-05-23",
+    "assignee": "engineering-frontend-developer",
+    "completed": "2026-05-23 09:12:28"
   }
 ]
