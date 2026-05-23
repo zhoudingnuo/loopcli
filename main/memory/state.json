@@ -1,12 +1,10 @@
 {
   "agent": "main",
   "status": "idle",
-  "last_run": "2026-05-23 09:49:28",
-  "run_count": 404,
-  "last_action": "dispatched_m4_task34",
-  "active_agents": [
-    "engineering-frontend-developer"
-  ],
+  "last_run": "2026-05-23 10:25:21",
+  "run_count": 406,
+  "last_action": "archived_m4_task34_disabled_frontend_agent",
+  "active_agents": [],
   "pending_user_requests": [],
-  "current_iteration": 20
+  "current_iteration": 21
 }
