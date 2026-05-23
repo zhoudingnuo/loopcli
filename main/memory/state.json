@@ -1,9 +1,9 @@
 {
   "agent": "main",
   "status": "idle",
-  "last_run": "2026-05-23 11:13:49",
-  "run_count": 414,
-  "last_action": "sent_game_publish_status_report",
+  "last_run": "2026-05-23 11:16:53",
+  "run_count": 416,
+  "last_action": "idle_cycle_no_pending_tasks",
   "active_agents": [],
   "pending_user_requests": [],
   "current_iteration": 25
