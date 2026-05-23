@@ -1,21 +1,21 @@
 {
   "agent": "main",
   "status": "idle",
-  "last_run": "2026-05-23 20:28:18",
-  "run_count": 483,
-  "last_action": "status_report_sent_awaiting_user",
+  "last_run": "2026-05-23 20:31:00",
+  "run_count": 485,
+  "last_action": "requested_user_credentials_for_douyin_upload",
   "active_agents": [],
   "pending_user_requests": [
     "publish_douyin_game"
   ],
-  "current_iteration": 60,
+  "current_iteration": 62,
   "douyin_game": {
     "name": "消消消大作战",
     "appId": "tte7a1911c79c6fc8302",
-    "status": "待发布-需IDE登录",
-    "dev_tools_path": "D:/ools/DouyinDevTools/@bytedminiprogram-ide/抖音开发者工具.exe",
-    "dev_tools_installing": false,
-    "publish_blocker": "需在开发者工具IDE中登录抖音账号",
+    "status": "等待用户提供密码或Token",
+    "dev_tools_path": "D:/tools/DouyinDevTools/抖音开发者工具.exe",
+    "cli_tool": "tmg (tt-minigame-ide-cli)",
+    "publish_blocker": "需要用户邮箱密码或开发者Token才能CLI上传",
     "project_dir": "D:/games/match3-xiaoxiaoxiao"
   }
 }

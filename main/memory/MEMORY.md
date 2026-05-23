@@ -17,6 +17,7 @@
 - [当前架构](memory/facts/current-architecture.md) — WebUI v8.8, agent框架, MCP配置
 - [待解决问题](memory/facts/open-issues.md) — 已知bug和待优化项
 - [游戏开发方向](memory/facts/game-development.md) — 抖音小游戏+Steam独立游戏，调研进行中
+- [抖音发布流程](memory/facts/douyin-publish-workflow.md) — tmg CLI上传、Token认证、发布步骤
 
 ## 决策记录
 - [关键决策](memory/facts/key-decisions.md) — 重要技术选型和原因
