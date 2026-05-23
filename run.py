@@ -123,7 +123,13 @@ def cmd_run(args):
                         msg_queue.put("__EXIT__")
                         return
                     if line:
-                        msg_queue.put(line)
+                        # 直接写入 inbox，不依赖队列处理
+                        inbox_dir = os.path.join(LOOPCLI_DIR, "main", "inbox")
+                        os.makedirs(inbox_dir, exist_ok=True)
+                        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+                        msg_file = os.path.join(inbox_dir, f"user_{ts}.md")
+                        with open(msg_file, "w", encoding="utf-8") as f:
+                            f.write(f"# 来自 zhoudingnuo 的消息\n- 类型：指令\n- 时间：{datetime.now().strftime('%Y-%m-%d %H:%M')}\n\n## 内容\n{line}\n")
                         out(f"  {C.GREEN}✔ -> main/inbox/{C.RST}")
                 elif ch == '\x03':
                     msg_queue.put("__EXIT__")

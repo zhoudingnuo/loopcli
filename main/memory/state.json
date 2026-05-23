@@ -1,12 +1,12 @@
 {
   "agent": "main",
   "status": "idle",
-  "last_run": "2026-05-23 19:08:55",
-  "run_count": 468,
-  "last_action": "disabled_idle_game_testers",
+  "last_run": "2026-05-23 19:11:19",
+  "run_count": 470,
+  "last_action": "sent_douyin_publish_guide",
   "active_agents": [],
   "pending_user_requests": [
-    "等待用户提供抖音AppID"
+    "等待用户提供抖音AppID（消消消大作战）"
   ],
   "current_iteration": 53
 }
