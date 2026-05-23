@@ -1,9 +1,9 @@
 {
   "agent": "main",
   "status": "idle",
-  "last_run": "2026-05-23 20:11:24",
-  "run_count": 482,
-  "last_action": "douyin_devtools_installed_need_login",
+  "last_run": "2026-05-23 20:28:18",
+  "run_count": 483,
+  "last_action": "status_report_sent_awaiting_user",
   "active_agents": [],
   "pending_user_requests": [
     "publish_douyin_game"
