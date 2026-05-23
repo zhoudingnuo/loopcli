@@ -367,5 +367,14 @@
     "created": "2026-05-23",
     "assignee": "engineering-frontend-developer",
     "completed": "2026-05-23 13:07:17"
+  },
+  {
+    "id": 42,
+    "status": "done",
+    "title": "M6 叙事系统",
+    "description": "深夜便利店 v0.5.0到v0.6.0 M6叙事里程碑。实现StoryManager(6层洋葱叙事Day1-30)+ClueManager(75+线索)+EndingSystem(5结局)+RadioManager(深夜广播)+NoteManager(笔记系统)+NarrativeChoiceManager(选择系统)+App.ts集成。复用已有HorrorEventManager/BehaviorTree/JumpScareManager/DayCycle。TypeScript零错误Vite构建成功。项目路径D:/game-projects/steam-horror-sim/",
+    "created": "2026-05-23",
+    "assignee": "engineering-frontend-developer",
+    "completed": "2026-05-23 13:16:00"
   }
 ]

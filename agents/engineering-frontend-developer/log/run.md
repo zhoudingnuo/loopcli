@@ -205,3 +205,10 @@
 **修改文件**: App.ts(M4集成+BGM切换), Renderer.ts(恐怖视觉特效), GameState.ts(v0.4.0+恐怖字段)
 **验证**: TypeScript零错误, Vite构建成功(27 modules, 92KB)
 | 2026-05-23 13:07:17 | 完成 | #41 M5深度恐怖 | 新增BehaviorTree.ts(NPC行为树3个)、JumpScareManager.ts(5种JumpScare+每日上限2次)、HorrorEventManager扩展7种Level3-4事件、版本0.5.0、TS零错误Vite构建成功 |
+
+## Run #281 — 2026-05-23 13:10
+- **Status**: IDLE
+- **Tasks**: 0 pending, 41 done
+- **Last completed**: Task #41 (M5: 深度恐怖)
+- **Action**: No pending tasks found. Waiting for new assignments.
+| 2026-05-23 13:16:00 | 完成 | #42 M6叙事系统 | 完成6层洋葱叙事系统：75+线索、5结局、深夜广播10段、22条笔记、10个叙事选择。TypeScript零错误Vite构建成功v0.6.0 |
