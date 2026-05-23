@@ -35,8 +35,13 @@
 - **M4已完成**(Task #34)：元婴+化神 — 跨区域传送、高级丹方、终局内容，v0.4.0 ✅
   - 5新地图+12新建筑+3丹方+4资源+跨区域传送+飞升挑战+39成就+存档迁移
 - **M5 Phase1 已完成**（Task #35）：v0.5.0，Steam集成+Electron打包+UI优化
-- **M5 Phase2 已派发**（Task #36）：测试+平衡性+商店页面材料+最终构建v1.0.0
-- **下一步**：等M5-Phase2完成，准备上线
+- **M5 Phase2 已完成**（Task #36）：v1.0.0 正式版 ✅
+  - 14个bug修复（6 Critical/High + 4 Medium + 4 Low）
+  - 平衡性调整（修炼速率提升2-4倍、傀儡减速、expGrowth降低）
+  - Steam商店页面材料完成
+  - TypeScript零错误编译、Vite构建96KB JS
+- **修仙工厂 v1.0.0 正式版开发完成** — 下一步：Steam上传+发布
+- [[current-architecture]]
 
 ## 关键约束
 - 游戏项目放在 D 盘（`D:/game-projects/`），不放在 loopcli 根目录

@@ -1,12 +1,10 @@
 {
   "agent": "main",
   "status": "idle",
-  "last_run": "2026-05-23 10:45:05",
-  "run_count": 410,
-  "last_action": "dispatched_M5_phase2_task36",
-  "active_agents": [
-    "engineering-frontend-developer"
-  ],
+  "last_run": "2026-05-23 11:09:53",
+  "run_count": 412,
+  "last_action": "m5_phase2_completed_v1.0.0",
+  "active_agents": [],
   "pending_user_requests": [],
   "current_iteration": 23
 }
