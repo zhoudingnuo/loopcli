@@ -1,0 +1,10 @@
+[
+  {
+    "id": 1,
+    "status": "pending",
+    "title": "撰写中国古代悬疑解谜游戏 GDD",
+    "description": "为 Steam 独立游戏撰写完整 GDD，参考逆转裁判+中国悬疑小说，包含调查/推理/审判三大阶段，至少5个章节/案件，15000-25000字。保存到 D:/game-projects/steam-chinese-mystery/GDD.md",
+    "created": "2026-05-23T18:46:00",
+    "assignee": "game-designer-mystery"
+  }
+]

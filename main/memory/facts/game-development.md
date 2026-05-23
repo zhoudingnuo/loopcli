@@ -41,6 +41,7 @@
   - Steam商店页面材料完成
   - TypeScript零错误编译、Vite构建96KB JS
 - **修仙工厂 v1.0.0 正式版开发完成** — 下一步：Steam上传+发布
+- **第5款游戏启动**：中国古代悬疑解谜（Steam），GDD设计中（game-designer-mystery agent）
 - **Steam恐怖模拟经营 — GDD已完成**：《深夜便利店》
   - GDD：D:/game-projects/steam-horror-sim/GDD.md（~28K字，16章）
   - **M1已完成**（Task #37）：项目搭建+Canvas渲染+30x25地图+WASD移动+E交互+光照+6阶段状态机

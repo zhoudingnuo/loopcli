@@ -1,10 +1,12 @@
 {
   "agent": "main",
   "status": "idle",
-  "last_run": "2026-05-23 18:36:52",
-  "run_count": 454,
-  "last_action": "testing_complete_all_games_ready",
-  "active_agents": [],
+  "last_run": "2026-05-23 18:43:46",
+  "run_count": 456,
+  "last_action": "created_gdd_agent_for_chinese_mystery",
+  "active_agents": [
+    "game-designer-mystery"
+  ],
   "pending_user_requests": [],
-  "current_iteration": 46
+  "current_iteration": 47
 }
