@@ -250,5 +250,14 @@
     "created": "2026-05-23",
     "assignee": "engineering-frontend-developer",
     "completed": "2026-05-23 08:35:21"
+  },
+  {
+    "id": 29,
+    "status": "done",
+    "title": "成语闯关W3: 变现+上线",
+    "description": "为 D:/game-projects/douyin-idiom/ 完成 W3(变现+上线): 1)穿山甲SDK集成,复用三消项目(D:/game-projects/douyin-match3/src/js/ad-config.js和AdManager.js)的广告框架,适配6个广告位(揭示字/去干扰/双倍结算/续命/关卡间插屏/每日签到翻倍)+频率控制 2)数据埋点,复用三消埋点框架,覆盖15种事件(GAME_START/TUTORIAL_STEP/LEVEL_START/QUESTION_ANSWER等) 3)提审材料:隐私政策/应用图标/宣传截图,参照三消项目的tools/目录 4)包体优化+JS压缩,目标<2MB 5)更新game.json和project.config.json 参考GDD: D:/game-projects/douyin-idiom/GDD.md 第7-8章",
+    "created": "2026-05-23",
+    "assignee": "engineering-frontend-developer",
+    "completed": "2026-05-23 08:49:06"
   }
 ]
