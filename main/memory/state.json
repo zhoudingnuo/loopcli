@@ -1,12 +1,12 @@
 {
   "agent": "main",
   "status": "idle",
-  "last_run": "2026-05-23 18:43:46",
-  "run_count": 456,
-  "last_action": "created_gdd_agent_for_chinese_mystery",
-  "active_agents": [
-    "game-designer-mystery"
+  "last_run": "2026-05-23 18:50:17",
+  "run_count": 458,
+  "last_action": "sent_douyin_publish_guide_to_user",
+  "active_agents": [],
+  "pending_user_requests": [
+    "等待用户提供抖音AppID"
   ],
-  "pending_user_requests": [],
-  "current_iteration": 47
+  "current_iteration": 48
 }
