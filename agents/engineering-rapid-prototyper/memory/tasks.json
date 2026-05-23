@@ -88,5 +88,14 @@
     "description": "完成M5里程碑（v0.4.0→v0.5.0）。项目路径：D:/game-projects/steam-ancient-mystery/。\n\nCh3大明宫闹鬼：宫中多名宫女声称见鬼，一名宫女离奇死亡，皇帝下令彻查。政治压力+限时调查+超自然现象与人为诡计混合。真凶是杨国忠亲信，利用宫中迷信制造恐慌以排除异己。暗线：宫中驱邪仪式实为古代封印术的伪装。关键转折：沈鹤年第一次遭遇无法用理性解释的现象。场景：大明宫外苑、大慈恩寺。\n\nCh4地下迷城：长安地下暗渠中发现秘密集会场所，多名失踪者被囚于此。开放式调查+多区域自由探索+时间压力。真凶是利用长安地下网络进行人口贩卖的秘密组织，与朝中多人有关联。暗线：组织的符号与Ch1铜符、Ch2封印术属于同一套体系。关键转折：发现陆判官。场景：长安城地下、平康坊。\n\n每案交付：30+对话节点、12+物证、3-5个NPC审问、14+庭审证词、新场景地图。\n\n技术要求：\n- 新增 src/data/chapters/ch3.json 和 ch4.json（参考ch1.json/ch2.json格式）\n- 更新 ChapterManager 加载ch3/ch4\n- 新增场景到 scenes.json\n- 新增角色到 characters.json\n- 存档系统适配新章节\n- 运行 npm run build 确保编译通过\n- 更新 package.json 版本为 0.5.0\n\n已完成模块可复用：ReasoningBoard/TrialLoop/ObjectionSystem/CredibilityScore/SceneExplorer/DialogueEngine/EvidenceManager/ChapterManager/AudioManager。\nGDD路径：D:/game-projects/steam-ancient-mystery/GDD.md。\n禁止AskUserQuestion。完成后在D:/loopcli/main/inbox/写报告。",
     "created": "2026-05-24",
     "assignee": "engineering-rapid-prototyper"
+  },
+  {
+    "id": 11,
+    "status": "done",
+    "title": "M6: Ch5终章判官殿+多结局系统",
+    "description": "长安诡案录M6开发：Ch5终章+多结局系统。项目路径：D:/game-projects/steam-ancient-mystery/。禁止AskUserQuestion。",
+    "created": "2026-05-24",
+    "assignee": "engineering-rapid-prototyper",
+    "completed": "2026-05-24T03:01:02"
   }
 ]
