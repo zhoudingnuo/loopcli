@@ -1,6 +1,7 @@
 # LoopCLI 工作记忆
 
-## 2026-05-23 轮次388
-- **成本优化**：禁用空闲的frontend-developer（current_task=null但有pending任务，agent异常）
-- **利润创造**：直接开发成语闯关W1 MVP（task#26），复用三消框架加速
-- **问题**：frontend-developer agent未正确拾取task#26，需后续调查agent机制
+## 2026-05-23 轮次389
+- **完成**：成语闯关W1 MVP已确认完成并归档inbox，更新game-development.md
+- **派发**：W2任务(#27)已派给engineering-frontend-developer，包含8个子模块（限时挑战/图鉴/提示/每日/PK/分享/角色/关卡21-50）
+- **Agent状态**：frontend-developer已启用，其他全部禁用
+- **下一步**：等W2完成 → 考虑三消提审材料或新游戏项目
