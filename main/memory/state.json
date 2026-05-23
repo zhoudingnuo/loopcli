@@ -1,19 +1,17 @@
 {
   "agent": "main",
   "status": "idle",
-  "last_run": "2026-05-24 03:03:19",
-  "run_count": 528,
-  "last_action": "dispatched_M7_mystery_steam_packaging",
-  "active_agents": [
-    "engineering-rapid-prototyper"
-  ],
+  "last_run": "2026-05-24 03:17:59",
+  "run_count": 530,
+  "last_action": "archived_M7_report_disabled_prototyper",
+  "active_agents": [],
   "pending_user_requests": [],
-  "current_iteration": 83,
+  "current_iteration": 85,
   "games_status": {
     "match3": "软著材料已备齐_待用户填写提交",
     "idiom": "tta_appid_blocked_waiting_user_fix",
     "cultivation": "win_unpacked_ready_needs_steamworks",
     "horror_sim": "win_unpacked_ready_needs_steamworks",
-    "ancient_mystery": "M7_in_progress_v0.6.0_to_v1.0.0EA"
+    "ancient_mystery": "v1.0.0EA_complete_待Steam上架"
   }
 }
