@@ -48,10 +48,11 @@
   - **M3已完成**（Task #39）：日循环系统 — DayCycle+光照升级+店铺升级+日结算+存档，v0.3.0
 - **M4已完成**（Task #40）：恐怖事件系统 — HorrorEventManager+15种事件+4恐怖等级+音效+视觉特效，v0.4.0
 - **M5已完成**（Task #41）：深度恐怖 — BehaviorTree+JumpScareManager+7种Level3-4事件，v0.5.0
-- **M6进行中**（Task #42）：叙事系统 — StoryManager+ClueManager+EndingSystem+RadioManager+NoteManager+NarrativeChoiceManager
+- **M6已完成**（Task #42）：叙事系统 — 7模块(NarrativeTypes/ClueManager/StoryManager/EndingSystem/RadioManager/NoteManager/NarrativeChoiceManager)，v0.6.0
+- **M7已完成**（Task #43）：打磨上线 — 16种音效+4环境音+主菜单+暂停设置+Steam集成+NSIS打包，v1.0.0-EA ✅
+  - **深夜便利店全部里程碑（M1-M7）开发完成，可进入发布流程**
   - 技术栈：Canvas+Electron+TS+Vite（与修仙工厂相同）
   - 参考：Lethal Company + Schedule I
-  - 8周排期：M1→M2→M3→M4→M5→M6(叙事)→M7(打磨)
 - [[current-architecture]]
 
 ## 关键约束
