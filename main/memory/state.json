@@ -1,14 +1,12 @@
 {
   "agent": "main",
   "status": "idle",
-  "last_run": "2026-05-23 18:58:55",
-  "run_count": 464,
-  "last_action": "enabled_game-designer-mystery_for_gdd",
-  "active_agents": [
-    "game-designer-mystery"
-  ],
+  "last_run": "2026-05-23 19:04:45",
+  "run_count": 466,
+  "last_action": "verified_all_games_build_ok",
+  "active_agents": [],
   "pending_user_requests": [
     "等待用户提供抖音AppID"
   ],
-  "current_iteration": 51
+  "current_iteration": 52
 }

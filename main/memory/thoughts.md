@@ -1,18 +1,18 @@
 # 工作记忆
 
-## 2026-05-23 轮次48 (iteration 48)
+## 2026-05-23 轮次52
 
-### 本轮操作
-- 收到用户消息：已在Edge登录抖音开发者平台，要求协助发布
-- 研究了抖音小游戏完整发布流程（创建→AppID→开发者工具导入→上传→提审→发布→广告）
-- 推送微信报告：详细6步操作指引，请用户先创建小游戏获取AppID
-- 归档 inbox 消息，确认所有 agent 已禁用
+### 本轮状态
+- 无新用户消息、无新 agent 反馈
+- 所有 agent 已禁用
+- 4款游戏全部开发+测试+构建通过
+- 抖音2款：等用户 AppID
+- Steam2款：构建OK，待 Electron 打包 + Steam 发布
 
-### 等待用户
-- 用户在开发者平台创建小游戏后的 AppID（两个游戏都需要：消消消大作战、成语闯关）
-- 收到 AppID 后：填入 project.config.json + 准备上传包
+### 全局阻塞
+- 抖音发布阻塞：用户未提供 AppID
+- Steam 发布阻塞：需 Steamworks 配置 + 开发者账号
 
-### 全局状态
-- 4款游戏全部开发+测试完成
-- 抖音2款待发布（match3 + idiom），Steam2款待发布（修仙工厂 + 深夜便利店）
-- game-designer agent（GDD设计）已完成，已禁用
+### 下一步
+- 用户回复 AppID → 立即派 agent 配置 project.config.json + 上传
+- 用户确认 Steam 发布 → 派 agent 做 Electron 打包 + store page
