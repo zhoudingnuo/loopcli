@@ -27,8 +27,18 @@ tmg upload -v 1.0.0 -c "版本说明" D:/games/match3-xiaoxiaoxiao
 - AppID: `tte7a1911c79c6fc8302`
 - 游戏: 消消消大作战（三消）
 - 项目路径: `D:/games/match3-xiaoxiaoxiao`
-- 阻塞: 等待用户提供密码或Token
+- 游戏控制台URL: `https://developer.open-douyin.com/game-console/1065926/game-manage`
+- 阻塞: 等待用户回复手机验证码或邮箱密码
 
 ## 用户信息
 - 手机: 18108431035
 - 邮箱: 1163155015@qq.com
+
+## 踩坑记录（2026-05-23）
+- 新版控制台游戏管理页（`console/miniapp/{appId}/version`）显示"网站升级中"，不可用
+- 正确的游戏管理入口: `/game-console/1065926/game-manage`（从HTML中提取的href）
+- `tmg` CLI 的 cookie 存储路径: `~/.tmg-cli/.cookies`（第一行是cookie字符串）
+- 浏览器 cookies 对 API 服务器无效（域名不同：open-douyin.com vs toutiao.com）
+- `tmg` 的上传 API 端点: `developer.toutiao.com/api/developer/ide/microgame/v1/testing`
+- 发送验证码 API: `developer.toutiao.com/passport/web/send_code/`（返回 mobile_ticket）
+- 游戏管理页面有4个iframe（summon.bytedance.com），游戏数据在主frame中但可能异步加载

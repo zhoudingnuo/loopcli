@@ -1,9 +1,9 @@
 {
   "agent": "main",
   "status": "idle",
-  "last_run": "2026-05-23 20:31:00",
-  "run_count": 485,
-  "last_action": "requested_user_credentials_for_douyin_upload",
+  "last_run": "2026-05-23 20:44:41",
+  "run_count": 487,
+  "last_action": "sent_verification_code_request_to_user",
   "active_agents": [],
   "pending_user_requests": [
     "publish_douyin_game"
@@ -12,10 +12,12 @@
   "douyin_game": {
     "name": "消消消大作战",
     "appId": "tte7a1911c79c6fc8302",
-    "status": "等待用户提供密码或Token",
+    "status": "已发送手机验证码，等待用户回复",
     "dev_tools_path": "D:/tools/DouyinDevTools/抖音开发者工具.exe",
     "cli_tool": "tmg (tt-minigame-ide-cli)",
-    "publish_blocker": "需要用户邮箱密码或开发者Token才能CLI上传",
-    "project_dir": "D:/games/match3-xiaoxiaoxiao"
+    "publish_blocker": "等待用户回复手机验证码或邮箱密码",
+    "project_dir": "D:/games/match3-xiaoxiaoxiao",
+    "game_console_url": "https://developer.open-douyin.com/game-console/1065926/game-manage",
+    "mobile_ticket": "mobile_ticket_TFX8AHYZSF9HR2ZDGW5EDEM252TJJDJR"
   }
 }
