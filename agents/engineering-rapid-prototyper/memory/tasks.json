@@ -70,5 +70,14 @@
     "created": "2026-05-24",
     "assignee": "engineering-rapid-prototyper",
     "completed": "2026-05-24T02:30:00"
+  },
+  {
+    "id": 9,
+    "status": "done",
+    "title": "消消消大作战软著申请材料准备",
+    "description": "目标：为消消消大作战准备完整的软件著作权软著申请材料，保存到D:/games/match3-xiaoxiaoxiao/软著材料/目录下。交付物：(1)源代码文档-从项目D:/games/match3-xiaoxiaoxiao/收集所有源代码文件，按规范格式排列，前后各连续30页每页约50行，输出为src-code-doc.md；(2)软件说明书-2000到3000字包含软件名称版本号开发完成日期首次发表日期开发环境软件功能说明运行环境技术特点，输出为software-manual.md；(3)申请信息摘要包含软件全称简称版本号分类号开发方式开发者信息占位符输出为application-info.md。禁止AskUserQuestion。完成后在D:/loopcli/main/inbox/写报告。",
+    "created": "2026-05-24",
+    "assignee": "engineering-rapid-prototyper",
+    "completed": "2026-05-24T02:30:30"
   }
 ]

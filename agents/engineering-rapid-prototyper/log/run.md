@@ -48,3 +48,21 @@
 - 上传失败：新AppID格式(tta前缀)不被tma CLI编译服务器支持
 - open-douyin.com会话已过期，无法通过网页上传
 - **后续需要用户重新登录后上传**
+
+## 2026-05-24 02:30:30 - Run #28
+
+**任务**: #9 消消消大作战软著申请材料准备
+**状态**: 已完成
+**耗时**: ~5分钟
+
+**执行内容**:
+- 读取项目全部12个源代码文件（共2495行）
+- 生成源代码文档 src-code-doc.md（30页，全部收录）
+- 编写软件说明书 software-manual.md（约2800字）
+- 编写申请信息摘要 application-info.md
+- 所有材料保存至 D:/games/match3-xiaoxiaoxiao/软著材料/
+
+**输出**:
+- D:/games/match3-xiaoxiaoxiao/软著材料/src-code-doc.md
+- D:/games/match3-xiaoxiaoxiao/软著材料/software-manual.md
+- D:/games/match3-xiaoxiaoxiao/软著材料/application-info.md
