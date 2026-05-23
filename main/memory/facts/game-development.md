@@ -44,7 +44,8 @@
 - **Steam恐怖模拟经营 — GDD已完成**：《深夜便利店》
   - GDD：D:/game-projects/steam-horror-sim/GDD.md（~28K字，16章）
   - **M1已完成**（Task #37）：项目搭建+Canvas渲染+30x25地图+WASD移动+E交互+光照+6阶段状态机
-  - **M2待开发**（Task #38）：经营系统 — 商品管理+顾客AI+收银+定价+经济循环
+  - **M2已完成**（Task #38）：经营系统6模块完成，v0.1.0→v0.2.0
+  - **M3已派发**（Task #39）：日循环系统 — DayCycle+光照升级+店铺升级+日结算+存档
   - 技术栈：Canvas+Electron+TS+Vite（与修仙工厂相同）
   - 参考：Lethal Company + Schedule I
   - 8周排期：M1→M2(经营)→M3(日循环)→M4(恐怖核心)→M5(深度恐怖)→M6(叙事)→M7(打磨)
