@@ -1,8 +1,9 @@
 # 运行日志
 
 | 时间 | 状态 | 任务 | 摘要 |
-| 2026-05-24 01:00 | IDLE | 无 | 所有5个任务已完成，无pending任务 |
 |------|------|------|------|
+| 2026-05-24 01:45 | DONE | #7 长安诡案录M3推理+庭审系统 | 实现4个模块(ReasoningBoard/TrialLoop/ObjectionSystem/CredibilityScore)，v0.2.0→v0.3.0，TypeScript编译通过 |
+| 2026-05-24 01:00 | IDLE | 无 | 所有5个任务已完成，无pending任务 |
 
 ## Run 2 — 2026-05-23 19:55:00
 

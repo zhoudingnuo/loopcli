@@ -52,5 +52,14 @@
     "created": "2026-05-24",
     "assignee": "engineering-rapid-prototyper",
     "completed": "2026-05-24T01:30:00"
+  },
+  {
+    "id": 7,
+    "status": "done",
+    "title": "长安诡案录M3：推理+庭审系统",
+    "description": "目标：实现M3里程碑（推理+庭审系统），v0.2.0→v0.3.0。项目路径：D:/game-projects/steam-ancient-mystery/。技术栈：HTML5 Canvas+Electron+TypeScript+Vite（与修仙工厂/深夜便利店相同）。已有模块(M1+M2)：DialogueEngine/EvidenceCollector/EvidenceCombiner/GameState/InputManager/InterrogationSystem/SaveGame/SceneExplorer/SceneManager/Renderer/UIManager。M3需实现4个核心模块：(1)ReasoningBoard-推理板系统，可视化物证关联、推理链条、矛盾标记；(2)TrialLoop-庭审循环，开庭陈述→举证→异议→判决的完整流程；(3)ObjectionSystem-异议系统，玩家在庭审中对证人证词提出异议并出示证据反驳；(4)CredibilityScore-信誉值系统，正确的推理提升信誉、错误降低，影响NPC态度和结局。GDD路径：D:/game-projects/steam-ancient-mystery/GDD.md。参考已有代码风格和模块结构。禁止AskUserQuestion。完成后在D:/loopcli/main/inbox/写报告。",
+    "created": "2026-05-24",
+    "assignee": "engineering-rapid-prototyper",
+    "completed": "2026-05-24T01:45:00"
   }
 ]
