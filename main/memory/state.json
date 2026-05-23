@@ -1,12 +1,12 @@
 {
   "agent": "main",
   "status": "idle",
-  "last_run": "2026-05-23 11:19:37",
-  "run_count": 418,
-  "last_action": "started_horror_sim_gdd_task",
+  "last_run": "2026-05-23 11:31:35",
+  "run_count": 420,
+  "last_action": "dispatched_horror_sim_m1_task",
   "active_agents": [
-    "game-designer"
+    "engineering-frontend-developer"
   ],
   "pending_user_requests": [],
-  "current_iteration": 27
+  "current_iteration": 28
 }

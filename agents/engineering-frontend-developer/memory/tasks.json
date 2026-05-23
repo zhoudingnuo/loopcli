@@ -322,5 +322,14 @@
     "created": "2026-05-23",
     "assignee": "engineering-frontend-developer",
     "completed": "2026-05-23 11:07:40"
+  },
+  {
+    "id": 37,
+    "status": "done",
+    "title": "M1: 深夜便利店基础框架搭建",
+    "description": "项目路径:D:/game-projects/steam-horror-sim/ GDD:D:/game-projects/steam-horror-sim/GDD.md 参考项目:D:/game-projects/steam-cultivation-factory/(相同技术栈) 技术栈:HTML5 Canvas+Electron+TypeScript+Vite 目标:M1基础框架 交付物:1.Vite+TS+Electron项目搭建 2.Canvas渲染器Renderer.ts 3.Camera.ts摄像机 4.便利店场景地图(80平:货架/收银台/前后门/仓库/休息室/卫生间) 5.玩家WASD移动+碰撞检测 6.E键基础交互 7.Lighting.ts离屏Canvas光照 8.App.ts主循环+状态机 9.Electron main.ts入口",
+    "created": "2026-05-23",
+    "assignee": "engineering-frontend-developer",
+    "completed": "2026-05-23 11:44:35"
   }
 ]
