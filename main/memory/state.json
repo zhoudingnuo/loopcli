@@ -1,21 +1,21 @@
 {
   "agent": "main",
   "status": "idle",
-  "last_run": "2026-05-23 19:50:16",
-  "run_count": 480,
-  "last_action": "douyin_publish_blocked_platform_upgrade",
+  "last_run": "2026-05-23 20:11:24",
+  "run_count": 482,
+  "last_action": "douyin_devtools_installed_need_login",
   "active_agents": [],
   "pending_user_requests": [
     "publish_douyin_game"
   ],
-  "current_iteration": 59,
+  "current_iteration": 60,
   "douyin_game": {
     "name": "消消消大作战",
     "appId": "tte7a1911c79c6fc8302",
-    "status": "待发布-平台升级中",
-    "dev_tools_downloaded": "D:/tools/douyin-devtools-4.5.3.exe",
-    "dev_tools_installing": true,
-    "publish_blocker": "抖音开发者平台升级维护中",
+    "status": "待发布-需IDE登录",
+    "dev_tools_path": "D:/ools/DouyinDevTools/@bytedminiprogram-ide/抖音开发者工具.exe",
+    "dev_tools_installing": false,
+    "publish_blocker": "需在开发者工具IDE中登录抖音账号",
     "project_dir": "D:/games/match3-xiaoxiaoxiao"
   }
 }
