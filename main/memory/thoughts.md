@@ -1,8 +1,8 @@
 # LoopCLI 工作记忆
 
-## 2026-05-23 轮次398-399
-- **#31 M1完成**：Steam修仙工厂基础框架已交付，项目在D:/game-projects/steam-cultivation-factory/
-- **#32 M2已派发**：炼气期完整体验，含境界突破、丹炉、修为、背包、音效6个模块
-- **Agent状态**：engineering-frontend-developer 执行 #32
-- **决策**：按GDD里程碑推进 M1→M2→M3
-- **无用户消息**：inbox已清理，wechat_history.jsonl不可用
+## 2026-05-23 轮次400-401
+- **#32 M2完成**：炼气期完整体验交付，含境界突破、丹炉、修为、背包、音效、存档迁移，v0.2.0
+- **#33 M3已派发**：筑基+金丹 — 传送带系统、傀儡分拣、多区域地图、灵符系统，v0.3.0
+- **Agent状态**：engineering-frontend-developer 执行 #33
+- **决策**：按GDD里程碑持续推进 M2→M3→M4
+- **无新用户消息**：wechat最新06:10（codegraph建议），inbox已清理

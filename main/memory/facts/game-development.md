@@ -29,8 +29,10 @@
 - **GDD已完成**(Task #30)：`D:/game-projects/steam-cultivation-factory/GDD.md`（~28000字，16章）
   - 6大境界、6级自动化、12区域、7种丹药、14周开发计划
   - 技术栈：HTML5 Canvas + Electron + TypeScript + Vite
-- **M1已派发**(Task #31)：基础框架搭建（Vite+TS+Electron+Canvas渲染+地图+建筑放置+手动采集）
-- **下一步**：等#31完成 → 进入M2炼气期完整体验
+- **M1已完成**(Task #31)：基础框架搭建（Vite+TS+Electron+Canvas渲染+地图+建筑放置+手动采集）
+- **M2已完成**(Task #32)：炼气期完整体验（境界突破、丹炉、修为、背包、音效、存档迁移），v0.2.0
+- **M3已派发**(Task #33)：筑基+金丹 — 传送带、傀儡分拣、多区域地图、灵符系统
+- **下一步**：等#33完成 → 进入M4元婴+化神
 
 ## 关键约束
 - 游戏项目放在 D 盘（`D:/game-projects/`），不放在 loopcli 根目录

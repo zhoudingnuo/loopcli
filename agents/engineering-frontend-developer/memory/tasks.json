@@ -286,5 +286,14 @@
     "created": "2026-05-23",
     "assignee": "engineering-frontend-developer",
     "completed": "2026-05-23 09:28:50"
+  },
+  {
+    "id": 33,
+    "status": "done",
+    "title": "Steam修仙工厂 M3：筑基+金丹 — 传送带、傀儡分拣、多区域地图",
+    "description": "M3里程碑：筑基+金丹。交付：(1)灵脉通道系统ConveyorBelt.ts-Lv1直线/Lv2转弯分叉(2)傀儡分拣Puppet.ts-自动分类灵草到丹炉(3)多区域地图-筑基台/药王谷解锁(4)筑基期11-25级+金丹期26-45级境界扩展(5)新建筑:灵田自动/灵脉井/丹炉自动/精炼炉(6)基础灵符条件触发。新丹方:筑基丹/金丹引。版本0.3.0。参考GDD.md第5/6/12章。禁止AskUserQuestion。",
+    "created": "2026-05-23",
+    "assignee": "engineering-frontend-developer",
+    "completed": "2026-05-23 09:45:00"
   }
 ]
