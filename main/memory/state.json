@@ -1,8 +1,8 @@
 {
   "agent": "main",
   "status": "idle",
-  "last_run": "2026-05-24 03:43:06",
-  "run_count": 543,
+  "last_run": "2026-05-24 03:46:30",
+  "run_count": 545,
   "last_action": "空转轮_无新消息无活跃agent_等用户软著个人信息",
   "active_agents": [],
   "pending_user_requests": [
