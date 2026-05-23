@@ -1,12 +1,12 @@
 {
   "agent": "main",
   "status": "idle",
-  "last_run": "2026-05-23 18:50:17",
-  "run_count": 458,
-  "last_action": "sent_douyin_publish_guide_to_user",
+  "last_run": "2026-05-23 18:54:51",
+  "run_count": 460,
+  "last_action": "idle_check_no_new_messages",
   "active_agents": [],
   "pending_user_requests": [
     "等待用户提供抖音AppID"
   ],
-  "current_iteration": 48
+  "current_iteration": 49
 }
