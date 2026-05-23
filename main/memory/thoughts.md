@@ -1,7 +1,7 @@
 # LoopCLI 工作记忆
 
-## 2026-05-23 轮次405
-- **#34 M4完成**：元婴+化神交付，5新地图+12建筑+3丹方+飞升挑战+39成就，v0.4.0
-- **前端Agent已禁用**：无pending任务，节省token
-- **下一步**：M5打磨+上线（需用户确认是否继续）
+## 2026-05-23 轮次406
+- **M5 Phase1 派发**：Task #35 → engineering-frontend-developer，Steam集成+Electron打包+UI优化
+- **所有agent已禁用**（除刚启用的frontend-developer）
 - **inbox清空**，无新用户消息
+- **下一步**：等M5-Phase1完成，再派Phase2（测试+商店页面材料+上线）

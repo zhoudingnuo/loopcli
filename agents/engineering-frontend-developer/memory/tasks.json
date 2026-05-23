@@ -304,5 +304,14 @@
     "created": "2026-05-23",
     "assignee": "engineering-frontend-developer",
     "completed": "2026-05-23 10:23:08"
+  },
+  {
+    "id": 35,
+    "status": "done",
+    "title": "Steam修仙工厂M5-Phase1: Steam集成+Electron打包+UI优化",
+    "description": "Steam修仙工厂M5-Phase1: Steam集成+Electron打包+UI优化。项目路径: D:/game-projects/steam-cultivation-factory/。1) 集成steamworks.js: 成就系统对接Steam API+云存档 2) Electron打包配置: electron-builder生成Windows安装包 3) UI优化: 主菜单美化+设置页面(音量/分辨率/全屏)+加载画面 4) 更新版本到0.5.0。禁止AskUserQuestion。",
+    "created": "2026-05-23",
+    "assignee": "engineering-frontend-developer",
+    "completed": "2026-05-23 10:42:58"
   }
 ]

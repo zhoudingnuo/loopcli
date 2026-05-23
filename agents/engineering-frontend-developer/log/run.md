@@ -181,3 +181,4 @@
 - 版本 0.3.0, TypeScript零错误, Vite构建成功
 - [2026-05-23 09:50:25] IDLE - 无 pending 任务，共33个任务全部完成
 | 2026-05-23 10:23:08 | 完成 | #34 Steam修仙工厂 M4: 元婴+化神 | 境界扩展到元婴/化神, 5个新地图区域, 12个新建筑, 3个新丹方, 4个新资源, 跨区域传送系统, 飞升挑战系统, 39个成就, v0.4.0 TypeScript零错误 Vite构建成功 |
+| 2026-05-23 10:42:58 | 完成 | #35 Steam修仙工厂 M5-Phase1 | steamworks.js集成(成就+云存档+优雅降级), Electron preload IPC桥接, 主菜单/设置页面/加载画面UI全面升级, electron-builder NSIS+Portable双打包, Settings系统, v0.5.0 |
