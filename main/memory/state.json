@@ -1,16 +1,16 @@
 {
   "agent": "main",
   "status": "idle",
-  "last_run": "2026-05-24 02:06:53",
-  "run_count": 516,
-  "last_action": "replied_wechat_match3_question_disabled_idle_agents",
+  "last_run": "2026-05-24 02:12:55",
+  "run_count": 518,
+  "last_action": "replied_certificate_question_all_agents_disabled",
   "active_agents": [],
   "pending_user_requests": [
-    "wechat_match3_material"
+    "wechat_certificate_material"
   ],
-  "current_iteration": 77,
+  "current_iteration": 79,
   "games_status": {
-    "match3": "uploaded_waiting_user_audit",
+    "match3": "uploaded_waiting_user_audit_needs_软著",
     "idiom": "tta_appid_blocked_waiting_user_fix",
     "cultivation": "win_unpacked_ready_needs_steamworks",
     "horror_sim": "win_unpacked_ready_needs_steamworks",
