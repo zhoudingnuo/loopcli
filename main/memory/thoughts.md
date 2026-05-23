@@ -1,28 +1,22 @@
 # 工作记忆
 
-## 2026-05-23 轮次55
+## 2026-05-23 轮次56
 
-### 本轮操作
-- 收到用户微信消息："你自己发布，我已经认证完了，自己操作浏览器"
-- 使用 Playwright CDP 连接到用户 Edge 浏览器（端口9333）
-- 成功导航到抖音开发者平台创建小游戏页面
-- 表单填写状态：
-  - 游戏名称：消消消大作战 ✅
-  - 联系人姓名：周鼎诺 ✅
-  - 联系人电话：❌ 需要用户提供
-  - 联系人邮箱：❌ 需要用户提供
-  - 开发引擎：选择"普通小游戏引擎" ⚠️（需确认是否选上）
-  - 协议勾选：✅
-- 通过微信 report 向用户请求电话和邮箱
-- Edge 浏览器仍然打开，CDP 端口 9333 可用
+### 完成事项
+- 抖音小游戏「消消消大作战」创建成功
+  - AppID: tte7a1911c79c6fc8302
+  - 引擎: 普通小游戏引擎
+  - 状态: 待上传版本
+- 用户通过微信提供了电话(18108431035)和邮箱(1163155015@qq.com)
+- Playwright CDP 自动填写表单、选择引擎、勾选协议、提交并确认创建
 
 ### 技术备忘
 - Edge CDP 连接：`chromium.connectOverCDP('http://localhost:9333')`
-- 启动方式：先 taskkill Edge，再用 spawn 启动带 `--remote-debugging-port=9333` 的 Edge
-- 创建页面 URL：`https://developer.open-douyin.com/console/apply/game`
-- 脚本位置：`D:/loopcli/main/tools/douyin-publish.js`
+- 抖音控制台：`https://developer.open-douyin.com/console?type=2`
+- Semi-UI 组件：checkbox 需 force:true 点击，按钮禁用需 evaluate 移除 disabled 属性
+- 确认弹窗会阻断提交流程，需二次点击"确认创建"
 
 ### 下一步
-- 用户回复电话和邮箱 → 自动填入表单并提交创建
-- 创建成功后获取 AppID → 更新 project.config.json
+- 开发消消乐游戏代码（三消类游戏）
 - 使用抖音开发者工具 CLI 上传代码包
+- 考虑派 agent 开发游戏，参考 longtask.md

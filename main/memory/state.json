@@ -1,12 +1,16 @@
 {
   "agent": "main",
   "status": "idle",
-  "last_run": "2026-05-23 19:14:32",
-  "run_count": 472,
-  "last_action": "douyin_create_form_partial_fill",
+  "last_run": "2026-05-23 19:26:31",
+  "run_count": 474,
+  "last_action": "douyin_game_created_success",
   "active_agents": [],
-  "pending_user_requests": [
-    "等待用户提供电话和邮箱以完成抖音小游戏创建"
-  ],
-  "current_iteration": 55
+  "pending_user_requests": [],
+  "current_iteration": 56,
+  "douyin_game": {
+    "name": "消消消大作战",
+    "appId": "tte7a1911c79c6fc8302",
+    "engine": "普通小游戏引擎",
+    "status": "待上传版本"
+  }
 }
