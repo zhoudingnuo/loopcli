@@ -1,12 +1,12 @@
 {
   "agent": "main",
   "status": "idle",
-  "last_run": "2026-05-24 03:30:34",
-  "run_count": 537,
+  "last_run": "2026-05-24 03:32:41",
+  "run_count": 539,
   "last_action": "idle_无新消息_全部游戏等用户操作",
   "active_agents": [],
   "pending_user_requests": [],
-  "current_iteration": 89,
+  "current_iteration": 90,
   "games_status": {
     "match3": "软著材料已备齐_待用户填写提交",
     "idiom": "tta_appid_blocked_waiting_user_fix",
