@@ -277,5 +277,14 @@
     "created": "2026-05-23",
     "assignee": "engineering-frontend-developer",
     "completed": "2026-05-23 09:12:28"
+  },
+  {
+    "id": 32,
+    "status": "done",
+    "title": "Steam修仙工厂 M2：炼气期完整体验",
+    "description": "在 D:/game-projects/steam-cultivation-factory/ 已有 M1 基础框架上开发 M2 阶段。参考 GDD.md M2 章节。必须实现：1)境界突破系统 Cultivation.ts（凡人→炼气初/中/后期，修为门槛，成功率判定，突破动画）2)丹炉完整流程 Alchemy.ts（灵草→聚灵丹，新配方培元丹，炼丹进度条，成功率）3)修为系统（自动增长，灵气转化，境界加成）4)背包系统 Inventory.ts（丹药管理+使用）5)音效框架 AudioManager.ts（Web Audio API，采集/建造/突破音效，音量控制）6)UI更新（境界显示区，丹炉面板，背包面板，建筑解锁）。技术：TS严格模式，模块化，存档兼容M1。验证：编译零错误+Vite正常启动。禁止AskUserQuestion。",
+    "created": "2026-05-23",
+    "assignee": "engineering-frontend-developer",
+    "completed": "2026-05-23 09:28:50"
   }
 ]
