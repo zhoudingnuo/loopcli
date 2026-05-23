@@ -195,3 +195,12 @@
 **新增文件**: DayCycle.ts, DaySummary.ts, SaveManager.ts, UpgradeManager.ts
 **修改文件**: Lighting.ts(光照升级), App.ts(M3集成), Renderer.ts(结算渲染), GameState.ts(版本导出)
 **验证**: TypeScript零错误, Vite构建成功
+
+---
+
+## Run #36 — 2026-05-23 12:54:55
+**任务**: #40 M4 恐怖事件系统
+**状态**: ✅ 完成
+**新增文件**: HorrorEventManager.ts(15种恐怖事件+触发引擎), AudioManager.ts(Web Audio音效+BGM)
+**修改文件**: App.ts(M4集成+BGM切换), Renderer.ts(恐怖视觉特效), GameState.ts(v0.4.0+恐怖字段)
+**验证**: TypeScript零错误, Vite构建成功(27 modules, 92KB)

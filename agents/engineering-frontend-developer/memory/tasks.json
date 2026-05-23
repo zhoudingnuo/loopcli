@@ -349,5 +349,14 @@
     "created": "2026-05-23",
     "assignee": "engineering-frontend-developer",
     "completed": "2026-05-23 12:43:34"
+  },
+  {
+    "id": 40,
+    "status": "done",
+    "title": "M4: 恐怖事件系统",
+    "description": "深夜便利店 M4 恐怖事件系统。基于现有v0.3.0代码（D:/game-projects/steam-horror-sim/），实现：1) HorrorEventManager.ts — 事件触发引擎（时间/条件/随机），支持异常事件链 2) 异常事件类型（至少8种）：顾客异常（透明顾客/重复脸顾客/不付款顾客）、物品异常（商品移位/价格变化/货架流血）、环境异常（灯光闪烁/温度骤降/背景音变化） 3) 恐怖氛围升级：事件密度随天数递增，首次出现更恐怖 4) 玩家应对机制：选择处理方式影响后续事件 5) 音效系统：恐怖音效存根+氛围BGM切换。参考GDD第9-10章。保持TypeScript零编译错误，Vite构建成功。禁止AskUserQuestion。",
+    "created": "2026-05-23",
+    "assignee": "engineering-frontend-developer",
+    "completed": "2026-05-23 12:54:55"
   }
 ]
