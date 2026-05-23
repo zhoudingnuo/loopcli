@@ -40,5 +40,11 @@ tmg upload -v 1.0.0 -c "版本说明" D:/games/match3-xiaoxiaoxiao
 - `tmg` CLI 的 cookie 存储路径: `~/.tmg-cli/.cookies`（第一行是cookie字符串）
 - 浏览器 cookies 对 API 服务器无效（域名不同：open-douyin.com vs toutiao.com）
 - `tmg` 的上传 API 端点: `developer.toutiao.com/api/developer/ide/microgame/v1/testing`
-- 发送验证码 API: `developer.toutiao.com/passport/web/send_code/`（返回 mobile_ticket）
+- 发送验证码 API: `developer.toutiao.com/passport/web/send_code/`（参数: type=24, mobile=手机号, User-Agent: bytedanceide）
 - 游戏管理页面有4个iframe（summon.bytedance.com），游戏数据在主frame中但可能异步加载
+- **新旧平台认证不互通**：CLI(tmg/tma)用 developer.toutiao.com 认证，新版控制台用 developer.open-douyin.com
+- Edge cookie v20 加密是 app-bound，无法从外部解密（需要 win32crypt + AES-GCM）
+- Playwright 可通过 CDP 连接用户 Edge 浏览器，获取 open-douyin.com 的认证
+- 游戏列表 API: POST `/bff_api_game_console/v1/PlatBaseSettingService/QueryGameList?` (需要 headers: x-secsdk-csrf-token: DOWNGRADE, x-tt-groupid: 1065926)
+- 游戏状态: status 0=开发中, 1=已上线, 3=测试中; gameCountOverview 显示各状态数量
+- 微前端(Garfish)架构，游戏列表组件可能无法在 Playwright CDP 模式下正常渲染
