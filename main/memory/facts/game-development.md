@@ -44,7 +44,11 @@
 - **第5款游戏启动**：中国古代悬疑解谜（Steam），GDD设计中（game-designer-mystery agent）
 - **长安诡案录 M1-M2 已完成**（Task #5-#6）：项目搭建+场景探索系统，v0.2.0
 - **M3已完成**（Task #7）：推理+庭审系统 — ReasoningBoard/TrialLoop/ObjectionSystem/CredibilityScore，v0.3.0
-  - 下一步：M4（Ch1+Ch2完整案件制作）
+- **M4已完成**（Task #8）：Ch1鬼市浮尸+Ch2牡丹杀局完整案件，v0.4.0
+  - Ch1: 30+对话节点、12物证、3NPC审问、14条庭审证词
+  - Ch2: 30+对话节点、14物证、5NPC审问、18条庭审证词
+  - 新增: ChapterManager+AudioManager+水墨渲染增强+存档适配
+  - 下一步：M5（Ch3大明宫闹鬼+Ch4地下迷城）
 - **Steam恐怖模拟经营 — GDD已完成**：《深夜便利店》
   - GDD：D:/game-projects/steam-horror-sim/GDD.md（~28K字，16章）
   - **M1已完成**（Task #37）：项目搭建+Canvas渲染+30x25地图+WASD移动+E交互+光照+6阶段状态机

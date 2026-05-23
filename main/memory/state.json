@@ -1,19 +1,19 @@
 {
   "agent": "main",
   "status": "idle",
-  "last_run": "2026-05-24 01:43:00",
-  "run_count": 514,
-  "last_action": "dispatched_m4_ch1_ch2_to_prototyper",
-  "active_agents": [
-    "engineering-rapid-prototyper"
+  "last_run": "2026-05-24 02:06:53",
+  "run_count": 516,
+  "last_action": "replied_wechat_match3_question_disabled_idle_agents",
+  "active_agents": [],
+  "pending_user_requests": [
+    "wechat_match3_material"
   ],
-  "pending_user_requests": [],
   "current_iteration": 77,
   "games_status": {
-    "match3": "basic_info_filled_blocked_on_copyright_cert",
+    "match3": "uploaded_waiting_user_audit",
     "idiom": "tta_appid_blocked_waiting_user_fix",
     "cultivation": "win_unpacked_ready_needs_steamworks",
     "horror_sim": "win_unpacked_ready_needs_steamworks",
-    "ancient_mystery": "m4_in_progress_ch1_ch2"
+    "ancient_mystery": "m4_completed_v040_next_m5_ch3_ch4"
   }
 }
