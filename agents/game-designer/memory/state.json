@@ -1,6 +1,6 @@
 {
   "agent": "game-designer",
-  "status": "idle",
+  "status": "disabled",
   "current_task": null,
   "last_run": "2026-05-23 06:28:56",
   "run_count": 15,

@@ -1,6 +1,6 @@
 {
   "agent": "engineering-autonomous-optimization-architect",
-  "status": "idle",
+  "status": "disabled",
   "current_task": null,
   "last_run": null,
   "run_count": 0,

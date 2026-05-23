@@ -1,6 +1,6 @@
 {
   "agent": "market-analyst",
-  "status": "idle",
+  "status": "disabled",
   "current_task": null,
   "last_run": "2026-05-23 04:41:04",
   "run_count": 7,
