@@ -331,5 +331,14 @@
     "created": "2026-05-23",
     "assignee": "engineering-frontend-developer",
     "completed": "2026-05-23 11:44:35"
+  },
+  {
+    "id": 38,
+    "status": "done",
+    "title": "M2: 经营系统 - 商品管理+顾客AI+收银+定价+经济循环",
+    "description": "M2经营系统开发，项目D:/game-projects/steam-horror-sim/。实现6个模块:ProductManager(商品分类8+10+4+6+3种/库存/供应商4种)/CustomerManager+Customer(5种顾客AI/行为链/路径导航)/CashRegister(收银模式/找零/异常事件)/PricingSystem(动态定价/敏感度)/EconomySystem(日收入200-500/日支出120/30万债务/8种升级)/ShelfInteraction(货架交互/上架下架)。参考GDD第五章。禁止AskUserQuestion。",
+    "created": "2026-05-23",
+    "assignee": "engineering-frontend-developer",
+    "completed": "2026-05-23 12:10:21"
   }
 ]

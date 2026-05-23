@@ -1,9 +1,8 @@
 # LoopCLI 工作记忆
 
-## 2026-05-23 轮次420
-- **M1深夜便利店已完成**（Task #37）：Canvas渲染+地图+移动+交互+光照，Vite构建19KB
-- **P0三消bug修复**：在agent inbox中，阻塞抖音提审，最高优先级
-- **已创建M2任务**（Task #38）：经营系统（商品+顾客+收银+定价+经济），等P0完成后执行
-- **已归档过时任务**：成语闯关Phase1已完成，inbox消息已清理
-- **Agent状态**：engineering-frontend-developer idle，3个inbox任务待处理（P0 bugs > WebUI > M2）
-- **成本控制**：raw.log 861KB（<1MB暂不轮转）
+## 2026-05-23 轮次422
+- **M1深夜便利店已完成**（Task #37）：8模块，Vite构建19KB，TS零错误
+- **M2已派发**（Task #38）：经营系统6模块，已写入engineering-frontend-developer的tasks.json
+- **inbox已归档**：M1完成报告已移入archive/
+- **Agent状态**：engineering-frontend-developer 待执行M2
+- **游戏进展**：修仙工厂v1.0完成，深夜便利店M1完成→M2进行中
