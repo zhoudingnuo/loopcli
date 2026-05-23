@@ -212,3 +212,18 @@
 - **Last completed**: Task #41 (M5: 深度恐怖)
 - **Action**: No pending tasks found. Waiting for new assignments.
 | 2026-05-23 13:16:00 | 完成 | #42 M6叙事系统 | 完成6层洋葱叙事系统：75+线索、5结局、深夜广播10段、22条笔记、10个叙事选择。TypeScript零错误Vite构建成功v0.6.0 |
+
+## 2026-05-23 13:48 — Task #43: M7 深夜便利店打磨上线
+
+**状态**: DONE
+**版本**: v0.6.0 → v1.0.0-EA
+
+### 完成内容
+1. **音效系统完善** — 新增16种音效（脚步/门/收银机/货架/顾客/硬币/UI/新一天/游戏结束/成就/心跳）+ 4种环境音循环（白天/夜晚/仓库/雨声）
+2. **UI美化** — 主菜单（标题动画+背景光晕）、暂停界面（ESC）、设置面板（音量滑块）、通知系统恐怖样式
+3. **测试验证** — TypeScript零错误、Vite构建成功、36模块241ms
+4. **Steam集成** — Steamworks存根、成就IPC、云存档存根、Electron builder配置、NSIS安装包
+5. **版本号** — 全部更新到1.0.0
+
+### 修改文件
+AudioManager.ts, App.ts, main.ts, preload.ts, index.html, package.json

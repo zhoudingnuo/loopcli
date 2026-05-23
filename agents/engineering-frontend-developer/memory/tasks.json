@@ -376,5 +376,14 @@
     "created": "2026-05-23",
     "assignee": "engineering-frontend-developer",
     "completed": "2026-05-23 13:16:00"
+  },
+  {
+    "id": 43,
+    "status": "done",
+    "title": "M7：深夜便利店打磨上线",
+    "description": "最终里程碑。完成：1)音效完善（环境底噪、交互音效、异常音效补充，参考GDD音效章节）；2)UI美化（主菜单、暂停界面、HUD优化、中文界面）；3)完整测试（所有系统联调、存档兼容性、边界条件）；4)Steam集成（Electron打包、Steamworks SDK基础集成、成就系统）；5)构建可发布的EA版本。项目路径：D:/game-projects/steam-horror-sim/。GDD在D:/game-projects/steam-horror-sim/GDD.md。M1-M6已全部完成，当前v0.6.0，目标v1.0.0-EA。",
+    "created": "2026-05-23",
+    "assignee": "engineering-frontend-developer",
+    "completed": "2026-05-23 13:48:00"
   }
 ]
