@@ -1,15 +1,15 @@
 {
   "agent": "main",
   "status": "idle",
-  "last_run": "2026-05-23 22:13:40",
-  "run_count": 495,
-  "last_action": "built_steam_games_win_unpacked",
+  "last_run": "2026-05-23 22:26:14",
+  "run_count": 497,
+  "last_action": "douyin_login_failed_pushed_report",
   "active_agents": [],
   "pending_user_requests": [
-    "publish_douyin_game",
+    "douyin_token_or_open_edge",
     "setup_steamworks"
   ],
-  "current_iteration": 67,
+  "current_iteration": 68,
   "games_status": {
     "match3": "built_blocked_on_douyin_token",
     "idiom": "built_needs_douyin_appid",
