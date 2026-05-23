@@ -1,27 +1,19 @@
 {
   "agent": "main",
   "status": "idle",
-  "last_run": "2026-05-23 22:01:29",
-  "run_count": 491,
-  "last_action": "password_login_failed_notified_user",
+  "last_run": "2026-05-23 22:07:00",
+  "run_count": 493,
+  "last_action": "password_login_failed_notified_user_token_needed",
   "active_agents": [],
   "pending_user_requests": [
     "publish_douyin_game"
   ],
-  "current_iteration": 64,
+  "current_iteration": 65,
   "douyin_game": {
     "name": "消消消大作战",
     "appId": "tte7a1911c79c6fc8302",
-    "status": "用户提供密码但邮箱登录失败，已通知用户确认账号",
-    "blocker": "新旧平台认证不互通，CLI需要toutiao.com认证，用户账号在open-douyin.com",
-    "project_dir": "D:/games/match3-xiaoxiaoxiao",
-    "game_console_url": "https://developer.open-douyin.com/game-console/1065926/game-manage",
-    "api_discoveries": {
-      "game_list_api": "/bff_api_game_console/v1/PlatBaseSettingService/QueryGameList",
-      "game_status": "status 0=开发中, 1=已上线, 3=测试中",
-      "current_game_status": 3,
-      "audit_progress": "4 types all status 2",
-      "versions": "all null - no version uploaded"
-    }
+    "status": "等待用户提供Token或正确密码",
+    "blocker": "用户账号在open-douyin.com注册，CLI需要toutiao.com认证，Token方案待用户操作",
+    "project_dir": "D:/games/match3-xiaoxiaoxiao"
   }
 }
